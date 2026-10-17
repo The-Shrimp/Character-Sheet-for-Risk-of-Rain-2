@@ -1,0 +1,46 @@
+{
+  "ObservedUtc": "2026-10-06T02:50:57.943173+00:00",
+  "File": "\\\\localhost\\C$\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\config\\alexander.charactersheet.cfg",
+  "DeploymentReceiptVerifiedUtc": "2026-10-06T02:20:03.0569478Z",
+  "FileCreationUtc": "2026-10-05T23:39:27.672227+00:00",
+  "FileLastWriteUtc": "2026-10-06T02:27:20.307839+00:00",
+  "DeploymentSHA256": "06A310843104502CB23700EB4C3FE85912D9CA0BE47B7AC557DA09F31B5698EC",
+  "CurrentSHA256": "C44669BAFB1D7CE426CAF3C568FD722618E67DB0212D9BD8E0D488E4AF6970C5",
+  "CurrentHeader": [
+    "## Settings file was created by plugin Alexander's Character Sheet v0.2.2.2",
+    "## Plugin GUID: alexander.charactersheet",
+    "## Enable this UI addition. False leaves native UI/control behavior in place; takes effect on future startup or a live configuration reload.",
+    "## Addition scale (0.7-1.2); does not change native scoreboard geometry or HUD settings."
+  ],
+  "CurrentSettings": [
+    {
+      "Section": "General",
+      "Key": "Enabled",
+      "CurrentValue": "true"
+    },
+    {
+      "Section": "Input",
+      "Key": "ToggleSheet",
+      "CurrentValue": "true"
+    },
+    {
+      "Section": "Input",
+      "Key": "OpenCursor",
+      "CurrentValue": "true"
+    },
+    {
+      "Section": "Input",
+      "Key": "CursorToggleKey",
+      "CurrentValue": "LeftAlt"
+    },
+    {
+      "Section": "Presentation",
+      "Key": "Scale",
+      "CurrentValue": "1"
+    }
+  ],
+  "ReconstructedPreviousHeaderSHA256": "06A310843104502CB23700EB4C3FE85912D9CA0BE47B7AC557DA09F31B5698EC",
+  "ReconstructionMatchesDeploymentReceipt": true,
+  "KeyDelta": "No section/key/value changes; only generated header version v0.2.2.1 -> v0.2.2.2.",
+  "Cause": "Not inferred. Configuration read only; no writes issued."
+}

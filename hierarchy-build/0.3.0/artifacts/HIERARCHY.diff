@@ -1,0 +1,1064 @@
+--- 0.2.2.5/src\Core\CharacterEffectCatalog.cs
++++ 0.3.0/src\Core\CharacterEffectCatalog.cs
+@@ -0,0 +1,67 @@
++using System;
++using System.Collections.Generic;
++using System.Linq;
++namespace Alexander.CharacterSheet.Core
++{
++    public enum EffectOrigin { Item,Passive,Ability,Unknown }
++    public enum AttackProcScope { None,RandomRoll,ShieldHit,EligibleHit }
++    public enum EffectCondition { None,TargetHealth,Nearby,Unbroken,OutOfDanger,OutOfCombat,Sprinting,SprintJump,Shield }
++    public sealed class CharacterEffectRule
++    {
++        public readonly string Id,Section;
++        public readonly AttackProcScope Proc;
++        public readonly EffectCondition Condition;
++        internal CharacterEffectRule(string id,string section,AttackProcScope proc,EffectCondition condition)
++        {Id=id;Section=section;Proc=proc;Condition=condition;}
++        public string HoverNote(bool outOfDanger,bool outOfCombat,bool sprinting)
++        {
++            string note=Proc==AttackProcScope.RandomRoll?"Trigger chance depends on the attack's proc coefficient; attack context varies.":
++                Proc==AttackProcScope.ShieldHit?"Requires shield and an eligible nonzero-proc hit; this trigger is not a random chance.":
++                Proc==AttackProcScope.EligibleHit?"Eligible-hit effect; attack and proc-chain conditions apply.":"";
++            string condition=Condition==EffectCondition.OutOfDanger?"Out of danger: "+(outOfDanger?"active":"inactive")+". Separate from out of combat.":
++                Condition==EffectCondition.OutOfCombat?"Out of combat: "+(outOfCombat?"active":"inactive")+". Separate from out of danger.":
++                Condition==EffectCondition.SprintJump?"Triggers on a jump while sprinting; sprinting alone does not trigger it.":
++                Condition==EffectCondition.Sprinting?"While sprinting: "+(sprinting?"active":"inactive")+".":"";
++            return string.Join("\n",new[]{note,condition}.Where(s=>s.Length>0));
++        }
++    }
++    public static class CharacterEffectCatalog
++    {
++        // Original routing facts; quantitative item definitions remain a separate maintained boundary.
++        static readonly Dictionary<string,CharacterEffectRule> items=Build();
++        static Dictionary<string,CharacterEffectRule> Build()
++        {
++            var d=new Dictionary<string,CharacterEffectRule>(StringComparer.Ordinal);
++            Action<string,string,AttackProcScope,EffectCondition> add=(id,section,proc,condition)=>d.Add(id,new CharacterEffectRule(id,section,proc,condition));
++            foreach(string id in new[]{"Crowbar","FragileDamageBonus","NearbyDamageBonus","BossDamageBonus","RandomDamageZone","IncreaseDamageOnMultiKill"})
++                add(id,SheetHierarchy.Damage,AttackProcScope.None,id=="Crowbar"?EffectCondition.TargetHealth:id=="NearbyDamageBonus"?EffectCondition.Nearby:id=="FragileDamageBonus"?EffectCondition.Unbroken:EffectCondition.None);
++            foreach(string id in new[]{"Missile","ChainLightning","BleedOnHit","BleedOnHitVoid","StunChanceOnHit","BounceNearby","StickyBomb","ChainLightningVoid"})
++                add(id,SheetHierarchy.Hit,AttackProcScope.RandomRoll,EffectCondition.None);
++            add("MissileVoid",SheetHierarchy.Hit,AttackProcScope.ShieldHit,EffectCondition.Shield);
++            foreach(string id in new[]{"Behemoth","IceRing","FireRing","ElementalRingVoid","SlowOnHit","SlowOnHitVoid","AttackSpeedOnCrit","HealOnCrit","CritHeal","LightningStrikeOnHit","ArmorReductionOnHit","PermanentDebuffOnHit"})
++                add(id,SheetHierarchy.Hit,AttackProcScope.EligibleHit,EffectCondition.None);
++            foreach(string id in new[]{"IgniteOnKill","ExplodeOnDeath","Dagger","Tooth","Infusion","Bandolier","MoveSpeedOnKill","KillsToStats"})
++                add(id,SheetHierarchy.Kill,AttackProcScope.None,EffectCondition.None);
++            add("HealWhileSafe",SheetHierarchy.Combat,AttackProcScope.None,EffectCondition.OutOfDanger);
++            add("SprintOutOfCombat",SheetHierarchy.Combat,AttackProcScope.None,EffectCondition.OutOfCombat);
++            foreach(string id in new[]{"SprintArmor","SprintBonus","SprintWisp","SprintHealing","MushroomVoid","SprintMoney"})
++                add(id,SheetHierarchy.Sprint,AttackProcScope.None,EffectCondition.Sprinting);
++            add("JumpBoost",SheetHierarchy.Sprint,AttackProcScope.None,EffectCondition.SprintJump);
++            return d;
++        }
++        public static CharacterEffectRule Item(string id){CharacterEffectRule rule;return id!=null&&items.TryGetValue(id,out rule)?rule:null;}
++        public static string Route(string id,EffectOrigin origin)
++        {
++            if(origin==EffectOrigin.Ability||origin==EffectOrigin.Unknown)return null;
++            if(origin==EffectOrigin.Item)return Item(id)?.Section??SheetHierarchy.Other;
++            // Passive rows require the actual native passive metadata; no active skill entries are queried here.
++            return new[]{"BANDIT2_PASSIVE_NAME","CROCO_PASSIVE_NAME","TREEBOT_PASSIVE_NAME","RAILGUNNER_PASSIVE_NAME"}.Contains(id)?SheetHierarchy.Hit:SheetHierarchy.Other;
++        }
++        public static bool GeneralCooldownItem(string id)=>id=="AlienHead"||id=="HalfAttackSpeedHalfCooldowns"||id=="LunarBadLuck";
++        public static bool ShieldVisible(double capacity)=>NumberFormatting.IsFinite(capacity)&&capacity>0;
++        public static double ArmorReduction(double armor)=>100*(1-VerifiedMath.ArmorMultiplier(armor));
++        public static double FlatArmorPlate(long copies)=>copies>0?5.0*copies:0;
++        public static string ProcNote(string id)=>Item(id)?.HoverNote(false,false,false)??"";
++        public static IReadOnlyList<string> SupportedItemIds=>Array.AsReadOnly(items.Keys.OrderBy(s=>s,StringComparer.Ordinal).ToArray());
++    }
++}
+--- 0.2.2.5/src\Core\DetailsInteraction.cs
++++ 0.3.0/src\Core\DetailsInteraction.cs
+@@ -5,7 +5,7 @@
+     {
+         object source;
+         string key;
+-        bool sourceInside,popupInside;
++        bool sourceInside,popupInside,focused;
+         double leaveAt=double.PositiveInfinity;
+         public bool Expanded{get;private set;}
+         public bool Active=>source!=null;
+@@ -31,12 +31,18 @@
+             if(!Active||!nativeCursor||!primaryClick||!popupInside)return false;
+             Expanded=!Expanded;return true;
+         }
++        public void Focus(bool value,double now)
++        {focused=Active&&value;if(focused)leaveAt=double.PositiveInfinity;else if(Active&&!sourceInside&&!popupInside)leaveAt=now+.4;}
++        public bool FocusToggle(bool nativeCursor)
++        {if(!Active||!focused||!nativeCursor)return false;Expanded=!Expanded;return true;}
++        public bool FocusExpand(bool nativeCursor,bool expanded)
++        {if(!Active||!focused||!nativeCursor)return false;Expanded=expanded;return true;}
+         public bool Expire(double now)
+         {
+-            if(!Active||sourceInside||popupInside||!NumberFormatting.IsFinite(now)||now<=leaveAt)return false;
++            if(!Active||sourceInside||popupInside||focused||!NumberFormatting.IsFinite(now)||now<=leaveAt)return false;
+             Reset();return true;
+         }
+-        public void Reset(){source=null;key=null;sourceInside=popupInside=Expanded=false;leaveAt=double.PositiveInfinity;}
++        public void Reset(){source=null;key=null;sourceInside=popupInside=focused=Expanded=false;leaveAt=double.PositiveInfinity;}
+     }
+     public sealed class NativePointerExitLease
+     {
+--- 0.2.2.5/src\Core\GeneralCooldownPresentation.cs
++++ 0.3.0/src\Core\GeneralCooldownPresentation.cs
+@@ -0,0 +1,17 @@
++using System;
++using System.Collections.Generic;
++namespace Alexander.CharacterSheet.Core
++{
++    public static class GeneralCooldownPresentation
++    {
++        public static IReadOnlyList<string> Components(long alienHead,long lightFlux,long purity)
++        {
++            var lines=new List<string>();
++            if(alienHead>0)lines.Add("Alien Head reference: "+NumberFormatting.Display(100*(1-Math.Pow(.75,alienHead)))+"% cooldown reduction.");
++            if(lightFlux>0)lines.Add("Light Flux reference: "+NumberFormatting.Display(100*(1-Math.Pow(.5,lightFlux)))+"% cooldown reduction.");
++            if(purity>0)lines.Add("Purity reference: -"+NumberFormatting.Display(1.0+purity)+" seconds.");
++            return lines;
++        }
++        public const string UnknownTotal="Total: Unknown\nBase: Unknown\nBonuses: Other/unknown";
++    }
++}
+--- 0.2.2.5/src\Core\SheetHierarchy.cs
++++ 0.3.0/src\Core\SheetHierarchy.cs
+@@ -0,0 +1,107 @@
++using System;
++using System.Collections.Generic;
++using System.Linq;
++namespace Alexander.CharacterSheet.Core
++{
++    public enum SheetGlyph { None,Shield,Sword,Runner,Clover,Burst,Skull }
++    public sealed class SheetNode
++    {
++        public readonly string Id,Parent,Title,Payload;
++        public readonly bool Header;
++        public readonly int Depth;
++        public readonly SheetGlyph Glyph;
++        public SheetNode(string id,string parent,string title,bool header,int depth,string payload="",SheetGlyph glyph=SheetGlyph.None)
++        {Id=id;Parent=parent??"";Title=title;Header=header;Depth=depth;Payload=payload;Glyph=glyph;}
++    }
++    public static class SheetHierarchy
++    {
++        public const string Base="base",Defense="defense",Offense="offense",Movement="movement",Luck="luck",
++            Damage="damage-effects",Hit="on-hit",Kill="on-kill",Combat="out-of-combat",Sprint="sprinting",Other="other";
++        public static readonly IReadOnlyList<SheetNode> Headers=Array.AsReadOnly(new[]{
++            new SheetNode(Base,"","Base Stats",true,0),
++            new SheetNode(Defense,Base,"Defense",true,1,glyph:SheetGlyph.Shield),
++            new SheetNode(Offense,Base,"Offense",true,1,glyph:SheetGlyph.Sword),
++            new SheetNode(Movement,Base,"Movement",true,1,glyph:SheetGlyph.Runner),
++            new SheetNode(Luck,Base,"Luck",true,1,glyph:SheetGlyph.Clover),
++            new SheetNode(Damage,"","General Damage Modifiers",true,0,glyph:SheetGlyph.Sword),
++            new SheetNode(Hit,"","On-Hit",true,0,glyph:SheetGlyph.Burst),
++            new SheetNode(Kill,"","On-Kill",true,0,glyph:SheetGlyph.Skull),
++            new SheetNode(Combat,"","Out of Combat",true,0),
++            new SheetNode(Sprint,"","While Sprinting",true,0,glyph:SheetGlyph.Runner),
++            new SheetNode(Other,"","Other items & buffs",true,0)
++        });
++        public static readonly IReadOnlyDictionary<string,string[]> Stats=new Dictionary<string,string[]>{
++            [Defense]=new[]{"Health","Shield","Regeneration","Armor","Dmg Reduction"},
++            [Offense]=new[]{"Damage","Attack speed","Cooldown Reduction","Critical chance"},
++            [Movement]=new[]{"Movement speed","Sprint Speed Modifier","Maximum jumps"},
++            [Luck]=new[]{"Luck"}};
++        public static IReadOnlyList<SheetNode> Visible(IEnumerable<SheetNode> source,SheetExpansionState state)
++        {
++            if(source==null||state==null)throw new ArgumentNullException();
++            var nodes=source.ToArray();var map=new Dictionary<string,SheetNode>(StringComparer.Ordinal);
++            foreach(var node in nodes)
++            {
++                if(node==null||string.IsNullOrEmpty(node.Id)||map.ContainsKey(node.Id))throw new ArgumentException("Node identities must be unique.");
++                map.Add(node.Id,node);
++            }
++            var result=new List<SheetNode>();
++            foreach(var node in nodes)
++            {
++                string parent=node.Parent;var seen=new HashSet<string>();bool visible=true;
++                while(parent.Length>0)
++                {
++                    if(!seen.Add(parent))throw new ArgumentException("Hierarchy cycle.");
++                    SheetNode ancestor;if(!map.TryGetValue(parent,out ancestor)||!ancestor.Header)throw new ArgumentException("Missing section parent.");
++                    if(!state.IsOpen(parent))visible=false;
++                    parent=ancestor.Parent;
++                }
++                if(visible)result.Add(node);
++            }
++            return result;
++        }
++        public static IReadOnlyList<T> UniqueRows<T>(IEnumerable<T> rows,Func<T,string> id)
++        {
++            if(rows==null||id==null)throw new ArgumentNullException();
++            var seen=new HashSet<string>(StringComparer.Ordinal);var result=new List<T>();
++            foreach(var row in rows){string key=id(row);if(!string.IsNullOrEmpty(key)&&seen.Add(key))result.Add(row);}
++            return result;
++        }
++        public static string RestoreFocus(string previous,IEnumerable<SheetNode> all,IEnumerable<SheetNode> visible)
++        {
++            var available=new HashSet<string>(visible.Select(n=>n.Id));var map=all.ToDictionary(n=>n.Id);
++            string current=previous;var seen=new HashSet<string>();
++            while(!string.IsNullOrEmpty(current)&&seen.Add(current))
++            {if(available.Contains(current))return current;SheetNode node;if(!map.TryGetValue(current,out node))break;current=node.Parent;}
++            return available.Contains(Base)?Base:visible.Select(n=>n.Id).FirstOrDefault();
++        }
++    }
++    public sealed class SheetExpansionState
++    {
++        readonly Dictionary<string,bool> values=new Dictionary<string,bool>(StringComparer.Ordinal);
++        public bool IsOpen(string id)
++        {
++            bool value;if(values.TryGetValue(id??"",out value))return value;
++            return id==SheetHierarchy.Base||id==SheetHierarchy.Defense||id==SheetHierarchy.Offense||id==SheetHierarchy.Movement||id==SheetHierarchy.Luck;
++        }
++        public bool Set(string id,bool value)
++        {if(!SheetHierarchy.Headers.Any(n=>n.Id==id))return false;values[id]=value;return true;}
++        public bool Toggle(string id)=>Set(id,!IsOpen(id));
++    }
++    public static class HierarchySheetSizing
++    {
++        public const double BackgroundOpacity=.8;
++        public static double PanelHeight(double canvasHeight,int visibleRows,double rowHeight,double headerHeight,double spacing,double padding,double minHeight)
++        {
++            if(new[]{canvasHeight,rowHeight,headerHeight,spacing,padding,minHeight}.Any(v=>!NumberFormatting.IsFinite(v))||canvasHeight<=0||visibleRows<0||rowHeight<=0||headerHeight<=0||spacing<0||padding<0||minHeight<=0)throw new ArgumentOutOfRangeException();
++            double content=headerHeight+visibleRows*rowHeight+Math.Max(0,visibleRows-1)*spacing+2*padding;
++            return Math.Max(minHeight,Math.Min(content,Math.Max(minHeight,canvasHeight*.5)));
++        }
++        public static double EnsureVisible(double top,double bottom,double viewportHeight,double offset,double contentHeight)
++        {
++            if(new[]{top,bottom,viewportHeight,offset,contentHeight}.Any(v=>!NumberFormatting.IsFinite(v))||viewportHeight<=0||contentHeight<0)return 0;
++            if(top>viewportHeight)offset-=top-viewportHeight;
++            else if(bottom<0)offset-=bottom;
++            return Math.Max(0,Math.Min(Math.Max(0,contentHeight-viewportHeight),offset));
++        }
++    }
++}
+--- 0.2.2.5/src\Plugin.cs
++++ 0.3.0/src\Plugin.cs
+@@ -10,7 +10,7 @@
+ using UnityEngine.SceneManagement;
+ namespace Alexander.CharacterSheet
+ {
+-    [BepInPlugin(Id,"Alexander's Character Sheet","0.2.2.5")]
++    [BepInPlugin(Id,"Alexander's Character Sheet","0.3.0")]
+     public sealed class Plugin:BaseUnityPlugin
+     {
+         public const string Id="alexander.charactersheet";
+@@ -28,6 +28,7 @@
+         PauseStopController capturedPause;
+         bool capturedBeforePause,capturedOpen,sheetOpen,hasFocus=true,initialized,subscribed,faulted;
+         SheetView view;
++        readonly SheetExpansionState sheetExpansion=new SheetExpansionState();
+         LocalUser local;
+         CharacterBody body;
+         float nextRefresh;
+@@ -45,7 +46,7 @@
+             {
+                 harmony=new Harmony(Id);harmony.PatchAll(typeof(Plugin).Assembly);
+                 SceneManager.activeSceneChanged+=SceneChanged;subscribed=true;initialized=true;
+-                Logger.LogInfo("Native Tab-extension source 0.2.2.5; HUD branch placement and held-Info re-entry guards; in-game fix verification pending.");
++                Logger.LogInfo("Native Tab-extension source 0.3.0; HUD branch placement and held-Info re-entry guards; in-game fix verification pending.");
+             }
+             catch(Exception error)
+             {
+@@ -105,7 +106,7 @@
+             bool before=capturedOpen&&capturedHud==hud&&ReferenceEquals(capturedPause,pause)?capturedBeforePause:now;
+             capturedOpen=false;
+             Lease.OpenAfterNative(RoR2Application.isInSinglePlayer,before,now,pause,RequestPause);
+-            view=new SheetView(hud,Mathf.Clamp(scale.Value,.7f,1.2f));sheetOpen=true;lastStatus=null;nextRefresh=0;view.Refresh(body);
++            view=new SheetView(hud,Mathf.Clamp(scale.Value,.7f,1.2f),sheetExpansion);sheetOpen=true;lastStatus=null;nextRefresh=0;view.Refresh(body);
+         }
+         void RequestPause(bool value)
+         {
+--- 0.2.2.5/src\Presentation\NativeHoverPopup.cs
++++ 0.3.0/src\Presentation\NativeHoverPopup.cs
+@@ -19,6 +19,7 @@
+         readonly OwnedDetailsButton detailsButton;
+         readonly float scale;
+         NativeTooltipAnchor itemAnchor;
++        MPEventSystem focusContext;
+         SheetRow row;
+         bool lastFull;
+         internal bool PointerInside{get=>interaction.PointerInside;set{if(value)interaction.PopupEnter();else interaction.PopupExit(Time.unscaledTime);}}
+@@ -64,11 +65,11 @@
+         {
+             if(row!=null&&row.IsItem&&(itemAnchor==null||!itemAnchor.Current))return false;
+             var locator=root.GetComponentInParent<MPEventSystemLocator>();
+-            var owner=itemAnchor!=null?itemAnchor.EventSystem:locator?locator.eventSystem:null;
++            var owner=itemAnchor!=null?itemAnchor.EventSystem:focusContext?focusContext:locator?locator.eventSystem:null;
+             return owner&&owner.isCursorVisible&&owner.cursorOpenerCount>0;
+         }
+         internal void Enter(object source,string key)
+-        {if(interaction.Enter(source,key)){itemAnchor=null;row=null;lastFull=false;scroll.verticalNormalizedPosition=1;}}
++        {if(interaction.Enter(source,key)){focusContext=null;itemAnchor=null;row=null;lastFull=false;scroll.verticalNormalizedPosition=1;}}
+         internal void Leave(object source)=>interaction.Leave(source,Time.unscaledTime);
+         internal bool Expired()=>interaction.Expire(Time.unscaledTime);
+         internal bool CanDefer(TooltipProvider provider,out MPEventSystem context)
+@@ -93,7 +94,7 @@
+             row=source;lastFull=full;nativeStyle.Refresh(title,body,panelImage,headerImage,scale,source.IsItem?itemAnchor.Controller:null);
+             heading.gameObject.SetActive(!source.IsItem);
+             if(!source.IsItem){title.text=TooltipText.SingleLine(source.Title);if(source.Icon)title.color=source.Color;}
+-            string raw=source.IsItem?full?source.ItemDetailsRichTooltip:"":full?source.FullRichTooltip:source.ShortRichTooltip;
++            string raw=source.IsItem?full?string.Join("\n",new[]{source.ItemHoverNote,source.ItemDetailsRichTooltip}):source.ItemHoverNote??"":full?source.FullRichTooltip:source.ShortRichTooltip;
+             string text=source.IsItem?raw:raw??TooltipMarkup.Literal(full?source.FullTooltip??source.ShortTooltip:source.ShortTooltip);
+             body.text=TooltipMarkup.Render(text,nativeStyle.CanStyle);
+             detailsButton.gameObject.SetActive(hasDetails);
+@@ -104,8 +105,9 @@
+             luckText.text=TooltipText.Clip(source.LuckTooltip,700);
+             float width=source.IsItem?(float)itemAnchor.PinnedBounds.Width*1f:nativeStyle.PreferredWidth*scale;
+             width=Mathf.Min(width,canvasRect.rect.width-24*scale);
+-            float headerHeight=source.IsItem?0:title.fontSize*1.4f+8*scale,footerHeight=Mathf.Max(30*scale,detailsLabel.fontSize+10*scale);
+-            bool showBody=!source.IsItem||full;
++            bool hasFooter=hasDetails||luckBadge.gameObject.activeSelf;footer.gameObject.SetActive(hasFooter);
++            float headerHeight=source.IsItem?0:title.fontSize*1.4f+8*scale,footerHeight=hasFooter?Mathf.Max(30*scale,detailsLabel.fontSize+10*scale):0;
++            bool showBody=!source.IsItem||full||!string.IsNullOrWhiteSpace(source.ItemHoverNote);
+             viewport.gameObject.SetActive(showBody);
+             float preferred=showBody?body.GetPreferredValues(body.text,Mathf.Max(20,width-24*scale),0).y:0;
+             CompactTooltipSize sizing;
+@@ -117,7 +119,7 @@
+             {
+                 if(!showBody)height=footerHeight+12*scale;
+                 if(!NativeTooltipAddonPlacement.TryBelow(canvasRect.rect.width,canvasRect.rect.height,itemAnchor.PinnedBounds,
+-                    height,footerHeight+12*scale,scale,out dock)){root.gameObject.SetActive(false);return false;}
++                    height,footerHeight+(showBody?40:12)*scale,scale,out dock)){root.gameObject.SetActive(false);return false;}
+                 width=(float)dock.Width;height=(float)dock.Height;
+             }
+             root.sizeDelta=new Vector2(width,height);
+@@ -151,8 +153,11 @@
+             point.y=Mathf.Clamp(point.y,canvasRect.rect.yMin+root.rect.height+12,canvasRect.rect.yMax-12);
+             root.anchoredPosition=point-canvasRect.rect.min;
+         }
++        internal void Focus(bool focused,MPEventSystem context=null){focusContext=focused?context:null;interaction.Focus(focused,Time.unscaledTime);}
++        internal bool FocusToggle()=>interaction.FocusToggle(CursorAvailable());
++        internal bool FocusExpand(bool expanded)=>interaction.FocusExpand(CursorAvailable(),expanded);
+         internal void ShowLuck(bool show){if(luckDetail)luckDetail.gameObject.SetActive(show);}
+-        internal void Hide(){interaction.Reset();itemAnchor=null;row=null;if(root)root.gameObject.SetActive(false);ShowLuck(false);}
++        internal void Hide(){focusContext=null;interaction.Reset();itemAnchor=null;row=null;if(root)root.gameObject.SetActive(false);ShowLuck(false);}
+         public void Dispose(){Hide();if(root)UnityEngine.Object.Destroy(root.gameObject);}
+     }
+ }
+--- 0.2.2.5/src\Presentation\NativeItemHover.cs
++++ 0.3.0/src\Presentation\NativeItemHover.cs
+@@ -147,9 +147,10 @@
+         internal TextMeshProUGUI Label,Value;
+         internal TooltipProvider NativeProvider;
+         internal NativeItemHover ItemHover;
+-        public void OnPointerEnter(PointerEventData data){if(Row!=null&&!Row.IsItem)Owner?.EnterRow(this);}
+-        public void OnPointerExit(PointerEventData data){if(Row!=null&&!Row.IsItem)Owner?.Leave(this);}
+-        void OnDisable(){Owner?.Leave(this);}
++        internal bool PointerInside;
++        public void OnPointerEnter(PointerEventData data){PointerInside=true;if(Row!=null&&!Row.IsItem)Owner?.EnterRow(this);}
++        public void OnPointerExit(PointerEventData data){PointerInside=false;if(Row!=null&&!Row.IsItem)Owner?.Leave(this);}
++        void OnDisable(){PointerInside=false;Owner?.Leave(this);}
+     }
+     internal sealed class PopupPresence:MonoBehaviour,IPointerEnterHandler,IPointerExitHandler,IPointerDownHandler,IPointerUpHandler,IPointerClickHandler
+     {
+--- 0.2.2.5/src\Presentation\SheetData.cs
++++ 0.3.0/src\Presentation\SheetData.cs
+@@ -12,8 +12,8 @@
+     {
+         public string Id, Title, Detail, ShortTooltip, FullTooltip, ShortRichTooltip, FullRichTooltip, LuckTooltip, Group="Utility / passive", LuckLabel="Unverified";
+         public bool FormulaRegistered,IsItem;
+-        public string ItemDetailsRichTooltip;
+-        internal bool HasItemAddition=>NativeItemSurfacePolicy.HasAddition(ItemDetailsRichTooltip,LuckMark);
++        public string ItemDetailsRichTooltip,ItemHoverNote;
++        internal bool HasItemAddition=>NativeItemSurfacePolicy.HasAddition(ItemDetailsRichTooltip,LuckMark)||!string.IsNullOrWhiteSpace(ItemHoverNote);
+         public Sprite Icon;
+         public Color Color = Color.white;
+         public string LuckMark = "?";
+--- 0.2.2.5/src\Presentation\SheetFocusButton.cs
++++ 0.3.0/src\Presentation\SheetFocusButton.cs
+@@ -0,0 +1,19 @@
++using UnityEngine.EventSystems;
++using RoR2.UI;
++namespace Alexander.CharacterSheet
++{
++    internal sealed class SheetFocusButton:HGButton
++    {
++        internal SheetView Owner;
++        internal string NodeId;
++        internal AddedRowHover Hover;
++        public override void OnSelect(BaseEventData data){base.OnSelect(data);Owner?.Focus(this,data);}
++        public override void OnDeselect(BaseEventData data){base.OnDeselect(data);Owner?.Unfocus(this);}
++        public override void OnSubmit(BaseEventData data){Owner?.Submit(this);data.Use();}
++        public override void OnMove(AxisEventData data)
++        {if(Owner!=null&&Owner.Move(this,data.moveDir)){data.Use();return;}base.OnMove(data);}
++        public override void OnPointerDown(PointerEventData data){base.OnPointerDown(data);data.Use();}
++        public override void OnPointerUp(PointerEventData data){base.OnPointerUp(data);data.Use();}
++        public override void OnPointerClick(PointerEventData data){base.OnPointerClick(data);data.Use();}
++    }
++}
+--- 0.2.2.5/src\Presentation\SheetGlyphGraphic.cs
++++ 0.3.0/src\Presentation\SheetGlyphGraphic.cs
+@@ -0,0 +1,32 @@
++using Alexander.CharacterSheet.Core;
++using UnityEngine;
++using UnityEngine.UI;
++namespace Alexander.CharacterSheet
++{
++    // Original vector shapes, generated only on owned UI geometry.
++    internal sealed class SheetGlyphGraphic:MaskableGraphic
++    {
++        internal SheetGlyph Kind;
++        protected override void OnPopulateMesh(VertexHelper mesh)
++        {
++            mesh.Clear();
++            if(Kind==SheetGlyph.Shield)Polygon(mesh,new[]{new Vector2(.15f,.9f),new Vector2(.85f,.9f),new Vector2(.8f,.4f),new Vector2(.5f,.08f),new Vector2(.2f,.4f)});
++            else if(Kind==SheetGlyph.Sword){Line(mesh,new Vector2(.22f,.15f),new Vector2(.82f,.86f),.11f);Line(mesh,new Vector2(.12f,.4f),new Vector2(.48f,.1f),.09f);}
++            else if(Kind==SheetGlyph.Runner){Line(mesh,new Vector2(.12f,.28f),new Vector2(.88f,.28f),.13f);Line(mesh,new Vector2(.23f,.31f),new Vector2(.31f,.7f),.19f);Line(mesh,new Vector2(.32f,.58f),new Vector2(.72f,.28f),.13f);}
++            else if(Kind==SheetGlyph.Clover){Circle(mesh,new Vector2(.33f,.65f),.2f);Circle(mesh,new Vector2(.67f,.65f),.2f);Circle(mesh,new Vector2(.33f,.33f),.2f);Circle(mesh,new Vector2(.67f,.33f),.2f);Line(mesh,new Vector2(.5f,.4f),new Vector2(.5f,.05f),.07f);}
++            else if(Kind==SheetGlyph.Skull){Circle(mesh,new Vector2(.5f,.6f),.35f);Line(mesh,new Vector2(.32f,.25f),new Vector2(.68f,.25f),.2f);Circle(mesh,new Vector2(.37f,.61f),.08f,Color.black);Circle(mesh,new Vector2(.63f,.61f),.08f,Color.black);}
++            else if(Kind==SheetGlyph.Burst){for(int i=0;i<8;i++){float a=i*Mathf.PI/4;Line(mesh,new Vector2(.5f,.5f)+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*.13f,new Vector2(.5f,.5f)+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*.45f,.075f);}}
++        }
++        Vector2 Point(Vector2 p)=>new Vector2(rectTransform.rect.xMin+p.x*rectTransform.rect.width,rectTransform.rect.yMin+p.y*rectTransform.rect.height);
++        void Polygon(VertexHelper mesh,Vector2[] points,Color? ink=null)
++        {
++            int first=mesh.currentVertCount;
++            foreach(var point in points){var v=UIVertex.simpleVert;v.position=Point(point);v.color=ink??color;mesh.AddVert(v);}
++            for(int i=1;i<points.Length-1;i++)mesh.AddTriangle(first,first+i,first+i+1);
++        }
++        void Line(VertexHelper mesh,Vector2 a,Vector2 b,float width)
++        {var normal=new Vector2(-(b-a).y,(b-a).x).normalized*width*.5f;Polygon(mesh,new[]{a-normal,b-normal,b+normal,a+normal});}
++        void Circle(VertexHelper mesh,Vector2 center,float radius,Color? ink=null)
++        {var points=new Vector2[12];for(int i=0;i<points.Length;i++){float a=i*Mathf.PI*2/points.Length;points[i]=center+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*radius;}Polygon(mesh,points,ink);}
++    }
++}
+--- 0.2.2.5/src\Presentation\SheetStructureData.cs
++++ 0.3.0/src\Presentation\SheetStructureData.cs
+@@ -0,0 +1,122 @@
++using System;
++using System.Collections.Generic;
++using System.Linq;
++using Alexander.CharacterSheet.Core;
++using RoR2;
++using UnityEngine;
++namespace Alexander.CharacterSheet
++{
++    internal sealed class SheetStructureEntry
++    {
++        internal readonly SheetNode Node;
++        internal readonly SheetRow Row;
++        internal SheetStructureEntry(SheetNode node,SheetRow row=null){Node=node;Row=row;}
++    }
++    internal static class SheetStructureData
++    {
++        internal static long Count(CharacterBody body,string id)
++        {
++            if(!body||!body.inventory)return 0;var index=ItemCatalog.FindItemIndex(id);
++            return index==ItemIndex.None?0:Math.Max(0,body.inventory.GetItemCountEffective(index));
++        }
++        static SheetRow Numeric(string id,string title,double value,double basis,double growth,string suffix="",
++            Action<Calculation> terms=null,string note="",bool signed=false)
++        {
++            var calculation=new Calculation("Base",basis);
++            calculation.Apply("Level growth (level - 1)",CalculationStage.Flat,growth);
++            terms?.Invoke(calculation);
++            string compact=StatTooltipPresentation.Create(value,0,calculation,"cIsUtility",suffix);
++            if(signed)compact=compact.Replace("Total: "+TooltipMarkup.Style(NumberFormatting.Display(value)+suffix,"cIsUtility"),
++                "Total: "+TooltipMarkup.Style(NumberFormatting.Signed(value)+suffix,"cIsUtility"));
++            if(note.Length>0)compact+="\n"+TooltipMarkup.Style(note,"cStack");
++            string full=compact+"\n\n"+TooltipMarkup.Literal(calculation.Describe(value,false,true));
++            return new SheetRow{Id=id,Title=title,Detail=(signed?NumberFormatting.Signed(value):NumberFormatting.Display(value))+suffix,
++                ShortRichTooltip=compact,ShortTooltip=TooltipMarkup.Render(compact,null),FullRichTooltip=full,
++                FullTooltip=TooltipMarkup.Render(full,null),LuckMark="x",LuckTooltip="This value is not itself a probability."};
++        }
++        internal static IReadOnlyList<SheetStructureEntry> Build(CharacterBody body,List<SheetRow> inventory)
++        {
++            var character=SheetData.Character(body).ToDictionary(r=>r.Id);
++            character["Health"].Title="Health";character["Regeneration"].Title="Regen";
++            character["Attack speed"].Title="Attack Speed";character["Critical chance"].Title="Crit Chance";
++            character["Movement speed"].Title="Movement Speed";
++            character["Regeneration"].Detail=NumberFormatting.Display(body.regen)+" /s";
++            character["Attack speed"].Detail=NumberFormatting.Display(body.attackSpeed)+"x";
++            character["Movement speed"].Detail=NumberFormatting.Display(body.moveSpeed)+" m/s";
++            string armorNote="Reduction from armor: "+NumberFormatting.Display(CharacterEffectCatalog.ArmorReduction(body.armor))+"%.";
++            character["Armor"].ShortRichTooltip+="\n"+TooltipMarkup.Style(armorNote,"cStack");
++            character["Armor"].ShortTooltip+="\n"+armorNote;
++            character["Armor"].FullRichTooltip+="\n"+TooltipMarkup.Literal(armorNote);
++            if(CharacterEffectCatalog.ShieldVisible(body.maxShield))
++            {
++                var row=Numeric("Shield","Shield",body.maxShield,body.baseMaxShield,
++                    body.levelMaxShield*Mathf.Max(0,body.level-1),note:"Capacity; temporary depletion does not remove this row.");
++                row.ShortRichTooltip=StatTooltipPresentation.Create(body.maxShield,body.levelMaxShield,
++                    ShieldCalculation(body),"cIsHealing")+"\n"+TooltipMarkup.Style("Shield capacity; current shield is in Details.","cStack");
++                row.FullRichTooltip=row.ShortRichTooltip+"\n\n"+TooltipMarkup.Literal("Current shield: "+NumberFormatting.Display(body.healthComponent.shield)+"\n"+ShieldCalculation(body).Describe(body.maxShield,false,true));
++                character["Shield"]=row;
++            }
++            long plates=Count(body,"ArmorPlate");
++            character["Dmg Reduction"]=Numeric("Dmg Reduction","Dmg Reduction",CharacterEffectCatalog.FlatArmorPlate(plates),0,0,
++                terms:c=>{if(plates>0)c.Apply("Repulsion Armor Plate",CalculationStage.Flat,CharacterEffectCatalog.FlatArmorPlate(plates));},
++                note:"Repulsion Armor Plate per-hit reduction; hit conditions and minimum damage limit the benefit.");
++            character["Sprint Speed Modifier"]=new SheetRow{Id="Sprint Speed Modifier",Title="Sprint Speed Modifier",
++                Detail=NumberFormatting.Signed((body.sprintingSpeedMultiplier-1)*100)+"%",
++                ShortRichTooltip="Total: "+TooltipMarkup.Style(NumberFormatting.Signed((body.sprintingSpeedMultiplier-1)*100)+"%","cIsUtility")+"\nBase: Unknown\nBonuses: Other/unknown",
++                FullTooltip="Live sprint speed multiplier: "+NumberFormatting.Exact(body.sprintingSpeedMultiplier)+". Displayed modifier is (multiplier - 1) x 100. The survivor base coefficient and complete per-source attribution are unavailable.",
++                LuckMark="x",LuckTooltip="Sprint speed is not itself a luck roll."};
++            character["Maximum jumps"]=Numeric("Maximum jumps","Maximum jumps",body.maxJumpCount,body.baseJumpCount,0,
++                terms:c=>{long feathers=Count(body,"Feather");if(feathers>0)c.Apply("Hopoo Feather",CalculationStage.Flat,feathers);},
++                note:"Maximum jump count; this is not jumps remaining.");
++            long clovers=Count(body,"Clover"),purity=Count(body,"LunarBadLuck");
++            character["Luck"]=Numeric("Luck","Luck",body.master?body.master.luck:double.NaN,0,0,
++                terms:c=>{if(clovers>0)c.Apply("57 Leaf Clover",CalculationStage.Flat,clovers);if(purity>0)c.Apply("Purity",CalculationStage.Flat,-purity);},signed:true);
++            character["Luck"].LuckMark="mix";character["Luck"].LuckTooltip="Signed luck value, not a probability. Only eligible random rolls receive luck adjustment.";
++            character["Cooldown Reduction"]=new SheetRow{Id="Cooldown Reduction",Title="Cooldown Reduction",Detail="Unknown",
++                ShortRichTooltip=TooltipMarkup.Literal(GeneralCooldownPresentation.UnknownTotal),
++                FullTooltip="A single live general cooldown total is unavailable. Per-skill cooldown values are excluded because they can include slot-specific modifiers such as Hardlight Afterburner.\n"+
++                    string.Join("\n",GeneralCooldownPresentation.Components(Count(body,"AlienHead"),Count(body,"HalfAttackSpeedHalfCooldowns"),purity)),
++                LuckMark="x",LuckTooltip="Cooldown modifiers are separate from luck rolls."};
++
++            var routed=new Dictionary<string,List<SheetRow>>(StringComparer.Ordinal);
++            foreach(var header in SheetHierarchy.Headers)routed[header.Id]=new List<SheetRow>();
++            foreach(var row in SheetHierarchy.UniqueRows(inventory,r=>r.Id))
++            {
++                int index;if(!int.TryParse(row.Id.Substring("item:".Length),out index))continue;
++                var def=ItemCatalog.GetItemDef((ItemIndex)index);if(!def)continue;
++                row.Title=System.Text.RegularExpressions.Regex.Replace(Language.GetString(def.nameToken)??"","<[^>]*>","");
++                row.Detail="x"+NumberFormatting.Count(Count(body,def.name));
++                var rule=CharacterEffectCatalog.Item(def.name);
++                row.ItemHoverNote=rule?.HoverNote(body.outOfDanger,body.outOfCombat,body.isSprinting)??"";
++                routed[CharacterEffectCatalog.Route(def.name,EffectOrigin.Item)].Add(row);
++            }
++            var passive=body.skillLocator?body.skillLocator.passiveSkill:default(SkillLocator.PassiveSkill);
++            if(body.skillLocator&&passive.enabled&&!string.IsNullOrWhiteSpace(passive.skillNameToken))
++            {
++                string name=Language.GetString(passive.skillNameToken),description=Language.GetString(passive.skillDescriptionToken);
++                var row=new SheetRow{Id="passive:"+passive.skillNameToken,Title=name,Detail="Passive",Icon=passive.icon,
++                    ShortRichTooltip=description,ShortTooltip=description,FullRichTooltip=description,
++                    FullTooltip=description+"\nOwn native passive metadata only; no active ability effects are included.",
++                    LuckMark="?",LuckTooltip="Passive luck applicability depends on the specific effect."};
++                routed[CharacterEffectCatalog.Route(passive.skillNameToken,EffectOrigin.Passive)].Add(row);
++            }
++            var buffs=SheetData.Buffs(body);routed[SheetHierarchy.Other].AddRange(buffs);
++            if(body.healthComponent.barrier>0)
++                routed[SheetHierarchy.Other].Insert(0,Numeric("Barrier","Barrier",body.healthComponent.barrier,0,0,note:"Temporary barrier; separate from shield capacity."));
++            var entries=new List<SheetStructureEntry>();
++            foreach(var header in SheetHierarchy.Headers)
++            {
++                entries.Add(new SheetStructureEntry(header));
++                string[] names;if(SheetHierarchy.Stats.TryGetValue(header.Id,out names))
++                    foreach(string key in names){SheetRow row;if(character.TryGetValue(key,out row))entries.Add(new SheetStructureEntry(new SheetNode("stat:"+key,header.Id,row.Title,false,2,key),row));}
++                foreach(var row in routed[header.Id])
++                    entries.Add(new SheetStructureEntry(new SheetNode("effect:"+row.Id,header.Id,row.Title,false,1,row.Id),row));
++            }
++            return entries;
++        }
++        static Calculation ShieldCalculation(CharacterBody body)
++        {
++            var c=new Calculation("Base",body.baseMaxShield);c.Apply("Level growth (level - 1)",CalculationStage.Flat,body.levelMaxShield*Mathf.Max(0,body.level-1));return c;
++        }
++    }
++}
+--- 0.2.2.5/src\Presentation\SheetView.cs
++++ 0.3.0/src\Presentation\SheetView.cs
+@@ -7,31 +7,48 @@
+ using TMPro;
+ using UnityEngine;
+ using UnityEngine.UI;
++using UnityEngine.EventSystems;
+ namespace Alexander.CharacterSheet
+ {
+-    // Native strips, icons, transforms and ordering remain owned by the game.
+     internal sealed class SheetView:IDisposable
+     {
++        sealed class Control
++        {
++            internal SheetNode Node;
++            internal SheetFocusButton Button;
++            internal AddedRowHover Hover;
++            internal TextMeshProUGUI Label,Value;
++            internal Image Icon,FocusLine;
++            internal SheetGlyphGraphic Glyph;
++            internal RectTransform Rect;
++        }
+         readonly HUD hud;
+         readonly float scale;
++        readonly SheetExpansionState expansion;
+         readonly Dictionary<ItemIcon,NativeItemHover> bindings=new Dictionary<ItemIcon,NativeItemHover>();
+         readonly Dictionary<string,SheetRow> items=new Dictionary<string,SheetRow>();
+-        readonly List<AddedRowHover> statRows=new List<AddedRowHover>();
+-        readonly List<GameObject> effectRows=new List<GameObject>();
++        readonly Dictionary<string,Control> controls=new Dictionary<string,Control>(StringComparer.Ordinal);
++        readonly Dictionary<string,SheetStructureEntry> entries=new Dictionary<string,SheetStructureEntry>(StringComparer.Ordinal);
++        List<SheetNode> allNodes=new List<SheetNode>(),visibleNodes=new List<SheetNode>();
+         CharacterBody body;
+         ScoreboardStrip ownStrip;
+         Canvas canvas;
+         NativeUiStyle style;
+-        RectTransform root,content;
++        RectTransform root,content,viewport;
+         NativeSheetLayer layer;
+         NativeHoverPopup popup;
++        ScrollRect scroll;
++        TextMeshProUGUI scrollHint;
++        SheetFocusButton focused;
++        MPEventSystem focusedContext;
++        TooltipProvider focusedProvider;
+         object hovered;
+         SheetRow hoveredRow;
+-        bool effectsExpanded;
+-        TextMeshProUGUI effectsHeading;
+         internal string Status{get;private set;}="Waiting for the native own-player strip.";
+         string hoverCoverage="Own item hover coverage pending.";
+-        internal SheetView(HUD source,float presentationScale){hud=source;scale=presentationScale;}
++        internal SheetView(HUD source,float presentationScale,SheetExpansionState state)
++        {hud=source;scale=presentationScale;expansion=state??new SheetExpansionState();}
++        CompactSheetMetrics Metrics=>new CompactSheetMetrics(style.BodyFontSize,scale);
+         internal bool IsOwnIcon(ItemIcon icon)
+         {
+             if(!body||!body.master||!body.inventory||!hud||!icon)return false;
+@@ -63,68 +80,168 @@
+                 canvas=layer.Canvas;CreatePanel();popup=new NativeHoverPopup(layer.Root,canvas,style,scale);
+             }
+             items.Clear();var inventory=SheetData.Inventory(body,false);foreach(var row in inventory)items[row.Id]=row;
+-            RefreshBindings();var character=SheetData.Character(body);
+-            if(statRows.Count!=character.Count)
+-            {
+-                foreach(var row in statRows)if(row){row.gameObject.SetActive(false);UnityEngine.Object.Destroy(row.gameObject);}
+-                statRows.Clear();for(int i=0;i<character.Count;i++)statRows.Add(CreateRow(character[i],(float)Metrics.RowHeight));
+-                for(int i=0;i<statRows.Count;i++)statRows[i].transform.SetSiblingIndex(1+i);
+-            }
+-            for(int i=0;i<character.Count;i++)SetRow(statRows[i],character[i]);
+-            var buffs=SheetData.Buffs(body);
+-            effectsHeading.text="Effects & buffs  ("+(inventory.Count+buffs.Count)+")  "+(effectsExpanded?"v":">");
+-            if(effectsExpanded)RefreshEffects(inventory,buffs);else ClearEffects();
++            RefreshBindings();
++            var previousNodes=allNodes;var previousFocused=focused;
++            var previousContext=focusedContext;bool ownedSelection=previousFocused&&previousContext&&ReferenceEquals(previousContext.currentSelectedGameObject,previousFocused.gameObject);
++            var structure=SheetStructureData.Build(body,inventory);
++            entries.Clear();foreach(var entry in structure)entries.Add(entry.Node.Id,entry);
++            allNodes=structure.Select(e=>e.Node).ToList();visibleNodes=SheetHierarchy.Visible(allNodes,expansion).ToList();
++            var visibleIds=new HashSet<string>(visibleNodes.Select(n=>n.Id));
++            foreach(var pair in controls)if(!visibleIds.Contains(pair.Key))pair.Value.Rect.gameObject.SetActive(false);
++            foreach(var node in visibleNodes)
++            {
++                Control control;if(!controls.TryGetValue(node.Id,out control)){control=CreateControl(node);controls.Add(node.Id,control);}
++                UpdateControl(control,entries[node.Id]);control.Rect.gameObject.SetActive(true);control.Rect.SetAsLastSibling();
++            }
++            ConnectNavigation();
++            LayoutRebuilder.ForceRebuildLayoutImmediate(content);
+             Dock(strips);
++            if(root.gameObject.activeInHierarchy)LayoutRebuilder.ForceRebuildLayoutImmediate(content);
++            scrollHint.text=content.rect.height>viewport.rect.height+1?"Scroll":"";
++            if(previousFocused&&(!visibleIds.Contains(previousFocused.NodeId)||!previousFocused.gameObject.activeInHierarchy))
++            {
++                string next=SheetHierarchy.RestoreFocus(previousFocused.NodeId,previousNodes.Concat(allNodes.Where(n=>!previousNodes.Any(p=>p.Id==n.Id))),visibleNodes);
++                if(ownedSelection&&previousContext&&(previousContext.currentSelectedGameObject==null||ReferenceEquals(previousContext.currentSelectedGameObject,previousFocused.gameObject))&&next!=null&&controls.ContainsKey(next))
++                    previousContext.SetSelectedGameObject(controls[next].Button.gameObject);
++                else if(ReferenceEquals(focused,previousFocused))Unfocus(previousFocused);
++            }
+             if(hovered is NativeItemHover item&&item&&item.CanShow)items.TryGetValue(item.RowId,out hoveredRow);
+-            else if(hovered is AddedRowHover added&&added)hoveredRow=added.Row;
++            else if(hovered is AddedRowHover added&&added&&added.gameObject.activeInHierarchy)hoveredRow=added.Row;
+             else if(hovered!=null)EndHover();
+         }
+-        CompactSheetMetrics Metrics=>new CompactSheetMetrics(style.BodyFontSize,scale);
+         void CreatePanel()
+         {
+             var metrics=Metrics;
+-            root=NativeUiStyle.Rect(layer.Root,"AlexanderTabAdditions",Vector2.zero,Vector2.zero);root.pivot=Vector2.zero;
+-            root.gameObject.AddComponent<LayoutElement>().ignoreLayout=true;style.Background(root,true);style.Border(root,scale);
+-            var viewport=NativeUiStyle.Rect(root,"Viewport",Vector2.zero,Vector2.one);
+-            viewport.offsetMin=Vector2.one*(float)metrics.Padding;viewport.offsetMax=-viewport.offsetMin;
+-            viewport.gameObject.AddComponent<Image>().color=Color.clear;viewport.gameObject.AddComponent<RectMask2D>();
+-            content=NativeUiStyle.Rect(viewport,"Content",new Vector2(0,1),Vector2.one);content.pivot=new Vector2(.5f,1);
++            root=NativeUiStyle.Rect(layer.Root,"AlexanderCharacterSheet",Vector2.zero,Vector2.zero);root.pivot=Vector2.zero;root.gameObject.SetActive(false);
++            root.gameObject.AddComponent<LayoutElement>().ignoreLayout=true;
++            var background=style.Background(root,true);var color=background.color;
++            background.color=new Color(color.r,color.g,color.b,(float)HierarchySheetSizing.BackgroundOpacity);
++            style.Border(root,scale);
++            var header=NativeUiStyle.Rect(root,"CharacterSheetHeader",new Vector2(0,1),Vector2.one);header.pivot=new Vector2(.5f,1);header.sizeDelta=new Vector2(0,(float)metrics.HeaderHeight);
++            var title=style.Text(header,"Character Sheet",(style.BodyFontSize+2)*scale);title.fontStyle=FontStyles.Bold;
++            title.rectTransform.offsetMin=new Vector2((float)metrics.Padding,0);title.rectTransform.anchorMax=new Vector2(.82f,1);title.enableWordWrapping=false;Opaque(title);
++            scrollHint=style.Text(header,"",Mathf.Max(12,style.BodyFontSize-4)*scale);scrollHint.rectTransform.anchorMin=new Vector2(.82f,0);
++            scrollHint.rectTransform.offsetMax=new Vector2(-(float)metrics.Padding,0);scrollHint.alignment=TextAlignmentOptions.MidlineRight;Opaque(scrollHint);
++            viewport=NativeUiStyle.Rect(root,"SheetViewport",Vector2.zero,Vector2.one);
++            viewport.offsetMin=Vector2.one*(float)metrics.Padding;viewport.offsetMax=new Vector2(-(float)metrics.Padding,-(float)(metrics.HeaderHeight+metrics.Padding));
++            var surface=viewport.gameObject.AddComponent<Image>();surface.color=Color.clear;
++            viewport.gameObject.AddComponent<RectMask2D>();
++            content=NativeUiStyle.Rect(viewport,"SheetContent",new Vector2(0,1),Vector2.one);content.pivot=new Vector2(.5f,1);
+             var layout=content.gameObject.AddComponent<VerticalLayoutGroup>();layout.spacing=(float)metrics.Spacing;
+             layout.childControlWidth=true;layout.childControlHeight=true;layout.childForceExpandHeight=false;layout.childForceExpandWidth=true;
+             content.gameObject.AddComponent<ContentSizeFitter>().verticalFit=ContentSizeFitter.FitMode.PreferredSize;
+-            var scroll=viewport.gameObject.AddComponent<ScrollRect>();scroll.viewport=viewport;scroll.content=content;scroll.horizontal=false;
++            scroll=viewport.gameObject.AddComponent<ScrollRect>();scroll.viewport=viewport;scroll.content=content;scroll.horizontal=false;
+             scroll.movementType=ScrollRect.MovementType.Clamped;scroll.scrollSensitivity=24;
+-            var heading=NativeUiStyle.Rect(content,"CharacterHeader",Vector2.zero,Vector2.one);
+-            heading.gameObject.AddComponent<LayoutElement>().preferredHeight=(float)metrics.HeaderHeight;
+-            var title=style.Text(heading,"Character stats",(style.BodyFontSize+2)*scale);title.fontStyle=FontStyles.Bold;
+-            title.rectTransform.anchorMax=new Vector2(.75f,1);title.enableWordWrapping=false;
+-            var live=style.Text(heading,"Live",style.BodyFontSize*scale);live.alignment=TextAlignmentOptions.MidlineRight;
+-            live.rectTransform.anchorMin=new Vector2(.75f,0);live.alpha=.7f;live.enableWordWrapping=false;
+-            var buttonRoot=NativeUiStyle.Rect(content,"EffectsDisclosure",Vector2.zero,Vector2.one);
+-            buttonRoot.gameObject.AddComponent<LayoutElement>().preferredHeight=(float)metrics.ControlHeight;
+-            var buttonImage=buttonRoot.gameObject.AddComponent<Image>();buttonImage.color=new Color(1,1,1,.04f);
+-            effectsHeading=style.Text(buttonRoot,"Effects  >",style.BodyFontSize*scale);
+-            effectsHeading.rectTransform.offsetMin=new Vector2(6*scale,0);
+-            buttonRoot.gameObject.AddComponent<Button>().onClick.AddListener(()=>{effectsExpanded=!effectsExpanded;Refresh(body);scroll.verticalNormalizedPosition=1;});
+-        }
+-        AddedRowHover CreateRow(SheetRow row,float height)
+-        {
+-            var rect=NativeUiStyle.Rect(content,row.Id,Vector2.zero,Vector2.one);
+-            rect.gameObject.AddComponent<LayoutElement>().preferredHeight=height;
+-            rect.gameObject.AddComponent<Image>().color=new Color(1,1,1,.025f);
+-            var label=style.Text(rect,"",style.BodyFontSize*scale);
+-            label.rectTransform.anchorMax=new Vector2(.65f,1);label.rectTransform.offsetMin=new Vector2(6*scale,0);
+-            label.rectTransform.offsetMax=new Vector2(-6*scale,0);label.enableWordWrapping=false;label.overflowMode=TextOverflowModes.Ellipsis;
+-            var value=style.Text(rect,"",style.BodyFontSize*scale);value.alignment=TextAlignmentOptions.MidlineRight;
+-            value.rectTransform.anchorMin=new Vector2(.65f,0);value.rectTransform.offsetMax=new Vector2(-6*scale,0);
+-            value.enableWordWrapping=false;value.overflowMode=TextOverflowModes.Ellipsis;
+-            var hover=rect.gameObject.AddComponent<AddedRowHover>();hover.Owner=this;hover.Label=label;hover.Value=value;SetRow(hover,row);return hover;
+-        }
+-        void SetRow(AddedRowHover target,SheetRow row)
+-        {
+-            target.Row=row;target.Label.text=TooltipText.SingleLine(row.Title);target.Value.text=TooltipText.SingleLine(row.Detail??"");
+-            target.Label.rectTransform.anchorMax=new Vector2(string.IsNullOrEmpty(row.Detail)?1:.65f,1);
+-            if(row.IsItem)RefreshAddedItemProvider(target);
++        }
++        static void Opaque(TMP_Text text){var c=text.color;text.color=new Color(c.r,c.g,c.b,1);}
++        Control CreateControl(SheetNode node)
++        {
++            var c=new Control();c.Rect=NativeUiStyle.Rect(content,node.Id,Vector2.zero,Vector2.one);c.Rect.gameObject.SetActive(false);
++            c.Rect.gameObject.AddComponent<LayoutElement>().preferredHeight=(float)Metrics.RowHeight;
++            var image=c.Rect.gameObject.AddComponent<Image>();image.color=Color.clear;
++            c.Button=c.Rect.gameObject.AddComponent<SheetFocusButton>();c.Button.Owner=this;c.Button.NodeId=node.Id;c.Button.targetGraphic=image;
++            foreach(var auto in c.Rect.GetComponents<TooltipProvider>())auto.enabled=false;
++            c.Button.onClick.AddListener(()=>{if(c.Node.Header)Toggle(c.Node.Id);});
++            c.Label=style.Text(c.Rect,"",style.BodyFontSize*scale);Opaque(c.Label);
++            c.Value=style.Text(c.Rect,"",style.BodyFontSize*scale);Opaque(c.Value);c.Value.alignment=TextAlignmentOptions.MidlineRight;
++            c.Label.enableWordWrapping=c.Value.enableWordWrapping=false;c.Label.overflowMode=c.Value.overflowMode=TextOverflowModes.Ellipsis;
++            c.Value.rectTransform.anchorMin=new Vector2(.73f,0);c.Value.rectTransform.offsetMax=new Vector2(-4*scale,0);
++            var iconRect=NativeUiStyle.Rect(c.Rect,"MarginIcon",Vector2.zero,new Vector2(0,1));iconRect.pivot=new Vector2(0,.5f);iconRect.sizeDelta=new Vector2(20*scale,0);
++            c.Glyph=iconRect.gameObject.AddComponent<SheetGlyphGraphic>();c.Glyph.raycastTarget=false;c.Glyph.color=c.Label.color;
++            var itemRect=NativeUiStyle.Rect(c.Rect,"ItemIcon",Vector2.zero,new Vector2(0,1));itemRect.pivot=new Vector2(0,.5f);itemRect.sizeDelta=new Vector2(20*scale,0);
++            c.Icon=itemRect.gameObject.AddComponent<Image>();c.Icon.raycastTarget=false;c.Icon.preserveAspect=true;c.Icon.color=Color.white;
++            var focusRect=NativeUiStyle.Rect(c.Rect,"Focus",Vector2.zero,new Vector2(0,1));focusRect.pivot=new Vector2(0,.5f);focusRect.sizeDelta=new Vector2(2*scale,0);
++            c.FocusLine=focusRect.gameObject.AddComponent<Image>();c.FocusLine.raycastTarget=false;c.FocusLine.color=c.Label.color;c.FocusLine.gameObject.SetActive(false);
++            if(!node.Header)
++            {
++                c.Hover=c.Rect.gameObject.AddComponent<AddedRowHover>();c.Hover.Owner=this;c.Hover.Label=c.Label;c.Hover.Value=c.Value;c.Button.Hover=c.Hover;
++            }
++            return c;
++        }
++        void UpdateControl(Control c,SheetStructureEntry entry)
++        {
++            var node=entry.Node;c.Node=node;
++            float indent=(4+node.Depth*12)*scale,iconWidth=node.Header&&node.Glyph!=SheetGlyph.None||entry.Row!=null&&entry.Row.Icon?24*scale:0;
++            c.Label.fontStyle=node.Header?FontStyles.Bold:FontStyles.Normal;
++            c.Label.text=node.Header?(expansion.IsOpen(node.Id)?"v  ":">  ")+node.Title:TooltipText.SingleLine(entry.Row.Title);
++            c.Value.text=node.Header?"":TooltipText.SingleLine(entry.Row.Detail??"");c.Value.gameObject.SetActive(!node.Header);
++            c.Label.rectTransform.anchorMax=new Vector2(node.Header?1:.73f,1);
++            c.Label.rectTransform.offsetMin=new Vector2(indent+iconWidth,0);c.Label.rectTransform.offsetMax=new Vector2(-4*scale,0);
++            c.Glyph.Kind=node.Glyph;c.Glyph.gameObject.SetActive(node.Header&&node.Glyph!=SheetGlyph.None);c.Glyph.rectTransform.anchoredPosition=new Vector2(indent,0);c.Glyph.SetVerticesDirty();
++            c.Icon.sprite=entry.Row?.Icon;c.Icon.gameObject.SetActive(!node.Header&&c.Icon.sprite);c.Icon.rectTransform.anchoredPosition=new Vector2(indent,0);
++            if(c.Hover){c.Hover.Row=entry.Row;if(entry.Row.IsItem)RefreshAddedItemProvider(c.Hover);}
++        }
++        void ConnectNavigation()
++        {
++            for(int i=0;i<visibleNodes.Count;i++)
++            {
++                var navigation=new Navigation{mode=Navigation.Mode.Explicit};
++                navigation.selectOnUp=i>0?controls[visibleNodes[i-1].Id].Button:null;
++                navigation.selectOnDown=i+1<visibleNodes.Count?controls[visibleNodes[i+1].Id].Button:null;
++                controls[visibleNodes[i].Id].Button.navigation=navigation;
++            }
++        }
++        internal void Submit(SheetFocusButton source)
++        {
++            SheetStructureEntry entry;if(!source||!entries.TryGetValue(source.NodeId,out entry))return;
++            if(entry.Node.Header)Toggle(entry.Node.Id);else if(ReferenceEquals(focused,source))popup?.FocusToggle();
++        }
++        internal bool Move(SheetFocusButton source,MoveDirection direction)
++        {
++            if(direction!=MoveDirection.Left&&direction!=MoveDirection.Right)return false;
++            SheetStructureEntry entry;if(!source||!entries.TryGetValue(source.NodeId,out entry))return false;
++            if(entry.Node.Header)
++            {bool open=direction==MoveDirection.Right;if(expansion.IsOpen(entry.Node.Id)!=open){expansion.Set(entry.Node.Id,open);Refresh(body);}return true;}
++            if(ReferenceEquals(focused,source))
++            {
++                if(direction==MoveDirection.Right){popup?.FocusExpand(true);return true;}
++                if(direction==MoveDirection.Left&&focusedContext&&controls.ContainsKey(entry.Node.Parent))
++                {focusedContext.SetSelectedGameObject(controls[entry.Node.Parent].Button.gameObject);return true;}
++            }
++            return false;
++        }
++        void Toggle(string id){if(expansion.Toggle(id))Refresh(body);}
++        MPEventSystem ResolveContext(SheetFocusButton source,BaseEventData data)
++        {
++            var context=data!=null&&data.currentInputModule?data.currentInputModule.GetComponent<MPEventSystem>():null;
++            if(!context&&source){var locator=source.GetComponentInParent<MPEventSystemLocator>();context=locator?locator.eventSystem:null;}
++            return context;
++        }
++        internal void Focus(SheetFocusButton source,BaseEventData data)
++        {
++            if(!source||!source.gameObject.activeInHierarchy)return;
++            focused=source;focusedContext=ResolveContext(source,data);controls[source.NodeId].FocusLine.gameObject.SetActive(true);EnsureVisible(source);
++            if(!source.Hover){EndHover();return;}
++            if(source.Hover.Row.IsItem)
++            {
++                var provider=source.Hover.NativeProvider;
++                if(provider&&provider.enabled&&focusedContext&&focusedContext.isCursorVisible)
++                {
++                    focusedProvider=provider;
++                    ((IPointerEnterHandler)provider).OnPointerEnter(new PointerEventData(focusedContext));
++                    popup?.Focus(true,focusedContext);
++                }
++            }
++            else {EnterRow(source.Hover);popup?.Focus(true,focusedContext);}
++        }
++        internal void Unfocus(SheetFocusButton source)
++        {
++            if(source&&controls.ContainsKey(source.NodeId))controls[source.NodeId].FocusLine.gameObject.SetActive(false);
++            if(!ReferenceEquals(focused,source))return;
++            popup?.Focus(false);
++            if(focusedProvider&&focusedContext&&ReferenceEquals(focusedContext.currentTooltipProvider,focusedProvider)&&source&&source.Hover&&!source.Hover.PointerInside)
++                ((IPointerExitHandler)focusedProvider).OnPointerExit(new PointerEventData(focusedContext));
++            if(source&&source.Hover&&!source.Hover.PointerInside)Leave(source.Hover.Row.IsItem?(object)source.Hover.ItemHover:source.Hover);
++            focused=null;focusedProvider=null;focusedContext=null;
++        }
++        void EnsureVisible(SheetFocusButton source)
++        {
++            if(!content||!viewport||!source)return;
++            LayoutRebuilder.ForceRebuildLayoutImmediate(content);
++            var bounds=RectTransformUtility.CalculateRelativeRectTransformBounds(viewport,source.transform);
++            double top=bounds.max.y-viewport.rect.yMin,bottom=bounds.min.y-viewport.rect.yMin;
++            double offset=HierarchySheetSizing.EnsureVisible(top,bottom,viewport.rect.height,content.anchoredPosition.y,content.rect.height);
++            content.anchoredPosition=new Vector2(content.anchoredPosition.x,(float)offset);
+         }
+         void RefreshAddedItemProvider(AddedRowHover target)
+         {
+@@ -143,27 +260,6 @@
+             target.NativeProvider.titleColor=reference.titleColor;
+             target.NativeProvider.bodyColor=reference.bodyColor;
+         }
+-        void RefreshEffects(List<SheetRow> inventory,List<SheetRow> buffs)
+-        {
+-            var data=new List<SheetRow>();
+-            foreach(var group in inventory.GroupBy(r=>r.Group).OrderBy(g=>g.Key,StringComparer.Ordinal))
+-            {
+-                data.Add(new SheetRow{Id="group:"+group.Key,Title=group.Key,Detail="",ShortTooltip="Presentation group; trigger coverage can be incomplete.",
+-                    FullTooltip="Classification uses own visible item tags and explicitly known terms. A group does not certify a formula or luck applicability."});
+-                data.AddRange(group);
+-            }
+-            if(buffs.Count>0)
+-            {
+-                data.Add(new SheetRow{Id="group:buffs",Title="Active buff glossary",ShortTooltip="Own active visible buffs only.",
+-                    FullTooltip="Stacks, effect coverage, counter distinction, Nectar eligibility and timer availability are shown per entry."});
+-                data.AddRange(buffs);
+-            }
+-            bool rebuild=effectRows.Count!=data.Count;
+-            if(!rebuild)for(int i=0;i<data.Count;i++)if(effectRows[i].GetComponent<AddedRowHover>().Row.Id!=data[i].Id){rebuild=true;break;}
+-            if(rebuild){ClearEffects();foreach(var row in data)effectRows.Add(CreateRow(row,(float)Metrics.RowHeight).gameObject);}
+-            else for(int i=0;i<data.Count;i++)SetRow(effectRows[i].GetComponent<AddedRowHover>(),data[i]);
+-        }
+-        void ClearEffects(){foreach(var row in effectRows)if(row){row.SetActive(false);UnityEngine.Object.Destroy(row);}effectRows.Clear();}
+         void RefreshBindings()
+         {
+             var visible=new HashSet<ItemIcon>();
+@@ -215,16 +311,12 @@
+             foreach(var bar in hud.GetComponentsInChildren<ExpBar>(false))if(BoundsOf(bar.transform,out area))occupied.Add(area);
+             foreach(var buffs in hud.GetComponentsInChildren<BuffDisplay>(false))if(BoundsOf(buffs.transform,out area))occupied.Add(area);
+             var metrics=Metrics;UiRect dock;
+-            double preferredHeight=metrics.PanelHeight(canvasRect.rect.height,statRows.Count,effectRows.Count,effectsExpanded);
+-            bool fits=CompactSheetPlacement.TryBelowOwn(canvasRect.rect.width,canvasRect.rect.height,own,occupied,
+-                metrics.Width,preferredHeight,metrics.MinWidth,metrics.MinHeight,12*scale,out dock);
++            double preferredHeight=HierarchySheetSizing.PanelHeight(canvasRect.rect.height,visibleNodes.Count,metrics.RowHeight,metrics.HeaderHeight,metrics.Spacing,metrics.Padding,metrics.MinHeight);
++            double width=Math.Max(metrics.Width,380*scale),minimum=Math.Max(metrics.MinWidth,300*scale);
++            bool fits=CompactSheetPlacement.TryBelowOwn(canvasRect.rect.width,canvasRect.rect.height,own,occupied,width,preferredHeight,minimum,metrics.MinHeight,12*scale,out dock);
+             root.gameObject.SetActive(fits);
+-            if(fits)
+-            {
+-                root.anchoredPosition=new Vector2((float)dock.X,(float)dock.Y);root.sizeDelta=new Vector2((float)dock.Width,(float)dock.Height);
+-                Status="Compact native Tab stats attached below own strip; runtime layout verification pending. "+hoverCoverage;
+-            }
+-            else Status="No safe region below own strip; native panels retained and item hovers remain attached. "+hoverCoverage;
++            if(fits){root.anchoredPosition=new Vector2((float)dock.X,(float)dock.Y);root.sizeDelta=new Vector2((float)dock.Width,(float)dock.Height);Status="Hierarchical Character Sheet attached; live layout verification pending. "+hoverCoverage;}
++            else Status="No safe region below own strip; native item hovers retained. "+hoverCoverage;
+         }
+         void EndHover()
+         {
+@@ -250,9 +342,19 @@
+         {
+             context=null;return ReferenceEquals(hovered,source)&&popup!=null&&popup.CanDefer(source.Provider,out context);
+         }
++        void CloseOwnedFocusTooltip()
++        {
++            var provider=focusedProvider;var context=focusedContext;focusedProvider=null;
++            try
++            {
++                if(provider&&context&&ReferenceEquals(context.currentTooltipProvider,provider))
++                    ((IPointerExitHandler)provider).OnPointerExit(new PointerEventData(context));
++            }
++            finally{if(focused&&focused.Hover&&focused.Hover.ItemHover)focused.Hover.ItemHover.ReleaseDeferred();}
++        }
+         internal void SetNativeVisibility(bool visible)
+         {
+-            if(!visible)EndHover();
++            if(!visible){CloseOwnedFocusTooltip();EndHover();}
+             layer?.SetVisible(visible);
+         }
+         internal void UpdateTooltip()
+@@ -268,14 +370,14 @@
+         }
+         public void Dispose()
+         {
+-            try{DetachBindings();}
++            try{CloseOwnedFocusTooltip();}
+             finally
+             {
+-                try{ClearEffects();}
++                try{DetachBindings();}
+                 finally
+                 {
+-                    try{popup?.Dispose();}
+-                    finally{popup=null;layer?.Dispose();layer=null;}
++                    try{foreach(var c in controls.Values)if(c.Rect)c.Rect.gameObject.SetActive(false);controls.Clear();entries.Clear();focused=null;focusedProvider=null;focusedContext=null;}
++                    finally{try{popup?.Dispose();}finally{popup=null;layer?.Dispose();layer=null;}}
+                 }
+             }
+         }
+--- 0.2.2.5/tests\CoreTests.cs
++++ 0.3.0/tests\CoreTests.cs
+@@ -108,6 +108,7 @@
+         CompactTooltipTests.Run(Assert);
+         AdditiveDetailsTests.Run(Assert);
+         SimpleStatTooltipTests.Run(Assert);
++        HierarchyTests.Run(Assert);
+         LifecycleCoverageTests.Run(Assert);
+         CoverageFormulaTests.Run(Assert);
+         Console.WriteLine("PASS " + assertions + " assertions: lifecycle/ownership, ordered stat math, n=1/4/10 item components, caps/proc/luck, Nectar and buff uncertainty.");
+--- 0.2.2.5/tests\HierarchyTests.cs
++++ 0.3.0/tests\HierarchyTests.cs
+@@ -0,0 +1,136 @@
++using System;
++using System.Collections.Generic;
++using System.Linq;
++using Alexander.CharacterSheet.Core;
++static class HierarchyTests
++{
++    public static void Run(Action<bool,string> assert)
++    {
++        string[] expected={"Base Stats","Defense","Offense","Movement","Luck","General Damage Modifiers","On-Hit","On-Kill","Out of Combat","While Sprinting","Other items & buffs"};
++        assert(SheetHierarchy.Headers.Select(n=>n.Title).SequenceEqual(expected),"Hierarchy keeps the exact approved section names and preserves the glossary fallback");
++        assert(SheetHierarchy.Stats[SheetHierarchy.Defense].SequenceEqual(new[]{"Health","Shield","Regeneration","Armor","Dmg Reduction"}),"Corrected Defense contains discrete shield and flat reduction");
++        assert(SheetHierarchy.Stats[SheetHierarchy.Offense].SequenceEqual(new[]{"Damage","Attack speed","Cooldown Reduction","Critical chance"}),"Offense has general CDR rather than skill-specific values");
++        assert(SheetHierarchy.Stats[SheetHierarchy.Movement].SequenceEqual(new[]{"Movement speed","Sprint Speed Modifier","Maximum jumps"}),"Movement explicitly labels maximum jumps");
++        assert(SheetHierarchy.Stats[SheetHierarchy.Luck].SequenceEqual(new[]{"Luck"}),"Luck is its own subgroup");
++        assert(SheetHierarchy.Headers.Single(n=>n.Id==SheetHierarchy.Defense).Glyph==SheetGlyph.Shield&&SheetHierarchy.Headers.Single(n=>n.Id==SheetHierarchy.Offense).Glyph==SheetGlyph.Sword,"Defense and Offense have redundant semantic margin icons");
++        assert(SheetHierarchy.Headers.Single(n=>n.Id==SheetHierarchy.Movement).Glyph==SheetGlyph.Runner&&SheetHierarchy.Headers.Single(n=>n.Id==SheetHierarchy.Luck).Glyph==SheetGlyph.Clover,"Movement and Luck have their requested margin icons");
++        assert(SheetHierarchy.Headers.Single(n=>n.Id==SheetHierarchy.Hit).Glyph==SheetGlyph.Burst&&SheetHierarchy.Headers.Single(n=>n.Id==SheetHierarchy.Kill).Glyph==SheetGlyph.Skull,"On-Hit uses an impact burst and On-Kill a skull");
++        var nodes=new List<SheetNode>();
++        foreach(var header in SheetHierarchy.Headers)
++        {
++            nodes.Add(header);string[] stats;if(SheetHierarchy.Stats.TryGetValue(header.Id,out stats))
++                foreach(string key in stats)nodes.Add(new SheetNode("stat:"+key,header.Id,key,false,2));
++            if(header.Id==SheetHierarchy.Hit)nodes.Add(new SheetNode("effect:Missile",header.Id,"ATG",false,1));
++            if(header.Id==SheetHierarchy.Other)nodes.Add(new SheetNode("buff:1",header.Id,"Buff",false,1));
++        }
++        var state=new SheetExpansionState();var visible=SheetHierarchy.Visible(nodes,state);
++        assert(visible.Any(n=>n.Id=="stat:Health")&&visible.Any(n=>n.Id=="stat:Luck"),"Base and all stat subgroups start expanded");
++        assert(!visible.Any(n=>n.Id=="effect:Missile"||n.Id=="buff:1"),"Conditional sections and preserved extras start collapsed");
++        state.Set(SheetHierarchy.Defense,false);state.Set(SheetHierarchy.Base,false);
++        assert(!SheetHierarchy.Visible(nodes,state).Any(n=>n.Id==SheetHierarchy.Defense),"Closing Base hides its subgroup headers and all descendants");
++        state.Set(SheetHierarchy.Base,true);
++        assert(!state.IsOpen(SheetHierarchy.Defense)&&state.IsOpen(SheetHierarchy.Offense),"Nested preferences survive parent collapse and reopen");
++        visible=SheetHierarchy.Visible(nodes,state);
++        assert(SheetHierarchy.RestoreFocus("stat:Health",nodes,visible)==SheetHierarchy.Defense,"Closing a subgroup returns descendant focus to its visible header");
++        state.Set(SheetHierarchy.Base,false);visible=SheetHierarchy.Visible(nodes,state);
++        assert(SheetHierarchy.RestoreFocus("stat:Health",nodes,visible)==SheetHierarchy.Base,"Closing Base returns nested focus to Base");
++        assert(!state.Set("not-a-section",true)&&!state.Toggle(null),"Unknown section controls cannot create state");
++        bool invalid=false;
++        try{SheetHierarchy.Visible(new[]{new SheetNode("a","missing","A",false,1)},state);}catch(ArgumentException){invalid=true;}
++        assert(invalid,"Missing parent identities fail closed");
++        invalid=false;try{SheetHierarchy.Visible(new[]{new SheetNode("a","b","A",true,0),new SheetNode("b","a","B",true,0)},state);}catch(ArgumentException){invalid=true;}
++        assert(invalid,"Cyclic hierarchy identities fail closed");
++        invalid=false;try{SheetHierarchy.Visible(new[]{nodes[0],nodes[0]},state);}catch(ArgumentException){invalid=true;}
++        assert(invalid,"Duplicate node identities cannot produce duplicate focus targets");
++        var duplicateInputs=new[]{new SheetNode("item:1","","First",false,0),new SheetNode("item:1","","Second",false,0),new SheetNode("passive:1","","Passive",false,0),new SheetNode("item:2","","Other item",false,0)};
++        var unique=SheetHierarchy.UniqueRows(duplicateInputs,n=>n.Id);
++        assert(unique.Count==3&&unique[0].Title=="First"&&unique[1].Id=="passive:1","Duplicate item effects keep one stable first row without dropping separate passive effects");
++
++        foreach(string id in new[]{"Crowbar","FragileDamageBonus","NearbyDamageBonus"})
++            assert(CharacterEffectCatalog.Route(id,EffectOrigin.Item)==SheetHierarchy.Damage,"Conditional damage source has its own row and is not aggregated: "+id);
++        foreach(string id in new[]{"Missile","MissileVoid","BleedOnHit","ChainLightning","AttackSpeedOnCrit"})
++            assert(CharacterEffectCatalog.Route(id,EffectOrigin.Item)==SheetHierarchy.Hit,"Explicit item-on-hit source is routed: "+id);
++        foreach(string id in new[]{"IgniteOnKill","ExplodeOnDeath"})
++            assert(CharacterEffectCatalog.Route(id,EffectOrigin.Item)==SheetHierarchy.Kill,"Enemy-kill effects have the approved On-Kill heading: "+id);
++        assert(CharacterEffectCatalog.Route("HealWhileSafe",EffectOrigin.Item)==SheetHierarchy.Combat&&CharacterEffectCatalog.Item("HealWhileSafe").Condition==EffectCondition.OutOfDanger,"Cautious Slug preserves the out-of-danger distinction");
++        assert(CharacterEffectCatalog.Item("SprintOutOfCombat").Condition==EffectCondition.OutOfCombat,"Red Whip has a separate out-of-combat condition");
++        assert(CharacterEffectCatalog.Item("JumpBoost").Condition==EffectCondition.SprintJump&&CharacterEffectCatalog.Item("SprintArmor").Condition==EffectCondition.Sprinting,"Wax Quail is a sprint-jump trigger, Rose Buckler a sprinting effect");
++        assert(CharacterEffectCatalog.Item("JumpBoost").HoverNote(false,false,true).Contains("sprinting alone does not trigger"),"Quail hover states the required jump action");
++        assert(CharacterEffectCatalog.Item("HealWhileSafe").HoverNote(true,false,false).Contains("active")&&CharacterEffectCatalog.Item("SprintOutOfCombat").HoverNote(true,false,false).Contains("inactive"),"Independent native danger/combat states are not conflated");
++        foreach(string id in new[]{"Missile","BleedOnHit","ChainLightning","ChainLightningVoid"})
++            assert(CharacterEffectCatalog.Item(id).Proc==AttackProcScope.RandomRoll&&CharacterEffectCatalog.ProcNote(id).Contains("attack's proc coefficient"),"Proc-dependent random trigger has a scoped attack note: "+id);
++        assert(CharacterEffectCatalog.Item("MissileVoid").Proc==AttackProcScope.ShieldHit&&CharacterEffectCatalog.ProcNote("MissileVoid").Contains("not a random chance")&&CharacterEffectCatalog.ProcNote("MissileVoid").Contains("nonzero-proc"),"Plasma Shrimp does not inherit ATG's random-roll semantics");
++        assert(CharacterEffectCatalog.Route("BANDIT2_PASSIVE_NAME",EffectOrigin.Passive)==SheetHierarchy.Hit,"Native on-hit passive metadata can appear in On-Hit");
++        assert(CharacterEffectCatalog.Route("ARTIFICER_PASSIVE_NAME",EffectOrigin.Passive)==SheetHierarchy.Other,"A non-hit or unregistered passive is retained without invented on-hit behavior");
++        assert(CharacterEffectCatalog.Route("ARTIFICER_PRIMARY_FIRE_NAME",EffectOrigin.Ability)==null,"Ability-specific ignite is excluded");
++        foreach(string id in CharacterEffectCatalog.SupportedItemIds)
++        {
++            assert(CharacterEffectCatalog.Route(id,EffectOrigin.Ability)==null,"An ability never gains item membership by matching an item identifier");
++            assert(CharacterEffectCatalog.Route(id,EffectOrigin.Unknown)==null,"Unknown origins cannot be treated as item/passive effects");
++        }
++        assert(CharacterEffectCatalog.Route("UnregisteredModItem",EffectOrigin.Item)==SheetHierarchy.Other,"Unknown visible items remain accessible through their native tooltip");
++        assert(CharacterEffectCatalog.GeneralCooldownItem("AlienHead")&&CharacterEffectCatalog.GeneralCooldownItem("HalfAttackSpeedHalfCooldowns")&&CharacterEffectCatalog.GeneralCooldownItem("LunarBadLuck"),"Shared cooldown reference sources are explicitly scoped");
++        assert(!CharacterEffectCatalog.GeneralCooldownItem("UtilitySkillMagazine")&&!CharacterEffectCatalog.GeneralCooldownItem("SecondarySkillMagazine"),"Hardlight Afterburner and skill stocks do not contribute to general CDR");
++        assert(GeneralCooldownPresentation.UnknownTotal=="Total: Unknown\nBase: Unknown\nBonuses: Other/unknown","Missing general live total stays unknown in the simple hover");
++        assert(GeneralCooldownPresentation.Components(1,0,0).Single().Contains("25%")&&GeneralCooldownPresentation.Components(2,0,0).Single().Contains("43.75%"),"Shared item estimates preserve multiplicative stacking");
++        var cooldown=GeneralCooldownPresentation.Components(1,1,4);
++        assert(cooldown.Count==3&&cooldown[1].Contains("50%")&&cooldown[2].Contains("-5 seconds"),"Cooldown percent references and flat seconds remain separate components");
++        assert(GeneralCooldownPresentation.Components(0,0,0).Count==0,"Absent cooldown source does not create a guessed component");
++        assert(CharacterEffectCatalog.ShieldVisible(40)&&!CharacterEffectCatalog.ShieldVisible(0)&&!CharacterEffectCatalog.ShieldVisible(double.NaN),"Shield visibility depends on valid maximum capacity");
++        double currentDepleted=0;
++        assert(CharacterEffectCatalog.ShieldVisible(40)&&currentDepleted==0,"A depleted shield still retains its capacity row");
++        assert(CharacterEffectCatalog.FlatArmorPlate(0)==0&&CharacterEffectCatalog.FlatArmorPlate(1)==5&&CharacterEffectCatalog.FlatArmorPlate(4)==20,"Flat reduction is the separate maintained per-hit item component");
++        assert(CharacterEffectCatalog.ArmorReduction(100)==50&&CharacterEffectCatalog.ArmorReduction(-100)==-50,"Raw positive/negative armor has the correct percentage explanation");
++        assert(CharacterEffectCatalog.FlatArmorPlate(4)!=CharacterEffectCatalog.ArmorReduction(100),"Flat item reduction is never substituted with armor-derived percent");
++        assert(NumberFormatting.Signed(2)=="+2"&&NumberFormatting.Signed(-1)=="-1"&&NumberFormatting.Signed(0)=="0","Luck displays its signed raw value");
++        var jumps=new Calculation("Base",1);jumps.Apply("Level growth (level - 1)",CalculationStage.Flat,0);jumps.Apply("Feather",CalculationStage.Flat,2);
++        assert(StatTooltipPresentation.Create(3,0,jumps,"cIsUtility").Contains("Total: ")&&jumps.Predicted==3,"Maximum jump arithmetic is independent of remaining jump input");
++
++        int matrices=0;
++        var bitHeaders=new[]{SheetHierarchy.Base,SheetHierarchy.Defense,SheetHierarchy.Offense,SheetHierarchy.Movement,SheetHierarchy.Luck,SheetHierarchy.Hit,SheetHierarchy.Other};
++        for(int mask=0;mask<128;mask++)
++        {
++            var bits=new SheetExpansionState();for(int i=0;i<bitHeaders.Length;i++)bits.Set(bitHeaders[i],(mask&(1<<i))!=0);
++            var current=SheetHierarchy.Visible(nodes,bits);var ids=new HashSet<string>(current.Select(n=>n.Id));
++            assert(ids.Count==current.Count,"Every collapse combination has unique visible identities");
++            assert(ids.Contains(SheetHierarchy.Defense)==bits.IsOpen(SheetHierarchy.Base),"Subgroup header follows parent state");
++            assert(ids.Contains("stat:Health")== (bits.IsOpen(SheetHierarchy.Base)&&bits.IsOpen(SheetHierarchy.Defense)),"Nested health row follows both ancestors");
++            assert(ids.Contains("stat:Luck")== (bits.IsOpen(SheetHierarchy.Base)&&bits.IsOpen(SheetHierarchy.Luck)),"Nested luck row follows both ancestors");
++            assert(ids.Contains("effect:Missile")==bits.IsOpen(SheetHierarchy.Hit)&&ids.Contains("buff:1")==bits.IsOpen(SheetHierarchy.Other),"Conditional and buff sections retain independent state");
++            string recovered=SheetHierarchy.RestoreFocus("stat:Health",nodes,current);
++            assert(recovered!=null&&ids.Contains(recovered),"Focus recovery always chooses a visible owned target");
++            matrices++;
++        }
++        int layouts=0;
++        foreach(var resolution in new[]{new[]{1280d,720d},new[]{1920d,1080d},new[]{3440d,1440d}})
++        foreach(double scale in new[]{.7,.85,1,1.2})
++        foreach(double font in new[]{18d,24d})
++        foreach(int count in new[]{5,23,24,100})
++        {
++            var m=new CompactSheetMetrics(font,scale);
++            double height=HierarchySheetSizing.PanelHeight(resolution[1],count,m.RowHeight,m.HeaderHeight,m.Spacing,m.Padding,m.MinHeight);
++            assert(height>=m.MinHeight&&height<=Math.Max(m.MinHeight,resolution[1]*.5),"Nested sheet height is content-sized and bounded");
++            var own=new UiRect(resolution[0]*.25,resolution[1]*.6,resolution[0]*.5,60*scale);UiRect dock;
++            bool fits=CompactSheetPlacement.TryBelowOwn(resolution[0],resolution[1],own,new[]{own},Math.Max(m.Width,380*scale),height,Math.Max(m.MinWidth,300*scale),m.MinHeight,12*scale,out dock);
++            assert(fits&&dock.Top<own.Y&&dock.Y>=12*scale&&dock.Right<=resolution[0]-12*scale,"Hierarchical width fits below the own strip without changing native geometry");
++            layouts++;
++        }
++        assert(HierarchySheetSizing.BackgroundOpacity==.8,"Only the sheet background opacity is the requested constant");
++        assert(HierarchySheetSizing.EnsureVisible(230,200,200,80,600)==50,"Focus above viewport scrolls into view");
++        assert(HierarchySheetSizing.EnsureVisible(10,-20,200,80,600)==100,"Focus below viewport scrolls into view");
++        assert(HierarchySheetSizing.EnsureVisible(150,120,200,80,600)==80,"Visible focus does not shift the scroll");
++        assert(HierarchySheetSizing.EnsureVisible(0,-1000,200,80,600)==400,"Scroll clamps to owned content limits");
++        assert(HierarchySheetSizing.EnsureVisible(double.NaN,0,200,0,600)==0,"Unknown focus geometry fails closed");
++        invalid=false;try{HierarchySheetSizing.PanelHeight(1080,1,double.NaN,20,2,10,140);}catch(ArgumentOutOfRangeException){invalid=true;}
++        assert(invalid,"Unknown row metrics fail closed");
++        var details=new DetailsInteraction();object focusSource=new object();
++        details.Enter(focusSource,"stat:Health");details.Focus(true,0);details.Leave(focusSource,0);
++        assert(!details.Expire(100),"Keyboard focus retains the stat hover without a pointer");
++        assert(!details.FocusToggle(false)&&details.FocusToggle(true)&&details.Expanded,"Keyboard Details requires the native cursor context");
++        assert(details.FocusExpand(true,true)&&details.Expanded&&details.FocusExpand(true,true)&&details.Expanded,"Right expands Details idempotently");
++        details.Focus(false,100);assert(!details.Expire(100.3)&&details.Expire(100.5),"Deselect releases focus through the existing bounded transfer grace");
++        details.Enter(focusSource,"stat:Health");details.Focus(true,0);details.Enter(new object(),"stat:Damage");
++        assert(!details.FocusToggle(true)&&!details.Expanded,"Recycled source identity cannot retain another row's focus or expansion");
++        Console.WriteLine("Hierarchy coverage: "+CharacterEffectCatalog.SupportedItemIds.Count+" item routes, "+matrices+" collapse states, "+layouts+" sizing cases; Defense semantics, ability exclusions, proc conditions, duplicates and keyboard focus.");
++    }
++}

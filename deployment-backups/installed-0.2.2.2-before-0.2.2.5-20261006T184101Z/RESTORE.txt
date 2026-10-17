@@ -1,0 +1,14 @@
+Restore the previous installed 0.2.2.2 custom DLL only after Risk of Rain 2 is closed.
+
+Backup DLL:
+C:\Users\heale\Desktop\Not School Stuff\Risk of Rain 2 Stat Sheet\Character Sheet for Risk of Rain 2\deployment-backups\installed-0.2.2.2-before-0.2.2.5-20261006T184101Z\Alexander.CharacterSheet.dll
+
+Restore destination (actual host):
+\\localhost\C$\Users\heale\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\AlexanderCharacterSheet-Dev\BepInEx\plugins\Alexander-CharacterSheet\Alexander.CharacterSheet.dll
+
+Copy only this backup DLL over that exact destination. Do not copy the backup directory into plugins and do not alter supporting/configuration files.
+
+Expected restored SHA256:
+6C54A2FACA7A9751DD240EF3514647347C4B2BD86660378177C11F662964A396
+
+Verify exactly one DLL remains in BepInEx\plugins\Alexander-CharacterSheet.

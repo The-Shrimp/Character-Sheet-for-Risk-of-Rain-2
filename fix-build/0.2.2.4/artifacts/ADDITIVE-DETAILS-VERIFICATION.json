@@ -1,0 +1,297 @@
+{
+  "VerifiedUtc": "2026-10-06T15:26:53.388959+00:00",
+  "Version": "0.2.2.4",
+  "Lineage": {
+    "ParentVersion": "0.2.2.3",
+    "ParentSHA256": "49F6A0B90ADF8D341CD457CCB0C7719B9273ABE904D8A22B996B726E03A6D915",
+    "NextFeatureBranchesImported": false
+  },
+  "Dll": {
+    "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\fix-build\\0.2.2.4\\artifacts\\review-native-tab\\Alexander.CharacterSheet.dll",
+    "Bytes": 141312,
+    "SHA256": "08A4E34C4F0AF33DC40505077606BDA619A28B9E450CA6CDCF25433B5FD788DD"
+  },
+  "Checks": {
+    "PassedAssertions": 8681,
+    "AddedAssertions": 5924,
+    "RepeatedTabSessions": 24,
+    "ItemsPerSession": 16,
+    "TransferFramesPerItem": 12,
+    "AddonPlacementCases": 36,
+    "InheritedTooltipSizingCases": 96,
+    "OriginalTestsPreserved": true,
+    "NativePublicApiProbeCompiles": true,
+    "NativeEnterAlwaysRuns": true,
+    "NativeTitleBodyWrites": false,
+    "NativeCurrentProviderWrites": false,
+    "NoShiftHandlerOrHint": true,
+    "DockGeometryPreserved": true,
+    "PluginControlDiff": "Version strings only",
+    "RuntimeTested": false
+  },
+  "PreservedSource": [
+    {
+      "File": "src/Core/Calculation.cs",
+      "SHA256": "26384F712577A346A154BE6082FC9C665F8BE5B4B0CA29D4BF887A8512C52641"
+    },
+    {
+      "File": "src/Core/CompactSheetLayout.cs",
+      "SHA256": "9DF0B16401EBF791D71A58460DF5B4995729A3A0829B63180F96F7630B405B8A"
+    },
+    {
+      "File": "src/Core/ComparisonPresentation.cs",
+      "SHA256": "6FC5263777F3579EF994C13B3B23FEC048C291F29C5BC9D5F140A76E34A83ACB"
+    },
+    {
+      "File": "src/Core/InventoryPresentation.cs",
+      "SHA256": "D51AF4E3CEE7F37F59EFA0FE66020DF624BA6E3D3BDD0DCAA5385C5668C0065D"
+    },
+    {
+      "File": "src/Core/ItemTooltipPresentation.cs",
+      "SHA256": "D1086688416EB6691010560F6A09BB34B551D88F06F594C06FA74E27ADE41069"
+    },
+    {
+      "File": "src/Core/LuckEvidence.cs",
+      "SHA256": "03CB9706A0D964606058FD9DF74F3E2FF2BA46D80C6BF2232385324D4BC59B55"
+    },
+    {
+      "File": "src/Core/NativeAttachmentPolicy.cs",
+      "SHA256": "9EA976669FD7171E472C3BB157FCC48B1D16222714060D6A35CFAF2771C2E915"
+    },
+    {
+      "File": "src/Core/NativeLifecycle.cs",
+      "SHA256": "BC5A07821EF07E6B3D3A4F90FE91A2BACA90573AEEEB6DB0824EB1EEDE0FF51A"
+    },
+    {
+      "File": "src/Core/NativeTabPolicy.cs",
+      "SHA256": "4650E0FD1E7DD0CF37B1E5F188759F3768376BA349CD2CFB43CF38C0904FDDDD"
+    },
+    {
+      "File": "src/Core/NativeTooltipFillPolicy.cs",
+      "SHA256": "F4AA5303186013D83E9EDBC53D28D36791B5FA19426CFE18EFC47F2CD22D28DC"
+    },
+    {
+      "File": "src/Core/NumberFormatting.cs",
+      "SHA256": "B6800D33710D41CA2D6BA0A58BE7202F7E3CB53B4FE87A9D5FB68FFE167E4915"
+    },
+    {
+      "File": "src/Core/OriginalBuffDefinitions.cs",
+      "SHA256": "05F5173AFF9D961B9F94A37139921F2C422CBB7DA9C1CB4320600DA73671FB97"
+    },
+    {
+      "File": "src/Core/OriginalItemDefinitions.cs",
+      "SHA256": "15BDE520A3589BE7C1866B24779F5A691D9A53893725702B840B4A0A831F0E35"
+    },
+    {
+      "File": "src/Core/PauseLease.cs",
+      "SHA256": "07140CA1439307A6F1419DFEBF7122DF7F70ED03767ED25F5522E6E7B387789F"
+    },
+    {
+      "File": "src/Core/TooltipPresentation.cs",
+      "SHA256": "F1ACE4AEDDBB485AFE67225A48D21C18F133FDC3F0F39810709E61B57A444A98"
+    },
+    {
+      "File": "src/Core/VerifiedMath.cs",
+      "SHA256": "D926DD322C0ACB9EC56E62C948287302B2217C3163B1208CAE187450756F9136"
+    },
+    {
+      "File": "src/Presentation/NativeSheetLayer.cs",
+      "SHA256": "01A2F22B4908F560DD1B8BE216515B4B89ED0516510563D77E0E0FA13541D24A"
+    },
+    {
+      "File": "src/Presentation/NativeStripIdentity.cs",
+      "SHA256": "C3462E473B5F8A96C606BB3E2C8304A2FD9B94D77505E478D1D7FF8A937B3058"
+    },
+    {
+      "File": "src/Presentation/NativeUiStyle.cs",
+      "SHA256": "DC9D4A927B0B0BE76B3983987E34EEC27404E5A188794A504D3E5F8DD6027616"
+    }
+  ],
+  "SourceFiles": [
+    {
+      "File": "src\\Core\\Calculation.cs",
+      "SHA256": "26384F712577A346A154BE6082FC9C665F8BE5B4B0CA29D4BF887A8512C52641"
+    },
+    {
+      "File": "src\\Core\\CompactSheetLayout.cs",
+      "SHA256": "9DF0B16401EBF791D71A58460DF5B4995729A3A0829B63180F96F7630B405B8A"
+    },
+    {
+      "File": "src\\Core\\CompactTooltipPresentation.cs",
+      "SHA256": "E705BEEC67C8B63BA5AE1D0F380838D378D9CF7931528832454444A55C695937"
+    },
+    {
+      "File": "src\\Core\\ComparisonPresentation.cs",
+      "SHA256": "6FC5263777F3579EF994C13B3B23FEC048C291F29C5BC9D5F140A76E34A83ACB"
+    },
+    {
+      "File": "src\\Core\\DetailsInteraction.cs",
+      "SHA256": "624AB850D6BCD2B554A88165B8357DD117DD9444CFF63C089AAEFD42DD00582C"
+    },
+    {
+      "File": "src\\Core\\InventoryPresentation.cs",
+      "SHA256": "D51AF4E3CEE7F37F59EFA0FE66020DF624BA6E3D3BDD0DCAA5385C5668C0065D"
+    },
+    {
+      "File": "src\\Core\\ItemDetailsPresentation.cs",
+      "SHA256": "FBFD4216BC1E2B56D18430BF290825892D1E7668545D2116595AF052C7137A3A"
+    },
+    {
+      "File": "src\\Core\\ItemTooltipPresentation.cs",
+      "SHA256": "D1086688416EB6691010560F6A09BB34B551D88F06F594C06FA74E27ADE41069"
+    },
+    {
+      "File": "src\\Core\\LuckEvidence.cs",
+      "SHA256": "03CB9706A0D964606058FD9DF74F3E2FF2BA46D80C6BF2232385324D4BC59B55"
+    },
+    {
+      "File": "src\\Core\\NativeAttachmentPolicy.cs",
+      "SHA256": "9EA976669FD7171E472C3BB157FCC48B1D16222714060D6A35CFAF2771C2E915"
+    },
+    {
+      "File": "src\\Core\\NativeLifecycle.cs",
+      "SHA256": "BC5A07821EF07E6B3D3A4F90FE91A2BACA90573AEEEB6DB0824EB1EEDE0FF51A"
+    },
+    {
+      "File": "src\\Core\\NativeTabPolicy.cs",
+      "SHA256": "4650E0FD1E7DD0CF37B1E5F188759F3768376BA349CD2CFB43CF38C0904FDDDD"
+    },
+    {
+      "File": "src\\Core\\NativeTooltipAddonPlacement.cs",
+      "SHA256": "649AF79FB92BAC9A5E713B9DBABF9AE284DAB8B5669214C6B36FFC8BAC9401C0"
+    },
+    {
+      "File": "src\\Core\\NativeTooltipFillPolicy.cs",
+      "SHA256": "F4AA5303186013D83E9EDBC53D28D36791B5FA19426CFE18EFC47F2CD22D28DC"
+    },
+    {
+      "File": "src\\Core\\NumberFormatting.cs",
+      "SHA256": "B6800D33710D41CA2D6BA0A58BE7202F7E3CB53B4FE87A9D5FB68FFE167E4915"
+    },
+    {
+      "File": "src\\Core\\OriginalBuffDefinitions.cs",
+      "SHA256": "05F5173AFF9D961B9F94A37139921F2C422CBB7DA9C1CB4320600DA73671FB97"
+    },
+    {
+      "File": "src\\Core\\OriginalItemDefinitions.cs",
+      "SHA256": "15BDE520A3589BE7C1866B24779F5A691D9A53893725702B840B4A0A831F0E35"
+    },
+    {
+      "File": "src\\Core\\PauseLease.cs",
+      "SHA256": "07140CA1439307A6F1419DFEBF7122DF7F70ED03767ED25F5522E6E7B387789F"
+    },
+    {
+      "File": "src\\Core\\TooltipPresentation.cs",
+      "SHA256": "F1ACE4AEDDBB485AFE67225A48D21C18F133FDC3F0F39810709E61B57A444A98"
+    },
+    {
+      "File": "src\\Core\\VerifiedMath.cs",
+      "SHA256": "D926DD322C0ACB9EC56E62C948287302B2217C3163B1208CAE187450756F9136"
+    },
+    {
+      "File": "src\\Plugin.cs",
+      "SHA256": "1E7FDE71272B56327A385C5E7979CD7F9BFBEAED7A8C1E0438E2223A3E96A271"
+    },
+    {
+      "File": "src\\Presentation\\NativeHoverPopup.cs",
+      "SHA256": "B1C6FEDBEB0DA46B9FA0FCF7EE9E170E5800DDEBA8673F9CF70C5425F88B71F0"
+    },
+    {
+      "File": "src\\Presentation\\NativeItemHover.cs",
+      "SHA256": "9D179B84D8EF783ACD1B048D830A1267268E07868E9C146DE92A07C912BB6A78"
+    },
+    {
+      "File": "src\\Presentation\\NativeSheetLayer.cs",
+      "SHA256": "01A2F22B4908F560DD1B8BE216515B4B89ED0516510563D77E0E0FA13541D24A"
+    },
+    {
+      "File": "src\\Presentation\\NativeStripIdentity.cs",
+      "SHA256": "C3462E473B5F8A96C606BB3E2C8304A2FD9B94D77505E478D1D7FF8A937B3058"
+    },
+    {
+      "File": "src\\Presentation\\NativeTooltipAnchor.cs",
+      "SHA256": "76FB083B95BCD963AA5A3D88AD2F39C336679BE4434C7A5A8A2E3ED74D0456F4"
+    },
+    {
+      "File": "src\\Presentation\\NativeTooltipStyle.cs",
+      "SHA256": "C69CA4B5E20D0220174CE2BB78449B422C56E6319C829261953062BE6CDC5C3E"
+    },
+    {
+      "File": "src\\Presentation\\NativeUiStyle.cs",
+      "SHA256": "DC9D4A927B0B0BE76B3983987E34EEC27404E5A188794A504D3E5F8DD6027616"
+    },
+    {
+      "File": "src\\Presentation\\SheetData.cs",
+      "SHA256": "0D08DD1BB5E801A8634AA691010832017D6815A73704D100C54C58344267C521"
+    },
+    {
+      "File": "src\\Presentation\\SheetView.cs",
+      "SHA256": "F0B0492B0E32FDEB7A01E188943BABAE9F6641A285F2D0D0FA6AD77ADC474AF9"
+    }
+  ],
+  "Installed": {
+    "Version": "0.2.2.2",
+    "SHA256": "6C54A2FACA7A9751DD240EF3514647347C4B2BD86660378177C11F662964A396",
+    "PluginDLLCount": 1,
+    "OwnConfigSHA256": "C44669BAFB1D7CE426CAF3C568FD722618E67DB0212D9BD8E0D488E4AF6970C5",
+    "SupportingFiles": [
+      {
+        "File": "BepInEx\\core\\BepInEx.dll",
+        "SHA256": "D021965B0FE61EE2BA8F68D931DFE4ADF172075038D220950D811B12A036CA0E"
+      },
+      {
+        "File": "BepInEx\\core\\BepInEx.Preloader.dll",
+        "SHA256": "9E69AEA4F69F8E8364045C5E8784DD92D79F5065F57F661D65F5ACFE7BFBCE2A"
+      },
+      {
+        "File": "BepInEx\\core\\0Harmony.dll",
+        "SHA256": "1A21CC03424FC82C3DD1346905D16494536B9595AE4162228D99FB7C285C1031"
+      },
+      {
+        "File": "BepInEx\\core\\Newtonsoft.Json.dll",
+        "SHA256": "4A3D7BBAA2C347C2F98FA06A7324EBF311F696D9965E9BA0A81A56219420CE01"
+      },
+      {
+        "File": "BepInEx\\core\\Newtonsoft.Json.LICENSE.md",
+        "SHA256": "B98A397897FF55F76CDDC380041507A95A896B2946E0188703BF0496793D6516"
+      },
+      {
+        "File": "mods.yml",
+        "SHA256": "5B81074CDBE64EB45FE83ED4ABC27793A2A266FAF87B5230366F133F50F770C9"
+      },
+      {
+        "File": "doorstop_config.ini",
+        "SHA256": "D9DAB1EB8E541971D5F6ED0DF139F30706E77615E06847FFBBB41B174B8D9C0F"
+      },
+      {
+        "File": "BepInEx\\config\\alexander.charactersheet.cfg",
+        "SHA256": "C44669BAFB1D7CE426CAF3C568FD722618E67DB0212D9BD8E0D488E4AF6970C5"
+      },
+      {
+        "File": "BepInEx\\config\\BepInEx.cfg",
+        "SHA256": "E4C147F11B97D4E384DC9A6D4BF52A7154C311141734F7F1974514093B79E232"
+      }
+    ]
+  },
+  "SeparateCandidates": [
+    {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\next-build\\0.2.6\\artifacts\\review-native-tab\\Alexander.CharacterSheet.dll",
+      "SHA256": "FDB12A2870582490A059A1F5D230E41AACFB495F8AF5D462E9A63A477F803483"
+    },
+    {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\next-build\\0.2.6.1\\artifacts\\review-native-tab\\Alexander.CharacterSheet.dll",
+      "SHA256": "24A5747F9737F6663CDC17951D5903BE10230E214F056698626E47708853B020"
+    }
+  ],
+  "Deployment": "NONE",
+  "GameInteraction": "NONE",
+  "ProprietaryImplementationInspection": "NONE",
+  "RuntimeLimits": [
+    "Exact native-provider association and native cursor ownership must be observed in game.",
+    "Native tooltip movement/draw order, pointer transfer, owned added-row native provider copies and UI click routing need runtime checks.",
+    "UI events are consumed; raw gameplay input behavior in multiplayer relies on native Tab cursor context and must be verified.",
+    "No safe room below native tooltip means augmentation is declined; native tooltip remains unchanged.",
+    "Sidecar pins its first observed native bounds; native tooltip's own movement is not overridden.",
+    "Native body text, title and other mods' native provider content remain outside the add-on renderer."
+  ]
+}

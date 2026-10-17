@@ -1,0 +1,195 @@
+{
+  "InstalledUtc": "2026-10-06T21:57:10.035348Z",
+  "Authorization": "User approval responding to installation request, Sentinel_53382e4fa0b481918702f61c6d96c5ed, 2026-10-06T21:55:02Z",
+  "Version": "0.3.1",
+  "GameClosedBeforeCopy": true,
+  "Candidate": {
+    "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\visual-build\\0.3.1\\artifacts\\review-native-tab\\Alexander.CharacterSheet.dll",
+    "Bytes": 181248,
+    "SHA256": "9B3CD10CCEA8823E3ABAFE11CA1F6025737B1D4B60C711CDD8FB7C315A8DBB25"
+  },
+  "Installed": {
+    "File": "\\\\localhost\\C$\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\plugins\\Alexander-CharacterSheet\\Alexander.CharacterSheet.dll",
+    "Bytes": 181248,
+    "SHA256": "9B3CD10CCEA8823E3ABAFE11CA1F6025737B1D4B60C711CDD8FB7C315A8DBB25"
+  },
+  "CustomPluginDLLCount": 1,
+  "NamedCustomDLLCountAcrossPlugins": 1,
+  "SupportingFiles": [
+    {
+      "File": "BepInEx\\core\\BepInEx.dll",
+      "Bytes": 135680,
+      "SHA256": "D021965B0FE61EE2BA8F68D931DFE4ADF172075038D220950D811B12A036CA0E",
+      "Unchanged": true
+    },
+    {
+      "File": "BepInEx\\core\\BepInEx.Preloader.dll",
+      "Bytes": 44032,
+      "SHA256": "9E69AEA4F69F8E8364045C5E8784DD92D79F5065F57F661D65F5ACFE7BFBCE2A",
+      "Unchanged": true
+    },
+    {
+      "File": "BepInEx\\core\\0Harmony.dll",
+      "Bytes": 204800,
+      "SHA256": "1A21CC03424FC82C3DD1346905D16494536B9595AE4162228D99FB7C285C1031",
+      "Unchanged": true
+    },
+    {
+      "File": "BepInEx\\core\\Newtonsoft.Json.dll",
+      "Bytes": 524200,
+      "SHA256": "4A3D7BBAA2C347C2F98FA06A7324EBF311F696D9965E9BA0A81A56219420CE01",
+      "Unchanged": true
+    },
+    {
+      "File": "BepInEx\\core\\Newtonsoft.Json.LICENSE.md",
+      "Bytes": 1104,
+      "SHA256": "B98A397897FF55F76CDDC380041507A95A896B2946E0188703BF0496793D6516",
+      "Unchanged": true
+    },
+    {
+      "File": "mods.yml",
+      "Bytes": 1549,
+      "SHA256": "5B81074CDBE64EB45FE83ED4ABC27793A2A266FAF87B5230366F133F50F770C9",
+      "Unchanged": true
+    },
+    {
+      "File": "doorstop_config.ini",
+      "Bytes": 1567,
+      "SHA256": "D9DAB1EB8E541971D5F6ED0DF139F30706E77615E06847FFBBB41B174B8D9C0F",
+      "Unchanged": true
+    },
+    {
+      "File": "BepInEx\\config\\alexander.charactersheet.cfg",
+      "Bytes": 588,
+      "SHA256": "16C25C8599F8A6FA1E22EA47308180E8B92911876EE666861C3628D501D561C3",
+      "Unchanged": true
+    },
+    {
+      "File": "BepInEx\\config\\BepInEx.cfg",
+      "Bytes": 4969,
+      "SHA256": "E4C147F11B97D4E384DC9A6D4BF52A7154C311141734F7F1974514093B79E232",
+      "Unchanged": true
+    }
+  ],
+  "Backup": {
+    "VerifiedUtc": "2026-10-06T21:57:08.2912763Z",
+    "Version": "0.3.0",
+    "Dll": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\deployment-backups\\installed-0.3.0-before-0.3.1-20261006T215707Z\\Alexander.CharacterSheet.dll",
+      "Bytes": 167936,
+      "SHA256": "9EB121AD7C2808645258A2EF5359CDE538F5E0C9BEA7FD3C8DF84C00B78750C4"
+    },
+    "RestoreTarget": "\\\\localhost\\C$\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\plugins\\Alexander-CharacterSheet\\Alexander.CharacterSheet.dll",
+    "RestoreInstructions": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\deployment-backups\\installed-0.3.0-before-0.3.1-20261006T215707Z\\RESTORE.txt",
+    "SupportingFiles": [
+      {
+        "File": "BepInEx\\core\\BepInEx.dll",
+        "Bytes": 135680,
+        "SHA256": "D021965B0FE61EE2BA8F68D931DFE4ADF172075038D220950D811B12A036CA0E"
+      },
+      {
+        "File": "BepInEx\\core\\BepInEx.Preloader.dll",
+        "Bytes": 44032,
+        "SHA256": "9E69AEA4F69F8E8364045C5E8784DD92D79F5065F57F661D65F5ACFE7BFBCE2A"
+      },
+      {
+        "File": "BepInEx\\core\\0Harmony.dll",
+        "Bytes": 204800,
+        "SHA256": "1A21CC03424FC82C3DD1346905D16494536B9595AE4162228D99FB7C285C1031"
+      },
+      {
+        "File": "BepInEx\\core\\Newtonsoft.Json.dll",
+        "Bytes": 524200,
+        "SHA256": "4A3D7BBAA2C347C2F98FA06A7324EBF311F696D9965E9BA0A81A56219420CE01"
+      },
+      {
+        "File": "BepInEx\\core\\Newtonsoft.Json.LICENSE.md",
+        "Bytes": 1104,
+        "SHA256": "B98A397897FF55F76CDDC380041507A95A896B2946E0188703BF0496793D6516"
+      },
+      {
+        "File": "mods.yml",
+        "Bytes": 1549,
+        "SHA256": "5B81074CDBE64EB45FE83ED4ABC27793A2A266FAF87B5230366F133F50F770C9"
+      },
+      {
+        "File": "doorstop_config.ini",
+        "Bytes": 1567,
+        "SHA256": "D9DAB1EB8E541971D5F6ED0DF139F30706E77615E06847FFBBB41B174B8D9C0F"
+      },
+      {
+        "File": "BepInEx\\config\\alexander.charactersheet.cfg",
+        "Bytes": 588,
+        "SHA256": "16C25C8599F8A6FA1E22EA47308180E8B92911876EE666861C3628D501D561C3"
+      },
+      {
+        "File": "BepInEx\\config\\BepInEx.cfg",
+        "Bytes": 4969,
+        "SHA256": "E4C147F11B97D4E384DC9A6D4BF52A7154C311141734F7F1974514093B79E232"
+      }
+    ]
+  },
+  "IndependentActualHostVerification": {
+    "VerifiedUtc": "2026-10-06T21:57:46.7431129Z",
+    "HostDosPath": "C:\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\plugins\\Alexander-CharacterSheet\\Alexander.CharacterSheet.dll",
+    "HostUncPath": "\\\\localhost\\C$\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\plugins\\Alexander-CharacterSheet\\Alexander.CharacterSheet.dll",
+    "CIMFileSize": 181248,
+    "FreshUNCSize": 181248,
+    "FreshUNCSHA256": "9B3CD10CCEA8823E3ABAFE11CA1F6025737B1D4B60C711CDD8FB7C315A8DBB25",
+    "CustomPluginDLLCount": 1,
+    "NamedCustomDLLCountAcrossPlugins": 1,
+    "SupportingFiles": [
+      {
+        "File": "BepInEx\\core\\BepInEx.dll",
+        "SHA256": "D021965B0FE61EE2BA8F68D931DFE4ADF172075038D220950D811B12A036CA0E",
+        "Unchanged": true
+      },
+      {
+        "File": "BepInEx\\core\\BepInEx.Preloader.dll",
+        "SHA256": "9E69AEA4F69F8E8364045C5E8784DD92D79F5065F57F661D65F5ACFE7BFBCE2A",
+        "Unchanged": true
+      },
+      {
+        "File": "BepInEx\\core\\0Harmony.dll",
+        "SHA256": "1A21CC03424FC82C3DD1346905D16494536B9595AE4162228D99FB7C285C1031",
+        "Unchanged": true
+      },
+      {
+        "File": "BepInEx\\core\\Newtonsoft.Json.dll",
+        "SHA256": "4A3D7BBAA2C347C2F98FA06A7324EBF311F696D9965E9BA0A81A56219420CE01",
+        "Unchanged": true
+      },
+      {
+        "File": "BepInEx\\core\\Newtonsoft.Json.LICENSE.md",
+        "SHA256": "B98A397897FF55F76CDDC380041507A95A896B2946E0188703BF0496793D6516",
+        "Unchanged": true
+      },
+      {
+        "File": "mods.yml",
+        "SHA256": "5B81074CDBE64EB45FE83ED4ABC27793A2A266FAF87B5230366F133F50F770C9",
+        "Unchanged": true
+      },
+      {
+        "File": "doorstop_config.ini",
+        "SHA256": "D9DAB1EB8E541971D5F6ED0DF139F30706E77615E06847FFBBB41B174B8D9C0F",
+        "Unchanged": true
+      },
+      {
+        "File": "BepInEx\\config\\alexander.charactersheet.cfg",
+        "SHA256": "16C25C8599F8A6FA1E22EA47308180E8B92911876EE666861C3628D501D561C3",
+        "Unchanged": true
+      },
+      {
+        "File": "BepInEx\\config\\BepInEx.cfg",
+        "SHA256": "E4C147F11B97D4E384DC9A6D4BF52A7154C311141734F7F1974514093B79E232",
+        "Unchanged": true
+      }
+    ],
+    "RollbackSHA256": "9EB121AD7C2808645258A2EF5359CDE538F5E0C9BEA7FD3C8DF84C00B78750C4",
+    "GameProcessCount": 0
+  },
+  "OnlyProfileMutation": "Replaced Alexander-CharacterSheet\\Alexander.CharacterSheet.dll",
+  "GameLaunch": "NONE",
+  "SettingsChanges": "NONE",
+  "OtherCandidatesChanged": false
+}

@@ -1,0 +1,1 @@
+This is the separate source-only 0.2.3 next build. Installed 0.2.2 and root source stay unchanged. Do not deploy/run from here. Existing game/loader references are external; no vendor binaries were copied. BUILD-MAP.json records the frozen 0.2.2 starting point.

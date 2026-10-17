@@ -1,0 +1,562 @@
+--- 0.2.2.3/src/Core/CompactTooltipPresentation.cs
++++ 0.2.2.4/src/Core/CompactTooltipPresentation.cs
+@@ -55,7 +55,7 @@
+                     (term.StackHint.Length>0?" "+TooltipMarkup.Style(term.StackHint,"cStack"):""));
+             }
+             if(effective!=permanent)lines.Add(TooltipMarkup.Style(effective+" effective / "+permanent+" owned","cStack"));
+-            lines.Add(TooltipMarkup.Style(terms.Length==0?"Scaling unverified":"Reference components; conditions in Shift","cStack"));
++            lines.Add(TooltipMarkup.Style(terms.Length==0?"Scaling unverified":"Reference components","cStack"));
+             return string.Join("\n",lines);
+         }
+         public static string Stat(string explanation,double live,Calculation calculation,string semanticStyle,string suffix="",string statName="stat")
+--- 0.2.2.3/src/Plugin.cs
++++ 0.2.2.4/src/Plugin.cs
+@@ -10,7 +10,7 @@
+ using UnityEngine.SceneManagement;
+ namespace Alexander.CharacterSheet
+ {
+-    [BepInPlugin(Id,"Alexander's Character Sheet","0.2.2.3")]
++    [BepInPlugin(Id,"Alexander's Character Sheet","0.2.2.4")]
+     public sealed class Plugin:BaseUnityPlugin
+     {
+         public const string Id="alexander.charactersheet";
+@@ -45,7 +45,7 @@
+             {
+                 harmony=new Harmony(Id);harmony.PatchAll(typeof(Plugin).Assembly);
+                 SceneManager.activeSceneChanged+=SceneChanged;subscribed=true;initialized=true;
+-                Logger.LogInfo("Native Tab-extension source 0.2.2.3; HUD branch placement and held-Info re-entry guards; in-game fix verification pending.");
++                Logger.LogInfo("Native Tab-extension source 0.2.2.4; HUD branch placement and held-Info re-entry guards; in-game fix verification pending.");
+             }
+             catch(Exception error)
+             {
+--- 0.2.2.3/src/Presentation/NativeHoverPopup.cs
++++ 0.2.2.4/src/Presentation/NativeHoverPopup.cs
+@@ -1,6 +1,7 @@
+ using System;
+ using Alexander.CharacterSheet.Core;
+ using RoR2;
++using RoR2.UI;
+ using TMPro;
+ using UnityEngine;
+ using UnityEngine.UI;
+@@ -10,18 +11,22 @@
+     {
+         readonly Canvas canvas;
+         readonly RectTransform canvasRect,root,content,luckDetail,heading,viewport,footer;
+-        readonly TextMeshProUGUI title,body,luck,luckText,note;
++        readonly TextMeshProUGUI title,body,luck,luckText,detailsLabel;
+         readonly ScrollRect scroll;
+         readonly Image panelImage,headerImage;
+         readonly NativeTooltipStyle nativeStyle=new NativeTooltipStyle();
++        readonly DetailsInteraction interaction=new DetailsInteraction();
++        readonly OwnedDetailsButton detailsButton;
+         readonly float scale;
++        NativeTooltipAnchor itemAnchor;
+         SheetRow row;
+         bool lastFull;
+-        internal bool PointerInside;
++        internal bool PointerInside{get=>interaction.PointerInside;set{if(value)interaction.PopupEnter();else interaction.PopupExit(Time.unscaledTime);}}
++        internal bool Active=>interaction.Active;
+         internal NativeHoverPopup(RectTransform ownedHost,Canvas eventCanvas,NativeUiStyle style,float presentationScale)
+         {
+             canvas=eventCanvas;canvasRect=ownedHost;scale=presentationScale;
+-            root=NativeUiStyle.Rect(canvasRect,"AlexanderItemHover",Vector2.zero,Vector2.zero);root.pivot=new Vector2(0,1);
++            root=NativeUiStyle.Rect(canvasRect,"AlexanderItemDetails",Vector2.zero,Vector2.zero);root.pivot=new Vector2(0,1);
+             root.gameObject.AddComponent<LayoutElement>().ignoreLayout=true;panelImage=style.Background(root,true);
+             root.gameObject.AddComponent<PopupPresence>().Popup=this;
+             heading=NativeUiStyle.Rect(root,"Header",new Vector2(0,1),Vector2.one);heading.pivot=new Vector2(0,1);
+@@ -36,9 +41,14 @@
+             scroll=viewport.gameObject.AddComponent<ScrollRect>();scroll.viewport=viewport;scroll.content=content;
+             scroll.horizontal=false;scroll.movementType=ScrollRect.MovementType.Clamped;scroll.scrollSensitivity=24;
+             footer=NativeUiStyle.Rect(root,"Footer",Vector2.zero,new Vector2(1,0));footer.pivot=Vector2.zero;
+-            note=style.Text(footer,"Shift: details",Mathf.Max(12,style.BodyFontSize-3)*scale);
+-            note.rectTransform.anchorMax=new Vector2(.6f,1);note.rectTransform.offsetMin=new Vector2(12*scale,0);note.alpha=.7f;
+-            var badge=NativeUiStyle.Rect(footer,"Luck",new Vector2(.64f,.08f),new Vector2(.97f,.92f));
++            var control=NativeUiStyle.Rect(footer,"DetailsToggle",new Vector2(.03f,.06f),new Vector2(.6f,.94f));
++            var buttonImage=control.gameObject.AddComponent<Image>();buttonImage.color=Color.clear;
++            detailsButton=control.gameObject.AddComponent<OwnedDetailsButton>();detailsButton.targetGraphic=buttonImage;
++            foreach(var automaticTooltip in control.GetComponents<TooltipProvider>())automaticTooltip.enabled=false;
++            var navigation=detailsButton.navigation;navigation.mode=Navigation.Mode.None;detailsButton.navigation=navigation;
++            detailsLabel=style.Text(control,"Details  >",Mathf.Max(14,style.BodyFontSize-1)*scale);
++            detailsButton.onClick.AddListener(()=>interaction.Toggle(CursorAvailable(),true));
++            var badge=NativeUiStyle.Rect(footer,"Luck",new Vector2(.66f,.08f),new Vector2(.97f,.92f));
+             badge.gameObject.AddComponent<Image>().color=Color.clear;badge.gameObject.AddComponent<LuckPresence>().Popup=this;
+             var index=ItemCatalog.FindItemIndex("Clover");var def=index==ItemIndex.None?null:ItemCatalog.GetItemDef(index);
+             var iconRect=NativeUiStyle.Rect(badge,"Clover",new Vector2(0,.08f),new Vector2(.24f,.92f));
+@@ -50,36 +60,83 @@
+             luckText.rectTransform.offsetMin=new Vector2(12*scale,12*scale);luckText.rectTransform.offsetMax=new Vector2(-12*scale,-12*scale);
+             luckDetail.gameObject.SetActive(false);root.gameObject.SetActive(false);
+         }
+-        internal void Set(SheetRow source,bool full,bool followPointer)
++        bool CursorAvailable()
+         {
+-            if(source==null){Hide();return;}
+-            bool changed=row==null||row.Id!=source.Id||lastFull!=full;
+-            row=source;lastFull=full;nativeStyle.Refresh(title,body,panelImage,headerImage,scale);
+-            title.text=TooltipText.SingleLine(source.Title);if(source.Icon)title.color=source.Color;
+-            string raw=full?source.FullRichTooltip:source.ShortRichTooltip;
+-            string text=TooltipMarkup.Render(raw??TooltipMarkup.Literal(full?source.FullTooltip??source.ShortTooltip:source.ShortTooltip),nativeStyle.CanStyle);
+-            body.text=text;note.text=full?"Release Shift: summary":"Shift: details";
++            if(row!=null&&row.IsItem&&(itemAnchor==null||!itemAnchor.Current))return false;
++            var locator=root.GetComponentInParent<MPEventSystemLocator>();
++            var owner=itemAnchor!=null?itemAnchor.EventSystem:locator?locator.eventSystem:null;
++            return owner&&owner.isCursorVisible&&owner.cursorOpenerCount>0;
++        }
++        internal void Enter(object source,string key)
++        {if(interaction.Enter(source,key)){itemAnchor=null;row=null;lastFull=false;scroll.verticalNormalizedPosition=1;}}
++        internal void Leave(object source)=>interaction.Leave(source,Time.unscaledTime);
++        internal bool Expired()=>interaction.Expire(Time.unscaledTime);
++        internal bool CanDefer(TooltipProvider provider,out MPEventSystem context)
++        {
++            context=null;
++            if(!root||!root.gameObject.activeInHierarchy||itemAnchor==null||!itemAnchor.Current||!ReferenceEquals(provider,itemAnchor.Provider))return false;
++            context=itemAnchor.EventSystem;return true;
++        }
++        internal bool Set(SheetRow source,TooltipProvider provider,bool followPointer)
++        {
++            if(source==null||!interaction.Active||interaction.Key!=source.Id){Hide();return false;}
++            if(source.IsItem)
++            {
++                if(!provider){Hide();return false;}
++                if(itemAnchor==null||!ReferenceEquals(itemAnchor.Provider,provider)||!itemAnchor.Current)
++                    itemAnchor=NativeTooltipAnchor.Find(provider,canvasRect,canvas);
++                if(itemAnchor==null||!itemAnchor.Current){root.gameObject.SetActive(false);return false;}
++            }
++            bool full=interaction.Expanded,changed=row==null||row.Id!=source.Id||lastFull!=full;
++            row=source;lastFull=full;nativeStyle.Refresh(title,body,panelImage,headerImage,scale,source.IsItem?itemAnchor.Controller:null);
++            heading.gameObject.SetActive(!source.IsItem);
++            if(!source.IsItem){title.text=TooltipText.SingleLine(source.Title);if(source.Icon)title.color=source.Color;}
++            string raw=source.IsItem?full?source.ItemDetailsRichTooltip:"":full?source.FullRichTooltip:source.ShortRichTooltip;
++            string text=source.IsItem?raw:raw??TooltipMarkup.Literal(full?source.FullTooltip??source.ShortTooltip:source.ShortTooltip);
++            body.text=TooltipMarkup.Render(text,nativeStyle.CanStyle);
++            detailsLabel.text=full?"Details  v":"Details  >";detailsButton.interactable=CursorAvailable();
++            detailsLabel.font=body.font;detailsLabel.fontSharedMaterial=body.fontSharedMaterial;detailsLabel.color=body.color;
+             luck.text=source.LuckMark=="mix"?"Mixed":source.LuckMark=="x"?"No":source.LuckMark=="\u2713"?"Yes":source.LuckMark;
+             luckText.text=TooltipText.Clip(source.LuckTooltip,700);
+-            float width=Mathf.Min(nativeStyle.PreferredWidth*scale,canvasRect.rect.width-24*scale);
+-            float headerHeight=title.fontSize*1.4f+8*scale,footerHeight=Mathf.Max(24*scale,note.fontSize+8*scale);
+-            double preferred=body.GetPreferredValues(body.text,Mathf.Max(20,width-24*scale),0).y;
++            float width=source.IsItem?(float)itemAnchor.PinnedBounds.Width*1f:nativeStyle.PreferredWidth*scale;
++            width=Mathf.Min(width,canvasRect.rect.width-24*scale);
++            float headerHeight=source.IsItem?0:title.fontSize*1.4f+8*scale,footerHeight=Mathf.Max(30*scale,detailsLabel.fontSize+10*scale);
++            bool showBody=!source.IsItem||full;
++            viewport.gameObject.SetActive(showBody);
++            float preferred=showBody?body.GetPreferredValues(body.text,Mathf.Max(20,width-24*scale),0).y:0;
+             CompactTooltipSize sizing;
+-            if(!CompactTooltipSizing.TryCreate(canvasRect.rect.width,canvasRect.rect.height,width,preferred,headerHeight,footerHeight,scale,full,out sizing)){Hide();return;}
+-            root.sizeDelta=new Vector2((float)sizing.Width,(float)sizing.Height);
++            if(!CompactTooltipSizing.TryCreate(canvasRect.rect.width,canvasRect.rect.height,width,preferred,headerHeight,footerHeight,scale,full,out sizing))
++            {root.gameObject.SetActive(false);return false;}
++            float height=(float)sizing.Height;
++            UiRect dock=default(UiRect);
++            if(source.IsItem)
++            {
++                if(!showBody)height=footerHeight+12*scale;
++                if(!NativeTooltipAddonPlacement.TryBelow(canvasRect.rect.width,canvasRect.rect.height,itemAnchor.PinnedBounds,
++                    height,footerHeight+12*scale,scale,out dock)){root.gameObject.SetActive(false);return false;}
++                width=(float)dock.Width;height=(float)dock.Height;
++            }
++            root.sizeDelta=new Vector2(width,height);
+             heading.sizeDelta=new Vector2(0,headerHeight);heading.anchoredPosition=Vector2.zero;
+             footer.sizeDelta=new Vector2(0,footerHeight);
+             viewport.offsetMin=new Vector2(12*scale,footerHeight+8*scale);viewport.offsetMax=new Vector2(-12*scale,-headerHeight-8*scale);
+-            content.sizeDelta=new Vector2(0,Mathf.Max((float)sizing.ViewportHeight,(float)preferred));
+-            float luckWidth=Mathf.Min(320*scale,(float)sizing.Width-24*scale);
+-            float luckHeight=Mathf.Min(Mathf.Min(320*scale,(float)sizing.Height-footerHeight-20*scale),luckText.GetPreferredValues(luckText.text,Mathf.Max(20,luckWidth-24*scale),0).y+24*scale);
+-            luckDetail.sizeDelta=new Vector2(luckWidth,Mathf.Max(48*scale,luckHeight));luckDetail.anchoredPosition=new Vector2(-12*scale,footerHeight+8*scale);
++            content.sizeDelta=new Vector2(0,Mathf.Max(24*scale,height-headerHeight-footerHeight-16*scale,preferred));
++            float luckWidth=Mathf.Min(320*scale,width-24*scale);
++            float luckHeight=Mathf.Min(320*scale,luckText.GetPreferredValues(luckText.text,Mathf.Max(20,luckWidth-24*scale),0).y+24*scale);
++            luckHeight=Mathf.Min(Mathf.Max(48*scale,luckHeight),canvasRect.rect.height-24*scale);
++            luckDetail.sizeDelta=new Vector2(luckWidth,luckHeight);
+             if(changed)scroll.verticalNormalizedPosition=1;
+-            root.gameObject.SetActive(true);root.SetAsLastSibling();Position(followPointer&&!PointerInside);
++            root.gameObject.SetActive(true);root.SetAsLastSibling();
++            if(source.IsItem)root.anchoredPosition=new Vector2((float)dock.X,(float)(dock.Y+dock.Height));
++            else Position(followPointer&&!PointerInside);
++            float panelBottom=root.anchoredPosition.y-height;
++            float luckBottom=Mathf.Clamp(panelBottom+footerHeight+8*scale,12*scale,canvasRect.rect.height-12*scale-luckHeight);
++            luckDetail.anchoredPosition=new Vector2(-12*scale,luckBottom-panelBottom);
++            return true;
+         }
+         void Position(bool followPointer)
+         {
+-            Vector2 point=root.anchoredPosition+new Vector2(canvasRect.rect.xMin,canvasRect.rect.yMin);
++            Vector2 point=root.anchoredPosition+canvasRect.rect.min;
+             if(followPointer)
+             {
+                 RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect,Input.mousePosition,
+@@ -88,10 +145,10 @@
+             }
+             point.x=Mathf.Clamp(point.x,canvasRect.rect.xMin+12,canvasRect.rect.xMax-root.rect.width-12);
+             point.y=Mathf.Clamp(point.y,canvasRect.rect.yMin+root.rect.height+12,canvasRect.rect.yMax-12);
+-            root.anchoredPosition=new Vector2(point.x-canvasRect.rect.xMin,point.y-canvasRect.rect.yMin);
++            root.anchoredPosition=point-canvasRect.rect.min;
+         }
+         internal void ShowLuck(bool show){if(luckDetail)luckDetail.gameObject.SetActive(show);}
+-        internal void Hide(){row=null;PointerInside=false;if(root)root.gameObject.SetActive(false);ShowLuck(false);}
++        internal void Hide(){interaction.Reset();itemAnchor=null;row=null;if(root)root.gameObject.SetActive(false);ShowLuck(false);}
+         public void Dispose(){Hide();if(root)UnityEngine.Object.Destroy(root.gameObject);}
+     }
+ }
+--- 0.2.2.3/src/Presentation/NativeItemHover.cs
++++ 0.2.2.4/src/Presentation/NativeItemHover.cs
+@@ -1,4 +1,6 @@
+ using System;
++using System.Collections.Generic;
++using System.Linq;
+ using System.Reflection;
+ using TMPro;
+ using Alexander.CharacterSheet.Core;
+@@ -11,54 +13,131 @@
+     internal sealed class NativeItemHover:MonoBehaviour,IPointerEnterHandler,IPointerExitHandler
+     {
+         static readonly NativeBindingRegistry Registry=new NativeBindingRegistry();
++        static readonly HashSet<NativeItemHover> Sources=new HashSet<NativeItemHover>();
++        readonly NativePointerExitLease exitLease=new NativePointerExitLease();
+         SheetView owner;
+         ItemIcon icon;
++        AddedRowHover added;
+         TooltipProvider provider;
++        object registryKey;
++        MPEventSystem deferredContext;
++        bool replaying;
+         internal ItemIcon Icon=>icon;
+-        internal bool CanShow=>owner!=null&&isActiveAndEnabled&&icon&&Registry.Owns(icon,this)&&
+-            (!provider||provider.enabled&&(provider.transform==icon.transform||provider.transform.IsChildOf(icon.transform)))&&owner.CanHandleIcon(icon);
++        internal TooltipProvider Provider=>provider;
++        internal string RowId=>icon?"item:"+(int)icon.itemIndex:added?.Row?.Id;
++        internal bool CanShow=>owner!=null&&isActiveAndEnabled&&provider&&provider.enabled&&Registry.Owns(registryKey,this)&&
++            (provider.transform==(icon?icon.transform:added?added.transform:null)||provider.transform.IsChildOf(icon?icon.transform:added?added.transform:null))&&
++            (icon?owner.CanHandleIcon(icon):added&&owner.CanHandleAddedItem(added));
+         internal bool Bind(SheetView view,ItemIcon source)
+         {
+-            if(!Registry.TryClaim(source,this))return false;
+-            owner=view;icon=source;provider=source.tooltipProvider;return true;
++            if(!source||!source.tooltipProvider||!Registry.TryClaim(source,this))return false;
++            owner=view;icon=source;provider=source.tooltipProvider;registryKey=source;Sources.Add(this);return true;
+         }
+-        internal void RefreshProvider(){provider=icon?icon.tooltipProvider:null;}
++        internal bool BindAdded(SheetView view,AddedRowHover source,TooltipProvider nativeProvider)
++        {
++            if(!source||!nativeProvider||!Registry.TryClaim(nativeProvider,this))return false;
++            owner=view;added=source;provider=nativeProvider;registryKey=nativeProvider;Sources.Add(this);return true;
++        }
++        internal void RefreshProvider()
++        {
++            var next=icon?icon.tooltipProvider:provider;
++            if(next!=provider){ReleaseDeferred();provider=next;}
++        }
+         internal void Detach()
+         {
+-            var oldOwner=owner;owner=null;
+-            if(icon)Registry.Release(icon,this);
+-            else if(!ReferenceEquals(icon,null))Registry.Release(icon,this);
+-            if(oldOwner!=null)oldOwner.Leave(this);enabled=false;
++            ReleaseDeferred();var previous=owner;owner=null;
++            if(registryKey!=null)Registry.Release(registryKey,this);
++            Sources.Remove(this);previous?.Leave(this);enabled=false;
+         }
+-        // Route only this local, active, exclusively claimed icon. No provider field is written.
+-        internal static bool TryRoute(TooltipProvider source)
++        internal static void BeforeNativeEnter(TooltipProvider next,PointerEventData data)
+         {
+-            if(!source)return false;
++            if(!next)return;
++            var context=data!=null&&data.currentInputModule?data.currentInputModule.GetComponent<MPEventSystem>():null;
++            if(!context){var locator=next.GetComponentInParent<MPEventSystemLocator>();context=locator?locator.eventSystem:null;}
++            foreach(var source in Sources.ToArray())
++            {
++                if(!source||!source.exitLease.Pending)continue;
++                if(context&&ReferenceEquals(context,source.deferredContext))
++                {
++                    if(ReferenceEquals(next,source.provider))source.CancelDeferred();
++                    else source.ReleaseDeferred();
++                }
++            }
++        }
++        internal static void AfterNativeEnter(TooltipProvider source)
++        {
++            if(!source)return;
+             foreach(var probe in source.GetComponentsInParent<NativeItemHover>())
+-                if(probe.CanShow&&ReferenceEquals(probe.provider,source)&&probe.owner.EnterItem(probe))return true;
++                if(probe.CanShow&&ReferenceEquals(probe.provider,source)){probe.owner.EnterItem(probe);return;}
++        }
++        internal static bool TryDeferNativeExit(TooltipProvider source,PointerEventData data)
++        {
++            if(!source||data==null)return false;
++            foreach(var probe in source.GetComponentsInParent<NativeItemHover>())
++            {
++                if(probe.replaying||!probe.CanShow||!ReferenceEquals(probe.provider,source))continue;
++                MPEventSystem context;
++                if(!probe.owner.CanDeferExit(probe,out context))return false;
++                // Keep this actual UI exit event; no gameplay input is fabricated.
++                if(!probe.exitLease.Defer(source,context,()=>probe.ReplayExit(source,data)))return false;
++                probe.deferredContext=context;probe.owner.Leave(probe);return true;
++            }
+             return false;
+         }
++        void ReplayExit(TooltipProvider source,PointerEventData data)
++        {
++            if(!source)return;replaying=true;
++            try{((IPointerExitHandler)source).OnPointerExit(data);}
++            finally{replaying=false;}
++        }
++        void CancelDeferred(){exitLease.Cancel();deferredContext=null;}
++        internal void ReleaseDeferred()
++        {
++            bool owns=provider&&deferredContext&&ReferenceEquals(deferredContext.currentTooltipProvider,provider);
++            try{exitLease.Release(owns);}catch(Exception){/* Owned lease is cleared before calling the native interface. */}
++            finally{deferredContext=null;}
++        }
++        internal static void ReleaseForView(SheetView view)
++        {foreach(var source in Sources.ToArray())if(source&&ReferenceEquals(source.owner,view))source.ReleaseDeferred();}
+         public void OnPointerEnter(PointerEventData data){if(CanShow)owner.EnterItem(this);}
+         public void OnPointerExit(PointerEventData data){owner?.Leave(this);}
+-        void OnDisable(){owner?.Leave(this);}
++        void OnDisable(){ReleaseDeferred();owner?.Leave(this);}
+         void OnDestroy(){Detach();}
+     }
+-    // Resolve the publicly implemented Unity interface; never inspect its implementation or private fields.
++    internal static class NativePointerContract
++    {
++        internal static MethodBase Resolve(Type contract,string method)
++        {
++            var map=typeof(TooltipProvider).GetInterfaceMap(contract);
++            for(int i=0;i<map.InterfaceMethods.Length;i++)
++                if(map.InterfaceMethods[i].Name==method)return map.TargetMethods[i];
++            throw new MissingMethodException("TooltipProvider's public Unity pointer contract is unavailable.");
++        }
++    }
+     [HarmonyPatch]
+-    internal static class NativePointerRoutePatch
++    internal static class NativePointerEnterPatch
+     {
+-        [HarmonyTargetMethod]static MethodBase TargetMethod()
++        [HarmonyTargetMethod]static MethodBase TargetMethod()=>NativePointerContract.Resolve(typeof(IPointerEnterHandler),nameof(IPointerEnterHandler.OnPointerEnter));
++        // Native enter always runs: title, description, localization and other mods stay native.
++        [HarmonyPrefix]static void Prefix(TooltipProvider __instance,PointerEventData __0)
+         {
+-            var map=typeof(TooltipProvider).GetInterfaceMap(typeof(IPointerEnterHandler));
+-            for(int i=0;i<map.InterfaceMethods.Length;i++)
+-                if(map.InterfaceMethods[i].Name==nameof(IPointerEnterHandler.OnPointerEnter))return map.TargetMethods[i];
+-            throw new MissingMethodException("TooltipProvider's public IPointerEnterHandler contract is unavailable.");
++            if(Plugin.Instance==null||!Plugin.Instance.CanRun)return;
++            try{NativeItemHover.BeforeNativeEnter(__instance,__0);}catch(Exception){}
+         }
+-        [HarmonyPrefix]static bool Prefix(TooltipProvider __instance)
++        [HarmonyPostfix]static void Postfix(TooltipProvider __instance)
++        {
++            if(Plugin.Instance==null||!Plugin.Instance.CanRun)return;
++            try{NativeItemHover.AfterNativeEnter(__instance);}catch(Exception){}
++        }
++    }
++    [HarmonyPatch]
++    internal static class NativePointerExitPatch
++    {
++        [HarmonyTargetMethod]static MethodBase TargetMethod()=>NativePointerContract.Resolve(typeof(IPointerExitHandler),nameof(IPointerExitHandler.OnPointerExit));
++        [HarmonyPrefix]static bool Prefix(TooltipProvider __instance,PointerEventData __0)
+         {
+             if(Plugin.Instance==null||!Plugin.Instance.CanRun)return true;
+-            try{return !NativeItemHover.TryRoute(__instance);}
+-            catch(Exception){return true;} // Preserve native hover if enhancement cannot handle this event.
++            try{return !NativeItemHover.TryDeferNativeExit(__instance,__0);}catch(Exception){return true;}
+         }
+     }
+     internal sealed class AddedRowHover:MonoBehaviour,IPointerEnterHandler,IPointerExitHandler
+@@ -66,16 +145,28 @@
+         internal SheetView Owner;
+         internal SheetRow Row;
+         internal TextMeshProUGUI Label,Value;
+-        public void OnPointerEnter(PointerEventData data){Owner?.EnterRow(this);}
+-        public void OnPointerExit(PointerEventData data){Owner?.Leave(this);}
++        internal TooltipProvider NativeProvider;
++        internal NativeItemHover ItemHover;
++        public void OnPointerEnter(PointerEventData data){if(Row!=null&&!Row.IsItem)Owner?.EnterRow(this);}
++        public void OnPointerExit(PointerEventData data){if(Row!=null&&!Row.IsItem)Owner?.Leave(this);}
+         void OnDisable(){Owner?.Leave(this);}
+     }
+-    internal sealed class PopupPresence:MonoBehaviour,IPointerEnterHandler,IPointerExitHandler
++    internal sealed class PopupPresence:MonoBehaviour,IPointerEnterHandler,IPointerExitHandler,IPointerDownHandler,IPointerUpHandler,IPointerClickHandler
+     {
+         internal NativeHoverPopup Popup;
+         public void OnPointerEnter(PointerEventData data){if(Popup!=null)Popup.PointerInside=true;}
+         public void OnPointerExit(PointerEventData data){if(Popup!=null)Popup.PointerInside=false;}
++        public void OnPointerDown(PointerEventData data){data.Use();}
++        public void OnPointerUp(PointerEventData data){data.Use();}
++        public void OnPointerClick(PointerEventData data){data.Use();}
+         void OnDisable(){if(Popup!=null)Popup.PointerInside=false;}
++    }
++    internal sealed class OwnedDetailsButton:HGButton
++    {
++        public override void OnPointerDown(PointerEventData data){base.OnPointerDown(data);data.Use();}
++        public override void OnPointerUp(PointerEventData data){base.OnPointerUp(data);data.Use();}
++        public override void OnPointerClick(PointerEventData data){base.OnPointerClick(data);data.Use();}
++        public override void OnSubmit(BaseEventData data){base.OnSubmit(data);data.Use();}
+     }
+     internal sealed class LuckPresence:MonoBehaviour,IPointerEnterHandler,IPointerExitHandler
+     {
+--- 0.2.2.3/src/Presentation/NativeTooltipStyle.cs
++++ 0.2.2.4/src/Presentation/NativeTooltipStyle.cs
+@@ -17,12 +17,12 @@
+         internal float PreferredWidth=420;
+         internal string Status{get;private set;}="Native tooltip component not yet observed; native TMP defaults retained.";
+         internal bool CanStyle(string name)=>styleSheet&&styleSheet.GetStyle(name)!=null;
+-        internal void Refresh(TextMeshProUGUI title,TextMeshProUGUI body,Image panel,Image heading,float scale)
++        internal void Refresh(TextMeshProUGUI title,TextMeshProUGUI body,Image panel,Image heading,float scale,TooltipController exactController=null)
+         {
+-            if(Time.unscaledTime>=nextCapture)
++            if(exactController||Time.unscaledTime>=nextCapture)
+             {
+                 nextCapture=Time.unscaledTime+2;
+-                var controller=Resources.FindObjectsOfTypeAll<TooltipController>()
++                var controller=exactController?exactController:Resources.FindObjectsOfTypeAll<TooltipController>()
+                     .Where(c=>c&&c.bodyLabel&&c.bodyLabel.font&&c.titleLabel&&c.titleLabel.font)
+                     .OrderByDescending(c=>c.gameObject.activeInHierarchy)
+                     .ThenByDescending(c=>c.gameObject.scene.IsValid()).FirstOrDefault();
+--- 0.2.2.3/src/Presentation/SheetData.cs
++++ 0.2.2.4/src/Presentation/SheetData.cs
+@@ -11,7 +11,8 @@
+     internal sealed class SheetRow
+     {
+         public string Id, Title, Detail, ShortTooltip, FullTooltip, ShortRichTooltip, FullRichTooltip, LuckTooltip, Group="Utility / passive", LuckLabel="Unverified";
+-        public bool FormulaRegistered;
++        public bool FormulaRegistered,IsItem;
++        public string ItemDetailsRichTooltip;
+         public Sprite Icon;
+         public Color Color = Color.white;
+         public string LuckMark = "?";
+@@ -130,7 +131,7 @@
+                 string compact=CompactTooltipPresentation.Item(terms,Language.GetString(def.pickupToken),effective,owned);
+                 string detailed=Language.GetString(def.descriptionToken)+"\n\n"+TooltipMarkup.Literal(fullText+
+                     "\nOwned: "+owned+" | Effective: "+effective);
+-                rows.Add(new SheetRow { FormulaRegistered=scaling!=null,ShortRichTooltip=compact,FullRichTooltip=detailed,Id = "item:" + i, Title = (effects ? group + " · " : "") + name + " ×" + effective,
++                rows.Add(new SheetRow { IsItem=true,ItemDetailsRichTooltip=ItemDetailsPresentation.Create(terms,effective,owned,definition?.TriggerContext??""),FormulaRegistered=scaling!=null,ShortRichTooltip=compact,FullRichTooltip=detailed,Id = "item:" + i, Title = (effects ? group + " · " : "") + name + " ×" + effective,
+                     Detail = scaling!=null ? scaling.NextLabel : current+" - "+next, Icon = def.pickupIconSprite,
+                     Color = ItemTierCatalog.GetItemTierDef(def.tier) ? ColorCatalog.GetColor(ItemTierCatalog.GetItemTierDef(def.tier).colorIndex) : Color.white, ShortTooltip = TooltipText.Clean(Regex.Replace(compact,"<[^>]*>","")),
+                     FullTooltip = NativeText(def.descriptionToken)+"\n\n"+fullText+"\nOwned: "+owned+" | Effective: "+effective,
+--- 0.2.2.3/src/Presentation/SheetView.cs
++++ 0.2.2.4/src/Presentation/SheetView.cs
+@@ -27,7 +27,6 @@
+         NativeHoverPopup popup;
+         object hovered;
+         SheetRow hoveredRow;
+-        float leaveAt;
+         bool effectsExpanded;
+         TextMeshProUGUI effectsHeading;
+         internal string Status{get;private set;}="Waiting for the native own-player strip.";
+@@ -44,6 +43,8 @@
+                 body.inventory.GetItemCountPermanent(def),body.inventory.GetItemCountEffective(def));
+         }
+         internal bool CanHandleIcon(ItemIcon icon)=>IsOwnIcon(icon)&&items.ContainsKey("item:"+(int)icon.itemIndex);
++        internal bool CanHandleAddedItem(AddedRowHover added)=>added&&ReferenceEquals(added.Owner,this)&&added.Row!=null&&
++            added.Row.IsItem&&root&&added.transform.IsChildOf(root)&&items.ContainsKey(added.Row.Id);
+         internal void Refresh(CharacterBody source)
+         {
+             body=source;if(!body||!body.master||!hud||!hud.scoreboardPanel)return;
+@@ -70,9 +71,9 @@
+             effectsHeading.text="Effects & buffs  ("+(inventory.Count+buffs.Count)+")  "+(effectsExpanded?"v":">");
+             if(effectsExpanded)RefreshEffects(inventory,buffs);else ClearEffects();
+             Dock(strips);
+-            if(hovered is NativeItemHover item&&item&&IsOwnIcon(item.Icon))items.TryGetValue("item:"+(int)item.Icon.itemIndex,out hoveredRow);
++            if(hovered is NativeItemHover item&&item&&item.CanShow)items.TryGetValue(item.RowId,out hoveredRow);
+             else if(hovered is AddedRowHover added&&added)hoveredRow=added.Row;
+-            else if(hovered!=null){hovered=null;hoveredRow=null;popup.Hide();}
++            else if(hovered!=null)EndHover();
+         }
+         CompactSheetMetrics Metrics=>new CompactSheetMetrics(style.BodyFontSize,scale);
+         void CreatePanel()
+@@ -119,6 +120,24 @@
+         {
+             target.Row=row;target.Label.text=TooltipText.SingleLine(row.Title);target.Value.text=TooltipText.SingleLine(row.Detail??"");
+             target.Label.rectTransform.anchorMax=new Vector2(string.IsNullOrEmpty(row.Detail)?1:.65f,1);
++            if(row.IsItem)RefreshAddedItemProvider(target);
++        }
++        void RefreshAddedItemProvider(AddedRowHover target)
++        {
++            if(!target.NativeProvider)
++            {
++                target.NativeProvider=target.gameObject.AddComponent<TooltipProvider>();
++                target.ItemHover=target.gameObject.AddComponent<NativeItemHover>();
++                if(!target.ItemHover.BindAdded(this,target,target.NativeProvider)){target.NativeProvider.enabled=false;return;}
++            }
++            var reference=bindings.Values.FirstOrDefault(h=>h&&h.CanShow&&h.RowId==target.Row.Id)?.Provider;
++            target.NativeProvider.enabled=reference;
++            if(!reference)return;
++            // This provider belongs to our added row. The actual native icon/provider is read only.
++            target.NativeProvider.overrideTitleText=reference.titleText;
++            target.NativeProvider.overrideBodyText=reference.bodyText;
++            target.NativeProvider.titleColor=reference.titleColor;
++            target.NativeProvider.bodyColor=reference.bodyColor;
+         }
+         void RefreshEffects(List<SheetRow> inventory,List<SheetRow> buffs)
+         {
+@@ -167,8 +186,9 @@
+         }
+         void DetachBindings()
+         {
++            NativeItemHover.ReleaseForView(this);
+             foreach(var pair in bindings)if(pair.Value){pair.Value.Detach();UnityEngine.Object.Destroy(pair.Value);}
+-            bindings.Clear();hovered=null;hoveredRow=null;popup?.Hide();
++            bindings.Clear();EndHover();
+         }
+         bool BoundsOf(Transform source,out UiRect area)
+         {
+@@ -198,25 +218,44 @@
+             }
+             else Status="No safe region below own strip; native panels retained and item hovers remain attached. "+hoverCoverage;
+         }
++        void EndHover()
++        {
++            if(hovered is NativeItemHover native&&native)native.ReleaseDeferred();
++            hovered=null;hoveredRow=null;popup?.Hide();
++        }
+         internal bool EnterItem(NativeItemHover source)
+         {
+-            if(!source.CanShow||!IsOwnIcon(source.Icon))return false;SheetRow row;
+-            if(!items.TryGetValue("item:"+(int)source.Icon.itemIndex,out row))return false;
+-            hovered=source;hoveredRow=row;leaveAt=float.PositiveInfinity;return true;
+-        }
+-        internal void EnterRow(AddedRowHover source){hovered=source;hoveredRow=source.Row;leaveAt=float.PositiveInfinity;}
+-        internal void Leave(object source){if(ReferenceEquals(hovered,source))leaveAt=Time.unscaledTime+.16f;}
+-        internal void SetNativeVisibility(bool visible){layer?.SetVisible(visible);}
++            if(popup==null||!source||!source.CanShow)return false;SheetRow row;
++            if(!items.TryGetValue(source.RowId,out row))return false;
++            if(!ReferenceEquals(hovered,source))EndHover();
++            hovered=source;hoveredRow=row;popup.Enter(source,row.Id);return true;
++        }
++        internal void EnterRow(AddedRowHover source)
++        {
++            if(popup==null||!source||source.Row==null)return;
++            if(!ReferenceEquals(hovered,source))EndHover();
++            hovered=source;hoveredRow=source.Row;popup.Enter(source,source.Row.Id);
++        }
++        internal void Leave(object source){if(ReferenceEquals(hovered,source))popup?.Leave(source);}
++        internal bool CanDeferExit(NativeItemHover source,out MPEventSystem context)
++        {
++            context=null;return ReferenceEquals(hovered,source)&&popup!=null&&popup.CanDefer(source.Provider,out context);
++        }
++        internal void SetNativeVisibility(bool visible)
++        {
++            if(!visible)EndHover();
++            layer?.SetVisible(visible);
++        }
+         internal void UpdateTooltip()
+         {
+             if(popup==null)return;
+-            if(hovered is NativeItemHover item&&(!item||!item.CanShow||!IsOwnIcon(item.Icon)) ||
++            if(hovered is NativeItemHover item&&(!item||!item.CanShow) ||
+                hovered is AddedRowHover added&&(!added||!added.gameObject.activeInHierarchy))
+-            {hovered=null;hoveredRow=null;popup.Hide();return;}
+-            if(hovered is NativeItemHover current)
+-                items.TryGetValue("item:"+(int)current.Icon.itemIndex,out hoveredRow);
+-            if(hoveredRow==null||Time.unscaledTime>leaveAt&&!popup.PointerInside){hovered=null;hoveredRow=null;popup.Hide();return;}
+-            popup.Set(hoveredRow,Input.GetKey(KeyCode.LeftShift)||Input.GetKey(KeyCode.RightShift),float.IsPositiveInfinity(leaveAt));
++            {EndHover();return;}
++            if(hovered is NativeItemHover current)items.TryGetValue(current.RowId,out hoveredRow);
++            if(hoveredRow==null||popup.Expired()){EndHover();return;}
++            var provider=hovered is NativeItemHover native?native.Provider:null;
++            if(!popup.Set(hoveredRow,provider,true)&&hovered is NativeItemHover failed&&failed)failed.ReleaseDeferred();
+         }
+         public void Dispose()
+         {

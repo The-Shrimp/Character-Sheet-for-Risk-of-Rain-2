@@ -1,0 +1,39 @@
+{
+  "CompletedUtc": "2026-10-06T01:26:05.2516347Z",
+  "Added": [
+    {
+      "File": "Newtonsoft.Json.dll",
+      "ActualHostPath": "C:\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\core\\Newtonsoft.Json.dll",
+      "Bytes": 524200,
+      "SHA256": "4A3D7BBAA2C347C2F98FA06A7324EBF311F696D9965E9BA0A81A56219420CE01",
+      "IndependentHostPlacementVerified": true
+    },
+    {
+      "File": "Newtonsoft.Json.LICENSE.md",
+      "ActualHostPath": "C:\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\core\\Newtonsoft.Json.LICENSE.md",
+      "Bytes": 1104,
+      "SHA256": "B98A397897FF55F76CDDC380041507A95A896B2946E0188703BF0496793D6516",
+      "IndependentHostPlacementVerified": true
+    }
+  ],
+  "Unchanged": [
+    {
+      "File": "BepInEx\\core\\BepInEx.dll",
+      "SHA256": "D021965B0FE61EE2BA8F68D931DFE4ADF172075038D220950D811B12A036CA0E",
+      "Unchanged": true
+    },
+    {
+      "File": "BepInEx\\plugins\\Alexander-CharacterSheet\\Alexander.CharacterSheet.dll",
+      "SHA256": "FE8B520259EE94D91589961B39D1644798E4A141182EE53D86E4EF5460E5D0CC",
+      "Unchanged": true
+    },
+    {
+      "File": "BepInEx\\core\\BepInEx.Preloader.dll",
+      "SHA256": "9E69AEA4F69F8E8364045C5E8784DD92D79F5065F57F661D65F5ACFE7BFBCE2A",
+      "Unchanged": true
+    }
+  ],
+  "GameRunning": false,
+  "RuntimeStatus": "Not launched or runtime tested",
+  "Rollback": "With the game closed, remove only Newtonsoft.Json.dll and Newtonsoft.Json.LICENSE.md from the actual host Dev profile BepInEx/core folder. Both files were absent before this deployment."
+}

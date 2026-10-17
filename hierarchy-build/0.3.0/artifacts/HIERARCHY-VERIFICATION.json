@@ -1,0 +1,376 @@
+{
+  "VerifiedUtc": "2026-10-06T20:04:10.942371+00:00",
+  "Version": "0.3.0",
+  "Lineage": {
+    "ParentVersion": "0.2.2.5",
+    "ParentSHA256": "257EBD7A6B913F6CFF0EE1362106A14B43675FF036361DB1E43B05735E174820",
+    "ParentSourceTestsAndDllUnchanged": true,
+    "FrozenNextFeatureBranchesImported": false
+  },
+  "Dll": {
+    "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\artifacts\\review-native-tab\\Alexander.CharacterSheet.dll",
+    "Bytes": 167936,
+    "SHA256": "9EB121AD7C2808645258A2EF5359CDE538F5E0C9BEA7FD3C8DF84C00B78750C4"
+  },
+  "Checks": {
+    "AssertionsPassed": 9928,
+    "AddedAssertions": 1116,
+    "ItemRoutingDefinitions": 44,
+    "CollapseStateCombinations": 128,
+    "HierarchySizingCases": 96,
+    "InheritedTooltipSizingCases": 96,
+    "InheritedAddonPlacementCases": 36,
+    "InheritedTransferSessions": 24,
+    "InheritedTransferItemsPerSession": 16,
+    "PluginBuild": "PASS no warnings",
+    "PublicApiProbe": "PASS compile-only; not executed",
+    "InheritedTestsUnchanged": true,
+    "PluginLifecycleDiff": "Two version strings, memory-only expansion-state field, constructor argument only",
+    "NativePointerHookImplementationPreserved": true,
+    "BothNativeInventoryOwnershipAndBindingPathsPreserved": true,
+    "NativeTooltipStyleAndAnchorPreserved": true,
+    "NoShiftOrRawKeyboardPolling": true,
+    "NoCanvasGroupOpacity": true,
+    "RuntimeTested": false
+  },
+  "SourceContract": {
+    "Title": "Character Sheet",
+    "BackgroundImageColorAlpha": 0.8,
+    "TextAndIconsColorAlpha": 1,
+    "DefaultExpanded": [
+      "Base Stats",
+      "Defense",
+      "Offense",
+      "Movement",
+      "Luck"
+    ],
+    "DefaultCollapsed": [
+      "General Damage Modifiers",
+      "On-Hit",
+      "On-Kill",
+      "Out of Combat",
+      "While Sprinting",
+      "Other items & buffs"
+    ],
+    "ShieldVisibility": "Actual maximum capacity > 0; independent of temporary depletion",
+    "Armor": "Raw value; armor-derived percent is a hover explanation only",
+    "DmgReduction": "Maintained Repulsion Armor Plate per-hit component; hit conditions/floor apply",
+    "MaximumJumps": "Maximum count, not remaining",
+    "Luck": "Signed live master.luck, not probability",
+    "GeneralCooldownReduction": "Unknown raw total; separate shared-item references in Details; no skill-slot inference"
+  },
+  "ChangedFiles": [
+    "src\\Core\\DetailsInteraction.cs",
+    "src\\Plugin.cs",
+    "src\\Presentation\\NativeHoverPopup.cs",
+    "src\\Presentation\\NativeItemHover.cs",
+    "src\\Presentation\\SheetData.cs",
+    "src\\Presentation\\SheetView.cs",
+    "tests\\CoreTests.cs"
+  ],
+  "AddedFiles": [
+    "src\\Core\\CharacterEffectCatalog.cs",
+    "src\\Core\\GeneralCooldownPresentation.cs",
+    "src\\Core\\SheetHierarchy.cs",
+    "src\\Presentation\\SheetFocusButton.cs",
+    "src\\Presentation\\SheetGlyphGraphic.cs",
+    "src\\Presentation\\SheetStructureData.cs",
+    "tests\\HierarchyTests.cs"
+  ],
+  "UnchangedFiles": [
+    "src\\Core\\Calculation.cs",
+    "src\\Core\\CompactSheetLayout.cs",
+    "src\\Core\\CompactTooltipPresentation.cs",
+    "src\\Core\\ComparisonPresentation.cs",
+    "src\\Core\\InventoryPresentation.cs",
+    "src\\Core\\ItemDetailsPresentation.cs",
+    "src\\Core\\ItemTooltipPresentation.cs",
+    "src\\Core\\LuckEvidence.cs",
+    "src\\Core\\NativeAttachmentPolicy.cs",
+    "src\\Core\\NativeItemSurfacePolicy.cs",
+    "src\\Core\\NativeLifecycle.cs",
+    "src\\Core\\NativeTabPolicy.cs",
+    "src\\Core\\NativeTooltipAddonPlacement.cs",
+    "src\\Core\\NativeTooltipFillPolicy.cs",
+    "src\\Core\\NumberFormatting.cs",
+    "src\\Core\\OriginalBuffDefinitions.cs",
+    "src\\Core\\OriginalItemDefinitions.cs",
+    "src\\Core\\PauseLease.cs",
+    "src\\Core\\StatTooltipPresentation.cs",
+    "src\\Core\\TooltipPresentation.cs",
+    "src\\Core\\VerifiedMath.cs",
+    "src\\Presentation\\NativeSheetLayer.cs",
+    "src\\Presentation\\NativeStripIdentity.cs",
+    "src\\Presentation\\NativeTooltipAnchor.cs",
+    "src\\Presentation\\NativeTooltipStyle.cs",
+    "src\\Presentation\\NativeUiStyle.cs",
+    "tests\\AdditiveDetailsTests.cs",
+    "tests\\CompactSheetLayoutTests.cs",
+    "tests\\CompactTooltipTests.cs",
+    "tests\\CoverageFormulaTests.cs",
+    "tests\\ItemTooltipTests.cs",
+    "tests\\LifecycleCoverageTests.cs",
+    "tests\\NativeTabRegressionTests.cs",
+    "tests\\NativeTabTests.cs",
+    "tests\\PresentationTests.cs",
+    "tests\\SimpleStatTooltipTests.cs"
+  ],
+  "SourceFiles": [
+    {
+      "File": "src\\Core\\Calculation.cs",
+      "SHA256": "26384F712577A346A154BE6082FC9C665F8BE5B4B0CA29D4BF887A8512C52641"
+    },
+    {
+      "File": "src\\Core\\CharacterEffectCatalog.cs",
+      "SHA256": "226F616E2CA26740DA4F5C71A0DCA3C1C3D23A0909B83EEFEE6C9264F152091B"
+    },
+    {
+      "File": "src\\Core\\CompactSheetLayout.cs",
+      "SHA256": "9DF0B16401EBF791D71A58460DF5B4995729A3A0829B63180F96F7630B405B8A"
+    },
+    {
+      "File": "src\\Core\\CompactTooltipPresentation.cs",
+      "SHA256": "AFE64D12812CA4AB4D90433D0397AA50FD0926E9A99B8EA1A12A9A71B601D856"
+    },
+    {
+      "File": "src\\Core\\ComparisonPresentation.cs",
+      "SHA256": "6FC5263777F3579EF994C13B3B23FEC048C291F29C5BC9D5F140A76E34A83ACB"
+    },
+    {
+      "File": "src\\Core\\DetailsInteraction.cs",
+      "SHA256": "EB1A3650718AED79ADC43353FBD2EBC5E55ED6BAEB643607D0CAF01877165173"
+    },
+    {
+      "File": "src\\Core\\GeneralCooldownPresentation.cs",
+      "SHA256": "41FD60A80604830EACEEFE756AEE132FFD4443A5F2C090C6C8680CC285984343"
+    },
+    {
+      "File": "src\\Core\\InventoryPresentation.cs",
+      "SHA256": "D51AF4E3CEE7F37F59EFA0FE66020DF624BA6E3D3BDD0DCAA5385C5668C0065D"
+    },
+    {
+      "File": "src\\Core\\ItemDetailsPresentation.cs",
+      "SHA256": "0D1EE24F6510337235C1ED2E8CA0159EED37F4F1BA4D81CECE811BC97DC53931"
+    },
+    {
+      "File": "src\\Core\\ItemTooltipPresentation.cs",
+      "SHA256": "D1086688416EB6691010560F6A09BB34B551D88F06F594C06FA74E27ADE41069"
+    },
+    {
+      "File": "src\\Core\\LuckEvidence.cs",
+      "SHA256": "03CB9706A0D964606058FD9DF74F3E2FF2BA46D80C6BF2232385324D4BC59B55"
+    },
+    {
+      "File": "src\\Core\\NativeAttachmentPolicy.cs",
+      "SHA256": "9EA976669FD7171E472C3BB157FCC48B1D16222714060D6A35CFAF2771C2E915"
+    },
+    {
+      "File": "src\\Core\\NativeItemSurfacePolicy.cs",
+      "SHA256": "9F4DC05D739F5C6C361FCBD7B43309294B3A7A8626011FA13B3A7D68E843EF1B"
+    },
+    {
+      "File": "src\\Core\\NativeLifecycle.cs",
+      "SHA256": "BC5A07821EF07E6B3D3A4F90FE91A2BACA90573AEEEB6DB0824EB1EEDE0FF51A"
+    },
+    {
+      "File": "src\\Core\\NativeTabPolicy.cs",
+      "SHA256": "4650E0FD1E7DD0CF37B1E5F188759F3768376BA349CD2CFB43CF38C0904FDDDD"
+    },
+    {
+      "File": "src\\Core\\NativeTooltipAddonPlacement.cs",
+      "SHA256": "649AF79FB92BAC9A5E713B9DBABF9AE284DAB8B5669214C6B36FFC8BAC9401C0"
+    },
+    {
+      "File": "src\\Core\\NativeTooltipFillPolicy.cs",
+      "SHA256": "F4AA5303186013D83E9EDBC53D28D36791B5FA19426CFE18EFC47F2CD22D28DC"
+    },
+    {
+      "File": "src\\Core\\NumberFormatting.cs",
+      "SHA256": "B6800D33710D41CA2D6BA0A58BE7202F7E3CB53B4FE87A9D5FB68FFE167E4915"
+    },
+    {
+      "File": "src\\Core\\OriginalBuffDefinitions.cs",
+      "SHA256": "05F5173AFF9D961B9F94A37139921F2C422CBB7DA9C1CB4320600DA73671FB97"
+    },
+    {
+      "File": "src\\Core\\OriginalItemDefinitions.cs",
+      "SHA256": "15BDE520A3589BE7C1866B24779F5A691D9A53893725702B840B4A0A831F0E35"
+    },
+    {
+      "File": "src\\Core\\PauseLease.cs",
+      "SHA256": "07140CA1439307A6F1419DFEBF7122DF7F70ED03767ED25F5522E6E7B387789F"
+    },
+    {
+      "File": "src\\Core\\SheetHierarchy.cs",
+      "SHA256": "FF230196AF0E851FABD62A43C7A485447B0E08B0A805BD3F74E1DF15D42ED469"
+    },
+    {
+      "File": "src\\Core\\StatTooltipPresentation.cs",
+      "SHA256": "13342FADCDE29A9D76153B21854F932A95B7C0D72507F1D5AF6BF39F83339D9A"
+    },
+    {
+      "File": "src\\Core\\TooltipPresentation.cs",
+      "SHA256": "F1ACE4AEDDBB485AFE67225A48D21C18F133FDC3F0F39810709E61B57A444A98"
+    },
+    {
+      "File": "src\\Core\\VerifiedMath.cs",
+      "SHA256": "D926DD322C0ACB9EC56E62C948287302B2217C3163B1208CAE187450756F9136"
+    },
+    {
+      "File": "src\\Plugin.cs",
+      "SHA256": "DDFBCCC7D2E5AA2A7C238CBA8D8E5AC76F54E7D38906CA21E95DC6D7725507AA"
+    },
+    {
+      "File": "src\\Presentation\\NativeHoverPopup.cs",
+      "SHA256": "22BAF6B70BBB29F4B62DEF1AD1D5B199B7165E8337AB1D9A2D2D5DE86D619F88"
+    },
+    {
+      "File": "src\\Presentation\\NativeItemHover.cs",
+      "SHA256": "76FE48CF2EBFCA6DC88AB05F5F06BB8678DF986695D7E731E52CF1F5A47C170D"
+    },
+    {
+      "File": "src\\Presentation\\NativeSheetLayer.cs",
+      "SHA256": "01A2F22B4908F560DD1B8BE216515B4B89ED0516510563D77E0E0FA13541D24A"
+    },
+    {
+      "File": "src\\Presentation\\NativeStripIdentity.cs",
+      "SHA256": "C3462E473B5F8A96C606BB3E2C8304A2FD9B94D77505E478D1D7FF8A937B3058"
+    },
+    {
+      "File": "src\\Presentation\\NativeTooltipAnchor.cs",
+      "SHA256": "76FB083B95BCD963AA5A3D88AD2F39C336679BE4434C7A5A8A2E3ED74D0456F4"
+    },
+    {
+      "File": "src\\Presentation\\NativeTooltipStyle.cs",
+      "SHA256": "C69CA4B5E20D0220174CE2BB78449B422C56E6319C829261953062BE6CDC5C3E"
+    },
+    {
+      "File": "src\\Presentation\\NativeUiStyle.cs",
+      "SHA256": "DC9D4A927B0B0BE76B3983987E34EEC27404E5A188794A504D3E5F8DD6027616"
+    },
+    {
+      "File": "src\\Presentation\\SheetData.cs",
+      "SHA256": "E27028B0FDD977949EF5F1F0981432D630D7C40ECDC3D4B8E8067B679A956D22"
+    },
+    {
+      "File": "src\\Presentation\\SheetFocusButton.cs",
+      "SHA256": "E3B93B87CC543B0DB482CD7F34456CBAFFFA1E1AEEA3A638DCD829C87237B37C"
+    },
+    {
+      "File": "src\\Presentation\\SheetGlyphGraphic.cs",
+      "SHA256": "0B61BB84D0538534F4016ECA606992550E4FC642D446A145E6BF8F86AB997910"
+    },
+    {
+      "File": "src\\Presentation\\SheetStructureData.cs",
+      "SHA256": "D08C7EE2BFC0A6C944FB755072BF841E75FB7690314C4AF68E2A8FEEE20F9E56"
+    },
+    {
+      "File": "src\\Presentation\\SheetView.cs",
+      "SHA256": "4BB0CD2662CE20BCB1F47F56D7467DA45F3B5A92C2C79E0085BF73DF60828C5D"
+    }
+  ],
+  "Installed": {
+    "Version": "0.2.2.5",
+    "Bytes": 142848,
+    "SHA256": "257EBD7A6B913F6CFF0EE1362106A14B43675FF036361DB1E43B05735E174820",
+    "CustomPluginDLLCount": 1,
+    "SupportingFiles": [
+      {
+        "File": "BepInEx\\core\\BepInEx.dll",
+        "SHA256": "D021965B0FE61EE2BA8F68D931DFE4ADF172075038D220950D811B12A036CA0E",
+        "UnchangedSinceSourceWorkStarted": true
+      },
+      {
+        "File": "BepInEx\\core\\BepInEx.Preloader.dll",
+        "SHA256": "9E69AEA4F69F8E8364045C5E8784DD92D79F5065F57F661D65F5ACFE7BFBCE2A",
+        "UnchangedSinceSourceWorkStarted": true
+      },
+      {
+        "File": "BepInEx\\core\\0Harmony.dll",
+        "SHA256": "1A21CC03424FC82C3DD1346905D16494536B9595AE4162228D99FB7C285C1031",
+        "UnchangedSinceSourceWorkStarted": true
+      },
+      {
+        "File": "BepInEx\\core\\Newtonsoft.Json.dll",
+        "SHA256": "4A3D7BBAA2C347C2F98FA06A7324EBF311F696D9965E9BA0A81A56219420CE01",
+        "UnchangedSinceSourceWorkStarted": true
+      },
+      {
+        "File": "BepInEx\\core\\Newtonsoft.Json.LICENSE.md",
+        "SHA256": "B98A397897FF55F76CDDC380041507A95A896B2946E0188703BF0496793D6516",
+        "UnchangedSinceSourceWorkStarted": true
+      },
+      {
+        "File": "mods.yml",
+        "SHA256": "5B81074CDBE64EB45FE83ED4ABC27793A2A266FAF87B5230366F133F50F770C9",
+        "UnchangedSinceSourceWorkStarted": true
+      },
+      {
+        "File": "doorstop_config.ini",
+        "SHA256": "D9DAB1EB8E541971D5F6ED0DF139F30706E77615E06847FFBBB41B174B8D9C0F",
+        "UnchangedSinceSourceWorkStarted": true
+      },
+      {
+        "File": "BepInEx\\config\\alexander.charactersheet.cfg",
+        "SHA256": "D968222623651D5FE7E595BE59C9784E465328BBA2AB81906C1CA6EA1546698D",
+        "UnchangedSinceSourceWorkStarted": true
+      },
+      {
+        "File": "BepInEx\\config\\BepInEx.cfg",
+        "SHA256": "E4C147F11B97D4E384DC9A6D4BF52A7154C311141734F7F1974514093B79E232",
+        "UnchangedSinceSourceWorkStarted": true
+      }
+    ],
+    "EarlierGeneratedConfigHeaderObservation": {
+      "CurrentSHA256": "D968222623651D5FE7E595BE59C9784E465328BBA2AB81906C1CA6EA1546698D",
+      "OnlyVersionHeaderDelta": true,
+      "ToolsWroteConfig": false
+    }
+  },
+  "SeparateCandidates": [
+    {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\next-build\\0.2.6\\artifacts\\review-native-tab\\Alexander.CharacterSheet.dll",
+      "SHA256": "FDB12A2870582490A059A1F5D230E41AACFB495F8AF5D462E9A63A477F803483"
+    },
+    {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\next-build\\0.2.6.1\\artifacts\\review-native-tab\\Alexander.CharacterSheet.dll",
+      "SHA256": "24A5747F9737F6663CDC17951D5903BE10230E214F056698626E47708853B020"
+    }
+  ],
+  "ScreenshotInspection": {
+    "LibraryIds": [
+      "libfile_6fb61df3779c819196c83072cc2010f4",
+      "libfile_f24dc58a6b288191b74aea02abbaf45c"
+    ],
+    "PixelsInspected": false,
+    "ReadResult": "Metadata/descriptions and asset pointers only; no ImageContent pixels",
+    "SupportedMaterializationAttempt": "Current helper fetched from skill source, authorized image prepared and helper invoked once",
+    "Blocker": "AttributeError: module 'os' has no attribute 'setxattr' in required Library metadata application on Windows",
+    "MetadataFreeBypass": false,
+    "DesignBasis": "Explicit written requirements and original project source"
+  },
+  "PublicFormulaReferences": [
+    "https://github.com/Wet-Boys/LookingGlass/blob/4aa6dff73e9df72a50a67b9d9cf449bd6dcaf9cf/LookingGlass/ItemStats/ItemDefinitions.cs",
+    "https://github.com/Wet-Boys/LookingGlass/blob/4aa6dff73e9df72a50a67b9d9cf449bd6dcaf9cf/LookingGlass/Utils.cs"
+  ],
+  "CoverageGaps": [
+    "No reliable single live general CDR adapter; raw row remains Unknown.",
+    "Flat reduction exposes the known Armor Plate component, not every possible modded mitigation source.",
+    "Sprint modifier uses the live multiplier; its base coefficient and full attribution remain unknown.",
+    "Only explicit native passive tokens are assigned On-Hit; unknown/modded passives remain under Other.",
+    "44 item routes are categorical coverage; quantitative current/next-copy coverage remains the inherited 23 registered definitions.",
+    "Full health/damage/regen/armor source attribution remains partial."
+  ],
+  "RuntimeLimits": [
+    "Live native style/draw order, icon appearance, 80% sheet opacity and label clipping still need user inspection.",
+    "Native keyboard/controller focus entry, directional navigation, scroll-to-focus, dynamic shield removal and native focus tooltip cleanup need live checks.",
+    "Both native inventory tooltip paths and pointer transfer must be checked with the new tree open/closed.",
+    "Native item tooltip first-bounds pin remains; insufficient safe room declines an extension.",
+    "Native Tab lifecycle/pause and multiplayer gameplay-click suppression remain runtime verification items."
+  ],
+  "Deployment": "NONE",
+  "GameInteraction": "NONE",
+  "GameOrProfileWrites": "NONE",
+  "ProprietaryImplementationInspection": "NONE",
+  "Publishing": "NONE"
+}

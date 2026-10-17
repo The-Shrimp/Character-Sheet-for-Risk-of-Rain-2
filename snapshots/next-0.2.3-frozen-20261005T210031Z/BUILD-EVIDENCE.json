@@ -1,0 +1,1501 @@
+{
+  "version": "0.2.3",
+  "verified_utc": "2026-10-05T20:53:45.025850+00:00",
+  "candidate": {
+    "path": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\next-build\\0.2.3\\artifacts\\review-native-tab\\Alexander.CharacterSheet.dll",
+    "sha256": "679D985D106FC21C17606DACFF61D69C4C13C0C931BF1FA528A40478EF9376F9",
+    "bytes": 139264
+  },
+  "deployed": false,
+  "runtime_tested": false,
+  "core_tests": {
+    "assertions": 471,
+    "result": "PASS",
+    "scope": "Synthetic pure math/presentation/lifecycle ownership; no Unity runtime"
+  },
+  "registered_item_ids": [
+    "ArmorPlate",
+    "AttackSpeedAndMoveSpeed",
+    "AttackSpeedOnCrit",
+    "Bear",
+    "Behemoth",
+    "BleedOnHit",
+    "BleedOnHitAndExplode",
+    "BleedOnHitVoid",
+    "BoostAllStats",
+    "BossDamageBonus",
+    "ChainLightning",
+    "ChainLightningVoid",
+    "CritGlasses",
+    "Crowbar",
+    "EnergizedOnEquipmentUse",
+    "ExtraStatsOnLevelUp",
+    "FlatHealth",
+    "FragileDamageBonus",
+    "HealOnCrit",
+    "HealWhileSafe",
+    "Hoof",
+    "ImmuneToDebuff",
+    "Infusion",
+    "Knurl",
+    "LunarDagger",
+    "Missile",
+    "MissileVoid",
+    "NearbyDamageBonus",
+    "OutOfCombatArmor",
+    "Pearl",
+    "PersonalShield",
+    "ShinyPearl",
+    "ShockDamageAura",
+    "SpeedBoostPickup",
+    "SpeedOnPickup",
+    "SprintArmor",
+    "Syringe"
+  ],
+  "registered_item_count": 37,
+  "source_inputs": [
+    {
+      "path": "src/Core/Calculation.cs",
+      "sha256": "BDBF641C67972C5E7618A302FB6176BA275297D24841A0942EA0C5268A15E99C",
+      "bytes": 3698
+    },
+    {
+      "path": "src/Core/ComparisonPresentation.cs",
+      "sha256": "6FC5263777F3579EF994C13B3B23FEC048C291F29C5BC9D5F140A76E34A83ACB",
+      "bytes": 8188
+    },
+    {
+      "path": "src/Core/CoreStatContributions.cs",
+      "sha256": "014C6131990D765FEB31A090BB95269AD28BABC2DD4FCEE18E59D47195D72374",
+      "bytes": 17662
+    },
+    {
+      "path": "src/Core/InventoryPresentation.cs",
+      "sha256": "D51AF4E3CEE7F37F59EFA0FE66020DF624BA6E3D3BDD0DCAA5385C5668C0065D",
+      "bytes": 5818
+    },
+    {
+      "path": "src/Core/ItemTooltipPresentation.cs",
+      "sha256": "A022955C408CDE259A1E27F6523A30746BA9B1705912CC6FD7CB181FFA218A6B",
+      "bytes": 8888
+    },
+    {
+      "path": "src/Core/LuckEvidence.cs",
+      "sha256": "03CB9706A0D964606058FD9DF74F3E2FF2BA46D80C6BF2232385324D4BC59B55",
+      "bytes": 1511
+    },
+    {
+      "path": "src/Core/NativeLifecycle.cs",
+      "sha256": "BC5A07821EF07E6B3D3A4F90FE91A2BACA90573AEEEB6DB0824EB1EEDE0FF51A",
+      "bytes": 3430
+    },
+    {
+      "path": "src/Core/NativeTabPolicy.cs",
+      "sha256": "4650E0FD1E7DD0CF37B1E5F188759F3768376BA349CD2CFB43CF38C0904FDDDD",
+      "bytes": 3838
+    },
+    {
+      "path": "src/Core/NumberFormatting.cs",
+      "sha256": "B6800D33710D41CA2D6BA0A58BE7202F7E3CB53B4FE87A9D5FB68FFE167E4915",
+      "bytes": 2691
+    },
+    {
+      "path": "src/Core/OriginalBuffDefinitions.cs",
+      "sha256": "05F5173AFF9D961B9F94A37139921F2C422CBB7DA9C1CB4320600DA73671FB97",
+      "bytes": 5500
+    },
+    {
+      "path": "src/Core/OriginalItemDefinitions.cs",
+      "sha256": "D6A9C999371ECD8A3034CA17D5D4C80C62C9DE7A2FEC1275C11D98B8A25D4967",
+      "bytes": 28410
+    },
+    {
+      "path": "src/Core/PauseLease.cs",
+      "sha256": "07140CA1439307A6F1419DFEBF7122DF7F70ED03767ED25F5522E6E7B387789F",
+      "bytes": 2924
+    },
+    {
+      "path": "src/Core/TooltipPresentation.cs",
+      "sha256": "F1ACE4AEDDBB485AFE67225A48D21C18F133FDC3F0F39810709E61B57A444A98",
+      "bytes": 5301
+    },
+    {
+      "path": "src/Core/VerifiedMath.cs",
+      "sha256": "D926DD322C0ACB9EC56E62C948287302B2217C3163B1208CAE187450756F9136",
+      "bytes": 1359
+    },
+    {
+      "path": "src/Plugin.cs",
+      "sha256": "1B1E7300A40E66A7D574D539A0D950F17A556ACF5E6E881D9FD17D8F7572DF70",
+      "bytes": 9766
+    },
+    {
+      "path": "src/Presentation/NativeHoverPopup.cs",
+      "sha256": "65FDBE0FD47DB1453F2A788C514CCC782A76A00282D4C11AD128AC519AB01AF6",
+      "bytes": 6046
+    },
+    {
+      "path": "src/Presentation/NativeItemHover.cs",
+      "sha256": "EAAF68C6F28CAE7F3652AD3DE68FD36EE46B1A61F5B57F624F172ACBFF78EA31",
+      "bytes": 4286
+    },
+    {
+      "path": "src/Presentation/NativeStripIdentity.cs",
+      "sha256": "C3462E473B5F8A96C606BB3E2C8304A2FD9B94D77505E478D1D7FF8A937B3058",
+      "bytes": 285
+    },
+    {
+      "path": "src/Presentation/NativeUiStyle.cs",
+      "sha256": "4DB203A181076501BB137B5F902B23D76C314801E0DA90613C51C8BA9DCF60C2",
+      "bytes": 2436
+    },
+    {
+      "path": "src/Presentation/SheetData.cs",
+      "sha256": "2BB139836464E393C790BAF8474D1D36D4973E1064BA7C31559F2DF0ED8E6E14",
+      "bytes": 18558
+    },
+    {
+      "path": "src/Presentation/SheetView.cs",
+      "sha256": "84872A67B64653BDA54F7A867ECEF008D1BD973B2B67D75468D425F598D26F9C",
+      "bytes": 13269
+    }
+  ],
+  "test_inputs": [
+    {
+      "path": "tests/CoreTests.cs",
+      "sha256": "D3C8AF48B5B56C90050B62AE354F8A9EDB488A7D2A9B0819421CFCDD850FE048",
+      "bytes": 7747
+    },
+    {
+      "path": "tests/CoverageFormulaTests.cs",
+      "sha256": "46DCCAD96CA760D23475C5C00CD6D0E7CC2F5481D662C7FEEB0BD0597C8C702D",
+      "bytes": 16764
+    },
+    {
+      "path": "tests/ItemTooltipTests.cs",
+      "sha256": "5CEDAF6F1C7F776D384B70092229E1A6738F7733917AEC48BC19ACFB81644AF3",
+      "bytes": 5235
+    },
+    {
+      "path": "tests/LifecycleCoverageTests.cs",
+      "sha256": "87D36F65A806F2988537FF09DDC25EC2E0100C9725AECA41F124491E049AD4BC",
+      "bytes": 9904
+    },
+    {
+      "path": "tests/NativeTabTests.cs",
+      "sha256": "1B49F8CFEF71D318F47CC0B8728BD3246D1DD987A805AA3998833BCDA041FED4",
+      "bytes": 5188
+    },
+    {
+      "path": "tests/PresentationTests.cs",
+      "sha256": "43B7A01246C145E3CC70CA651D2AAC8114F575546D3B6E7874A9202E28C0F882",
+      "bytes": 19845
+    },
+    {
+      "path": "tests/StatContributionTests.cs",
+      "sha256": "B4688045F030AEF2286790C286308F9C7B4CCA76230E898F37CCA73721ACAA2E",
+      "bytes": 11910
+    }
+  ],
+  "build_script": {
+    "path": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\next-build\\0.2.3\\build.ps1",
+    "sha256": "23047DD22EFA2361C7900C1BD1288BF946F5F9E7B8EFF4E9DB05644D5C8AC423",
+    "bytes": 3775
+  },
+  "compiler": {
+    "path": "C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools\\MSBuild\\Current\\Bin\\Roslyn\\csc.exe",
+    "sha256": "AAD477E2D3A94070E6117722F62E23A6D2EE0B09B7B2264776866F818A486C04",
+    "matches_snapshot": true
+  },
+  "external_references": [
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Ak.Wwise.Api.WAAPI.dll",
+      "sha256": "02AE7993105A78CF28EC5411450F99447DEABB0B4B85670DEA31EF85BF7B2D67",
+      "bytes": 45056,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\AK.Wwise.Unity.API.dll",
+      "sha256": "60B86F29256AC1941470E9D1DB24972787947EE925CF3A9A01088265BB747B76",
+      "bytes": 332288,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\AK.Wwise.Unity.API.WwiseTypes.dll",
+      "sha256": "9A12D5104A671479EE94BF4E1CB39EBB3B41C8DFF7FCEF21DA9681FA336DCDEC",
+      "bytes": 11776,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\AK.Wwise.Unity.MonoBehaviour.dll",
+      "sha256": "F0BC2C139E7F80BF8ABE2F8E92008B9D7295453A265E306E776A91AE7D6A631F",
+      "bytes": 66560,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\AK.Wwise.Unity.Timeline.dll",
+      "sha256": "CA9BFB8BA861414ED1E2B3EE7B4549E7173150770FA4BF8E1E82FF6C7EB46B63",
+      "bytes": 17920,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Assembly-CSharp.dll",
+      "sha256": "EBABE1976A381798CF19F1422D570818B3865BBD7DA6F26B385D51F2FEE64D72",
+      "bytes": 135168,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\com.unity.multiplayer-hlapi.Runtime.dll",
+      "sha256": "72784046C391A0E04AB2A4139014A7933F461BF9917FC64319AE793FEBF0E5EF",
+      "bytes": 233984,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Decalicious.dll",
+      "sha256": "F3C32CA714DC5E2E397ECAF0F004FD0F62E64249D491F840292313143BB5F288",
+      "bytes": 16896,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\EOS.dll",
+      "sha256": "A103097BFD6929DA7B6DFB4156D9B96742E8FD86939951BE31B4AA8E59291F67",
+      "bytes": 1159680,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Facepunch.Steamworks.dll",
+      "sha256": "17EBF022D4E7F7546FC0C643FC2D2B8CAB2AB55F0EC5E6849CD0F772C23F5B4E",
+      "bytes": 1046016,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\GenericIK.dll",
+      "sha256": "BF6B6C22A44EEFE849B5E39CF691719BC14052BBA49A17AE3349202DB755896A",
+      "bytes": 17920,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Grumpy.dll",
+      "sha256": "CBA753E14AF1EE057FEFC7843349C7805B36C620D3854D871424A05A5B83CE36",
+      "bytes": 20480,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\HGCSharpUtils.dll",
+      "sha256": "456E357DB8D763366ECA52D7F48CB5845606C5D3954B6F6B9A28DE14B487D769",
+      "bytes": 67584,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\HGSignup.dll",
+      "sha256": "0D610BB50C039589F4C2A2FD6A0EC1902F6D47931835A3C7FE21F748F5C4C307",
+      "bytes": 7680,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\HGUnityUtils.dll",
+      "sha256": "5E58C3B5BDD5B26A68E7785AC9D9BB12AE5AEA39738953430890D37FA3F6D447",
+      "bytes": 41472,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\KinematicCharacterController.dll",
+      "sha256": "F47D49957C5A65156018E5E2460B3752188FDF05DA631C70AC56FAD010BD1C69",
+      "bytes": 42496,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\LegacyResourcesAPI.dll",
+      "sha256": "83B03FC21A9B6709F9F3EDCAFD257968863CCB7D84ED6CEA4D1E973C000053C5",
+      "bytes": 903168,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\ModLoader.dll",
+      "sha256": "36029D5373CF24978CCF9275D098593129155E9B27C92D4607973BC35E52DCDB",
+      "bytes": 23040,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Mono.Security.dll",
+      "sha256": "4D7CE057E3BE46379BFD76046910AEA7D039A293D72E1E6CA95A71FBF03CC334",
+      "bytes": 241152,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\mscorlib.dll",
+      "sha256": "7D0C1FD40E86CCA9DA828BE11897509FC88261EB7C0D661228742280ACECC773",
+      "bytes": 4631552,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\netstandard.dll",
+      "sha256": "6AE62E082DC494A2433984177F60CA4DB5FAE69B1F360A8B33754172B310B8C5",
+      "bytes": 90112,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Rewired_Core.dll",
+      "sha256": "3B74451386D8BB90D1CBA9BF423EFF9E2FE9BA1D7B3ED4CE6E3341B2B932B93A",
+      "bytes": 1923072,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Rewired_CSharp.dll",
+      "sha256": "A73CC9A58323148630225BA77697E2A5709F9DCD6D5AFBB98424AE9650594C78",
+      "bytes": 350208,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Rewired_Windows.dll",
+      "sha256": "E994AFB30CE7FE303925FCDB640132E3E4C19BA2A862B4F1C3E82157F56D31D4",
+      "bytes": 1060352,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Rewired_Windows_Functions.dll",
+      "sha256": "20548F78518486D3B9B3E2BE05A6B9EF42E4494AAAC4D45187D0BC5371A0FFBD",
+      "bytes": 4096,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\RoR2.dll",
+      "sha256": "0497A902A7AAF3C97FA2F1251A5364723B0C1B422839F7002A4B5F9C02563E4F",
+      "bytes": 5888512,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\SimpleJSON.dll",
+      "sha256": "31941F1EB865B907A7E02829D45C44BA5BE990B80683A5C99F73AB06E568BDA0",
+      "bytes": 25088,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\SonyNP.dll",
+      "sha256": "51C721325BFF8B7986606C1AED7676001F65BCB05C7813C3D4F190D807485591",
+      "bytes": 242176,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\SonyPS4CommonDialog.dll",
+      "sha256": "984281583D2D6301A7AC5E529D4E22E5D8B4EBD0C776158DA34CF4D41F3EFC03",
+      "bytes": 18944,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\SonyPS4SaveData.dll",
+      "sha256": "3B7DCE3A364D12722C3F025F8785D729C3E146331801BBB7BE9FB4424AB20677",
+      "bytes": 70144,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\System.ComponentModel.Composition.dll",
+      "sha256": "1DE3E397A7A05FD118B7BC7C980CCB0852DC84D5948A171000DBC2AAA99906A5",
+      "bytes": 257024,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\System.Configuration.dll",
+      "sha256": "155D757CFF34AE97EF0DFE570E14CA20956E490A35DC1DAC2E7668147D26A5AB",
+      "bytes": 124928,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\System.Core.dll",
+      "sha256": "640FBF9FF08CF6B7469FF4190BA7FC4E0EA580645B8588D6F05974C93CD76167",
+      "bytes": 1113088,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\System.Data.DataSetExtensions.dll",
+      "sha256": "7751AFCAAF4683113E136C912343C3F1702B60C738DB2FFF4893A0C45E338DE4",
+      "bytes": 29696,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\System.Data.dll",
+      "sha256": "8EF51F4B7D65BC8E850668C785798EB71F3C1AF12A6C22C4F2825DB732E300A8",
+      "bytes": 2118656,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\System.dll",
+      "sha256": "733AAD2FDFDF641234A13A35B8BFE19D77CA3A115F7944823F9C02807CED34B0",
+      "bytes": 2637824,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\System.Drawing.dll",
+      "sha256": "CCE74285A84930DFC2F24394F13CFEB7E0B2C12E170BDD5639CEE7F538FB7597",
+      "bytes": 489984,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\System.EnterpriseServices.dll",
+      "sha256": "DF00184829E4DD7BCD1A7DB1285FF2F52378D896785CAC49FC209A5CCFE28AE3",
+      "bytes": 44544,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\System.IO.Compression.dll",
+      "sha256": "151A8CAE41152EE3430580A4F84DF610571D16375DEC46719F65559BF380B4C1",
+      "bytes": 114688,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\System.IO.Compression.FileSystem.dll",
+      "sha256": "9426BBBAE415DBB30CBEAA096A6C9F3E6465694736B59F623F07D4867C2F751A",
+      "bytes": 18432,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\System.Net.Http.dll",
+      "sha256": "96779EA792055C9A74A461366DE1873C8D8FBD592FBA7BB676592F6ECE68DF2A",
+      "bytes": 121344,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\System.Numerics.dll",
+      "sha256": "48AB498E7095F52C23B7C8E63DD87762F060858F2DB83EB89A713BBA28AFC940",
+      "bytes": 119296,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\System.Runtime.dll",
+      "sha256": "E0A7334B7BA419AAAB6BD3BB6992D693E689341A9178172C9BF99C2AA6A085BD",
+      "bytes": 12288,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\System.Runtime.Serialization.dll",
+      "sha256": "674DC89D475C7C1498AA6896FE9ED794F08A6DB44C8764DCCCB26463D12A425B",
+      "bytes": 934400,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\System.Security.dll",
+      "sha256": "27002DB76EA659B2F147A1D56759F8D41D9821909E52AB18E38B0E30BABA6D80",
+      "bytes": 320000,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\System.ServiceModel.Internals.dll",
+      "sha256": "C25496226885CE3DC95F1DDB6715B5AEE5D8DC5471490B7E15E32FEE7E591CD2",
+      "bytes": 215040,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\System.Transactions.dll",
+      "sha256": "A2E8992527436B8BE6F7493A5428E8C051244D4C60D468B50AE9E84646A58106",
+      "bytes": 35328,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\System.Xml.dll",
+      "sha256": "823F25157C7BDF35ADD3D00A86684EAC5AB3AB1493A1C95CDBFCA07E86915BF6",
+      "bytes": 3160064,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\System.Xml.Linq.dll",
+      "sha256": "AB8DB969E9543B4EDBE73DD171C41D1A172CAA3F0D470D660F46A2270B77403C",
+      "bytes": 136704,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Tayx.Graphy.dll",
+      "sha256": "DB57DDC25DBC69DC4BEEEF2CA0C18C1F04B8381D51F2DCD83AB20D26C48508CC",
+      "bytes": 48640,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.Addressables.dll",
+      "sha256": "B8B77C82C2AB6A53EF7C22D3475F09B447812E81AA8D479D89A69CDA695A7E0A",
+      "bytes": 84992,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.Burst.dll",
+      "sha256": "2ACE12BEC03E2FA1497D427AF383093222D245A2F890C0DD3C4096E07B034172",
+      "bytes": 310272,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.Burst.Unsafe.dll",
+      "sha256": "9D9C1FF52411DECBEE5D9F0D1CD61EBEAA222077AA77A52101EA3DEBAFAE98E2",
+      "bytes": 5632,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.Collections.dll",
+      "sha256": "6D96D062C6EB0AB6A5F61C734814F2BD5262DDB83150840BDB85A411A7A4FB45",
+      "bytes": 346112,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.Collections.LowLevel.ILSupport.dll",
+      "sha256": "DBD7FB37E353BF6609938BE1565C14C952FF6B6A67D2E6436AE3147A084D40F1",
+      "bytes": 4096,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.Mathematics.dll",
+      "sha256": "95781C9E2C293C141C3C024296ECEA2C0E256C8F8711CB63A245100FEB32C66B",
+      "bytes": 726528,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.MemoryProfiler.dll",
+      "sha256": "B9AECACB2B75819D4489C85440A5D02ACB1FB8AFB72361D8F236CD763FC5138E",
+      "bytes": 5120,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.Postprocessing.Runtime.dll",
+      "sha256": "0786154274269E00450B9B9A2E2309C11E72953A3D2FB2FB562723DF917E7575",
+      "bytes": 154112,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.ProBuilder.Csg.dll",
+      "sha256": "F79F8502B3BC562FE6BF2017AC5045D37C24F0D56C5226886BB90BBDC37872C2",
+      "bytes": 16896,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.ProBuilder.dll",
+      "sha256": "C7CDE1F6926A3D453E0B378E9DD4044DEEADFD143DF3066C4B56F1D35D4A3E7D",
+      "bytes": 387584,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.ProBuilder.KdTree.dll",
+      "sha256": "988F943CC39EF7AB98E7E8390EAC5AAD1564DD6220380186C2F0CDD78A046E8F",
+      "bytes": 18432,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.ProBuilder.Poly2Tri.dll",
+      "sha256": "5048A935465AD5D84407EB501C98350CAF57DFB26AC12217D691DB260B2DD890",
+      "bytes": 34816,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.ProBuilder.Stl.dll",
+      "sha256": "90B6C129D540257A0AF1DDEB43E4FDEDD551F4F8FA239587FE0B511555C7AD4C",
+      "bytes": 12800,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.Recorder.Base.dll",
+      "sha256": "167F959BB521A79AF26E8D656B0A225E74E9965B0ED591CD43A24E8E214B6B8B",
+      "bytes": 4096,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.Recorder.dll",
+      "sha256": "DBBFCE4DDD5B7D269CAA7E0E80624BCF068DEA302829A04C2FC33CB576086D0E",
+      "bytes": 5632,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.RenderPipelines.Core.Runtime.dll",
+      "sha256": "259575420DC83B2EBAD1A6F044DDB2C37BA160B8FC510B9D54AA97609BF1F260",
+      "bytes": 352256,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.RenderPipelines.Core.ShaderLibrary.dll",
+      "sha256": "078AB2131558B5CDC59AF0BFD823677DFD16332ED472DDB1A910EAA9828C8877",
+      "bytes": 3584,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.ResourceManager.dll",
+      "sha256": "283F4830F8A7D189F28E47AC720751D5422394829CC906130BD8B54FAB42822B",
+      "bytes": 94720,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.ScriptableBuildPipeline.dll",
+      "sha256": "E09D51665C354E941AC5FABF504EEAE298E6824AB33DBBD908F993496E208CEF",
+      "bytes": 7680,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.TextMeshPro.dll",
+      "sha256": "31F67A8EA35A21B85560346FC9D73147D1084B957EF78EB416F131B43B720FFA",
+      "bytes": 370688,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Unity.Timeline.dll",
+      "sha256": "5B74FC2B9882B4B7DE47F977C45465450A16E450C82677E173E6A90DF9D7AB99",
+      "bytes": 115712,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.AccessibilityModule.dll",
+      "sha256": "ECD2B069B927E5A50134B5C43F0D9011BB86FEC354A2ABCF0C03BDD67657ED89",
+      "bytes": 23064,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.AIModule.dll",
+      "sha256": "DD97C0C41BAB8714F4A9D4A6C515D0A962ADC2ADB6909944974E8E59FF98DE24",
+      "bytes": 56344,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.AndroidJNIModule.dll",
+      "sha256": "C93125FF1AEDA8594CD8D1DD07C882A7E405AC0B800BCBB82CF3ED99D6E9AC57",
+      "bytes": 79896,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.AnimationModule.dll",
+      "sha256": "1DAEFBC6E413F88A84D999B952C7051078E6837EAC1127ABE53A69B94A20A3D1",
+      "bytes": 161816,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.ARModule.dll",
+      "sha256": "ECF4AB11B641BE240A9BA715E34B3B83F19CA160DD4F78BE6156DB3B49E75350",
+      "bytes": 21016,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.AssetBundleModule.dll",
+      "sha256": "1DDC3C9A8F55135B6A0B3E4D74F3A093A2A383B890320C9DAEEF5FA718156E5F",
+      "bytes": 33304,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.AudioModule.dll",
+      "sha256": "E0C61E510A263CAA0CF834FDED2BC3E2354E0A0578D27759291BB0E5D7FEED9E",
+      "bytes": 70680,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.ClothModule.dll",
+      "sha256": "6AF039ED1B56AFA5E288AD25CFF27A4027B546B75E4D12EFB22CFA966FB9A38E",
+      "bytes": 26136,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.ClusterInputModule.dll",
+      "sha256": "583D79738F00956CEEDD3F54DF654026DC1F5C1947157BA6473ECC403A007DA5",
+      "bytes": 21528,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.ClusterRendererModule.dll",
+      "sha256": "8C80257C7797D3D3086C0FD2C0DBEF268FB567180BDF51DB7BBC97FC16D70C67",
+      "bytes": 22040,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.CoreModule.dll",
+      "sha256": "793C9454C9974CD7E969EE24C6557072EE388E65544415D6A7C0CC3C2C42B49A",
+      "bytes": 1275928,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.CrashReportingModule.dll",
+      "sha256": "799B7487EE73FBF80CBDA3DD21DC14982619E26CEF09CF50E2B1EB31CD6D3534",
+      "bytes": 20504,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.DirectorModule.dll",
+      "sha256": "8CE2ABF903AE93BE073518B348BAC351BF87E9A1F25205D73E2D9CBB766FCFC6",
+      "bytes": 24600,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.dll",
+      "sha256": "64EFE1A1FA6AAF3E7805539F60E1A900B3791D5D7D651E0BA4B39D06A865A21B",
+      "bytes": 112664,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.DSPGraphModule.dll",
+      "sha256": "B64F1DA15D168A3A6F1279DF8056CA72ECEDDBA3B29BEA8EB9F6ADF61B54B73E",
+      "bytes": 29208,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.GameCenterModule.dll",
+      "sha256": "D61610031476D3B0C155C809A4E4CBF38985E33D3B7045C380DE24B9A1273203",
+      "bytes": 39960,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.GIModule.dll",
+      "sha256": "3CD8B3F32E3491130274015B87DBB08E549ED3290E283FFEC64502E304EF65B7",
+      "bytes": 19992,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.GridModule.dll",
+      "sha256": "CA291531E428992C296F0844753CB9962E6B5894EE5B2F4B6219AA2B83C1E1B6",
+      "bytes": 24600,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.HotReloadModule.dll",
+      "sha256": "898CD4D965B6DE1C23E4DB2DAC529A0F2C9B099B785BBD9DCBAAD4813B896D32",
+      "bytes": 19992,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.ImageConversionModule.dll",
+      "sha256": "34C74944F90A2924E840AA54E2F5B2C3A93E322F1121E2A4059E666304C3930B",
+      "bytes": 24088,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.IMGUIModule.dll",
+      "sha256": "75CD1365C651C48AB3341E0C73F69EC9FD7EF249073BF1B8DD2B5F24F3745211",
+      "bytes": 173080,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.InputLegacyModule.dll",
+      "sha256": "E944BA81EA47CAAD0FF1247EC9CDFF75552A5511B0A1ABFCECEE832E0DB15D55",
+      "bytes": 37400,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.InputModule.dll",
+      "sha256": "F22D9891C40A41432B6AE0905CE33E64E8181E07BA57D46670DAA302F81070E7",
+      "bytes": 23064,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.JSONSerializeModule.dll",
+      "sha256": "F820A459C633FC5AEB2EFFB403D0A133EAB4B20F27687AFF242EE732FAD255EC",
+      "bytes": 22040,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.LocalizationModule.dll",
+      "sha256": "3080F3F2EF19C6689B2274D1B54461376DE60DAA3AF55F75370738593468CA1B",
+      "bytes": 21016,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.NVIDIAModule.dll",
+      "sha256": "7D13E502C178774C532FCD3DADB7484CDDC71841F33CB945C8B20334F13212DB",
+      "bytes": 33816,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.ParticleSystemModule.dll",
+      "sha256": "E3948BA8BF701D785705BDC3DAED3031623289D4EA5845D953012888F30ED6E8",
+      "bytes": 154648,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.PerformanceReportingModule.dll",
+      "sha256": "D95BA53F6C9A5087328D671FD2D8A5572B3D9941D5941A68D9D387FF46E4EFEB",
+      "bytes": 20504,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.Physics2DModule.dll",
+      "sha256": "ACDEDBE84A7735BCE6ABAEE8500EF0DF5E25AF0ECC80152DE20382B81AE3E5F3",
+      "bytes": 134168,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.PhysicsModule.dll",
+      "sha256": "4CBD58DDFBFFA0DBE6E0A5EE744328A7AE39847A7E149FF1A929CA02375FE731",
+      "bytes": 114712,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.ProfilerModule.dll",
+      "sha256": "D358500966F1D0896A6BE2FF4C1ABF9CB537175A170B513D2CB1E6EF51341F01",
+      "bytes": 19992,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll",
+      "sha256": "785900A730D8121279C7D40C84BF633B852BE1749E689FBA2AB79755EBAE7FEA",
+      "bytes": 19992,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.ScreenCaptureModule.dll",
+      "sha256": "9F9B3F9A6D5735F8ACE5D67E88E52E1FC298352EA5A1724932FCA809BD57420E",
+      "bytes": 21016,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.SharedInternalsModule.dll",
+      "sha256": "08D8D6B358812FD3793373D1B4790033660293AE5FF999ED81B4B8EC9509CBF0",
+      "bytes": 32280,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.SpatialTracking.dll",
+      "sha256": "E5EAFE700EF7CA04FCDCEFE523FCE8B9CA3EB703FDA9CF8857154B47E596637E",
+      "bytes": 10240,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.SpriteMaskModule.dll",
+      "sha256": "5022D6BA4617B00B54B378C86BD4C13D1AE95FCC16EB52949A61463EFEDD2F80",
+      "bytes": 21016,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.SpriteShapeModule.dll",
+      "sha256": "8423092FD0BBA0B226041F998FB6AC25F3B17EEFAAEE323D88AABCEF82AA0277",
+      "bytes": 25112,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.StreamingModule.dll",
+      "sha256": "67BF9FBE2AEFB39F99F24993269A75ED67CC14330F83C47C732C6A8B71C5D34D",
+      "bytes": 20504,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.SubstanceModule.dll",
+      "sha256": "D76211E60055ACB8FEB2BFA859F5BB62D1742FB89375097774A6B289DBC48CCC",
+      "bytes": 24600,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.SubsystemsModule.dll",
+      "sha256": "BA2F7ACCAB1F3BB9ACF7DFFCC22917B7D10EC2B53A13675FD30FBBC0290EDE12",
+      "bytes": 34840,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.TerrainModule.dll",
+      "sha256": "CCB6BCE52B0FC7041217E4AF147245D1D5EF32B1216401A489BE31680428D973",
+      "bytes": 98840,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.TerrainPhysicsModule.dll",
+      "sha256": "0C0D9AD4AD79F1C1D83C91FE161B56C28090AC37FBD8FF440060733AF51347F2",
+      "bytes": 20504,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.TextCoreFontEngineModule.dll",
+      "sha256": "D50F8E1296F169CCABB7C5685CD346A6C2DB2DC25D872AA79772EA0B724213BC",
+      "bytes": 72728,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.TextCoreTextEngineModule.dll",
+      "sha256": "A96ABE2ADA277420511533782A5C69B2FD841D1D348E86613EC7C71456018BC9",
+      "bytes": 197656,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.TextRenderingModule.dll",
+      "sha256": "B3525848520E4C9C6EE5BD9391168A950BFA6003AA9A0BA02610AE21C1131993",
+      "bytes": 38936,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.TilemapModule.dll",
+      "sha256": "B3D5444FC62110C533131A529CBCC1295540664B81F4444F4AFE4BFAB73CB0F4",
+      "bytes": 43032,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.TLSModule.dll",
+      "sha256": "EEC053E13CE5125FCF0C830CB4197FDA2FF0961F0B1F592BE8E4EB95B813ED83",
+      "bytes": 26648,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.UI.dll",
+      "sha256": "D35D46D17A28C6A4033388B1B546A2D2C2C93018F475C6802733CE26877379AB",
+      "bytes": 247808,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.UIElementsModule.dll",
+      "sha256": "6A36F920B05D4E64E8FEC3655B543227AB60750719353BFDAF19E75F4A3C32C1",
+      "bytes": 1235480,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.UIElementsNativeModule.dll",
+      "sha256": "58EC4B75B7448E47311545EC88AA7BE9CF146EF3D737B02C5AD46F84E6BEB362",
+      "bytes": 58904,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.UIModule.dll",
+      "sha256": "D49B38361C7B24F13CB8101CD7DCEF077321582652E50F6BAFEBD9A119666292",
+      "bytes": 35864,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.UmbraModule.dll",
+      "sha256": "279FF9F9C3C6D545A79C77B2F87B8FA9CD1F5585B1CCC9763E5B799B3AE7C99A",
+      "bytes": 19992,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.UNETModule.dll",
+      "sha256": "91BD89C9DA7B6CA323F252E59FA53DAAF3810AB297529262C707F457D2FF12FF",
+      "bytes": 89624,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.UnityAnalyticsCommonModule.dll",
+      "sha256": "00B983675B93C20628287F80611139DF2FA85B1E0AC1E213F4DE60E2D001479B",
+      "bytes": 20504,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.UnityAnalyticsModule.dll",
+      "sha256": "3DACB530A17E058DCA79ACA1B8CFCD6057AD024C4DBA6F6BD6118672DBE4A2D0",
+      "bytes": 44056,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.UnityConnectModule.dll",
+      "sha256": "E3D76CD38B5520C80402B64366B0BC86E27D1D1D8A862BB308B860ADE28E9B98",
+      "bytes": 21528,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.UnityCurlModule.dll",
+      "sha256": "D98650A3CC7B945DD3994530A099B9C3977FB1F778448806937F737E95458037",
+      "bytes": 21528,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.UnityTestProtocolModule.dll",
+      "sha256": "31A12FFE98969D783BD86429AC38A6867C5D81DF32BCEF39E7446E8469477C7E",
+      "bytes": 19992,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.UnityWebRequestAssetBundleModule.dll",
+      "sha256": "5CFCA77F9F10EE8B9D1468E5942781CCCD0B55FF9053A416F507859964C054BB",
+      "bytes": 23064,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.UnityWebRequestAudioModule.dll",
+      "sha256": "769FAFC82259D730EB2209591BF40BC9D0675EAEB096D8D41DC1860937417A15",
+      "bytes": 22552,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.UnityWebRequestModule.dll",
+      "sha256": "99C7488F0922696E0C41D4C450102EC721E5688F9200FCBAA2981BB8F052197C",
+      "bytes": 56856,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.UnityWebRequestTextureModule.dll",
+      "sha256": "235ED4AB5B44FF0C361249B5F326A0444CDEA243C3225724C7AC4149E16120A0",
+      "bytes": 22040,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.UnityWebRequestWWWModule.dll",
+      "sha256": "7B8FEA83ADE90CCAC513E1C14A6C8BE87D71B75D7F3968BCCDB2FB4424A56284",
+      "bytes": 31256,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.VehiclesModule.dll",
+      "sha256": "853C7AAD0E909E78820B8D74CA86EF73EB4C0CACC78A540156E72E179142ED76",
+      "bytes": 23576,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.VFXModule.dll",
+      "sha256": "D3DD8AE6633D4B17BB2B1D05ABE03E554C8C572EE2BC6D7309635F339716B4CB",
+      "bytes": 54808,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.VideoModule.dll",
+      "sha256": "22B2303FF18411DE6889354123ED48EAA35AA76F157DC2C0EE73CFCDACA395FA",
+      "bytes": 39960,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.VirtualTexturingModule.dll",
+      "sha256": "DD87993FC3606E780AD0ECE14B67ECB03368EA1335DA4B336ABC7E2979A08918",
+      "bytes": 34840,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.VRModule.dll",
+      "sha256": "4B89798C0F056E881FA9CBC9EB34D3EF1133DE675E6702BDAF335C7794D542AC",
+      "bytes": 26136,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.WindModule.dll",
+      "sha256": "0B301EB644175CC9D546789883046970283A70B71182DE359B2E4A49CE031A0A",
+      "bytes": 20504,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.XR.LegacyInputHelpers.dll",
+      "sha256": "F0F8C5520C26B473CEFCC0A4F50D5308D94C9D5DE362E494955DADA0EDF30E4D",
+      "bytes": 21504,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\UnityEngine.XRModule.dll",
+      "sha256": "9ADAAAF82A37A6C0F28AC4230B80D7E9E5478DFBA27DFD1C899E7CDA1BEAB3C6",
+      "bytes": 70168,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\Risk of Rain 2_Data\\Managed\\Zio.dll",
+      "sha256": "EBF493629859FD2D040B857744A9DE713A52CE8A22CE9A094B6929111DA70A33",
+      "bytes": 98816,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\.references\\BepInExPack-5.4.2122\\BepInEx.dll",
+      "sha256": "D021965B0FE61EE2BA8F68D931DFE4ADF172075038D220950D811B12A036CA0E",
+      "bytes": 135680,
+      "copied": false,
+      "matches_snapshot": true
+    },
+    {
+      "path": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\.references\\BepInExPack-5.4.2122\\0Harmony.dll",
+      "sha256": "1A21CC03424FC82C3DD1346905D16494536B9595AE4162228D99FB7C285C1031",
+      "bytes": 204800,
+      "copied": false,
+      "matches_snapshot": true
+    }
+  ],
+  "deterministic_identical_input_check": {
+    "TimestampUTC": "2026-10-05T20:52:16.4743581Z",
+    "FirstBuildSHA256": "679D985D106FC21C17606DACFF61D69C4C13C0C931BF1FA528A40478EF9376F9",
+    "SecondBuildSHA256": "679D985D106FC21C17606DACFF61D69C4C13C0C931BF1FA528A40478EF9376F9",
+    "Identical": true,
+    "Scope": "Same compiler/source/reference bytes, paths and environment; not a cross-machine guarantee"
+  },
+  "installed_0_2_2": {
+    "path": "C:\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\plugins\\Alexander-CharacterSheet\\Alexander.CharacterSheet.dll",
+    "sha256": "FE8B520259EE94D91589961B39D1644798E4A141182EE53D86E4EF5460E5D0CC",
+    "bytes": 109056
+  },
+  "root_review_0_2_2": {
+    "path": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\artifacts\\review-coverage\\Alexander.CharacterSheet.dll",
+    "sha256": "FE8B520259EE94D91589961B39D1644798E4A141182EE53D86E4EF5460E5D0CC",
+    "bytes": 109056
+  },
+  "root_source_and_frozen_snapshot_checks": [
+    {
+      "path": ".gitattributes",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": ".gitignore",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "CharacterSheet.csproj",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "LICENSE",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "README.md",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "build.ps1",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "docs/ManualSmokeChecklist.md",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "docs/Readiness-0.2.2.md",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "docs/SourceCoverage.md",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "docs/TestCandidate-0.2.2.md",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Core/Calculation.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Core/ComparisonPresentation.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Core/InventoryPresentation.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Core/ItemTooltipPresentation.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Core/LuckEvidence.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Core/NativeLifecycle.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Core/NativeTabPolicy.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Core/NumberFormatting.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Core/OriginalBuffDefinitions.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Core/OriginalItemDefinitions.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Core/PauseLease.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Core/TooltipPresentation.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Core/VerifiedMath.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Plugin.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Presentation/NativeHoverPopup.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Presentation/NativeItemHover.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Presentation/NativeStripIdentity.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Presentation/NativeUiStyle.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Presentation/SheetData.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "src/Presentation/SheetView.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "tests/CoreTests.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "tests/CoverageFormulaTests.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "tests/ItemTooltipTests.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "tests/LifecycleCoverageTests.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "tests/NativeTabTests.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    },
+    {
+      "path": "tests/PresentationTests.cs",
+      "root_unchanged": true,
+      "snapshot_matches": true
+    }
+  ],
+  "protected_config_loader_bootstrap_license_checks": [
+    {
+      "Path": "C:\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\config\\alexander.charactersheet.cfg",
+      "SHA256": "981CD6C830986B2F662E2836FB4EA6764534D1DCC507FA7A4CDB7922C2FEC99F",
+      "unchanged": true
+    },
+    {
+      "Path": "C:\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\core\\BepInEx.dll",
+      "SHA256": "D021965B0FE61EE2BA8F68D931DFE4ADF172075038D220950D811B12A036CA0E",
+      "unchanged": true
+    },
+    {
+      "Path": "C:\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\core\\0Harmony.dll",
+      "SHA256": "1A21CC03424FC82C3DD1346905D16494536B9595AE4162228D99FB7C285C1031",
+      "unchanged": true
+    },
+    {
+      "Path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\.doorstop_version",
+      "SHA256": "B4116D6E880009DC1440DDAB7EC054BCEA529AEA394EC5BAB7943B415A359281",
+      "unchanged": true
+    },
+    {
+      "Path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\doorstop_config.ini",
+      "SHA256": "D9DAB1EB8E541971D5F6ED0DF139F30706E77615E06847FFBBB41B174B8D9C0F",
+      "unchanged": true
+    },
+    {
+      "Path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Risk of Rain 2\\winhttp.dll",
+      "SHA256": "7E90398DD7154B41F76E0524AEDB795A7BCBE2ED9A14E4CEEE214235AA04E442",
+      "unchanged": true
+    },
+    {
+      "Path": "C:\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\plugins\\Alexander-CharacterSheet\\LICENSE",
+      "SHA256": "72A75B179C9AA62A6D9265B0AC9302AC6F7E5FE8E4AD46711AD34C90EEEBA2A2",
+      "unchanged": true
+    }
+  ],
+  "native_architecture_checks": [
+    {
+      "path": "src/Presentation/NativeHoverPopup.cs",
+      "unchanged": true
+    },
+    {
+      "path": "src/Presentation/NativeItemHover.cs",
+      "unchanged": true
+    },
+    {
+      "path": "src/Presentation/NativeStripIdentity.cs",
+      "unchanged": true
+    },
+    {
+      "path": "src/Presentation/NativeUiStyle.cs",
+      "unchanged": true
+    },
+    {
+      "path": "src/Presentation/SheetView.cs",
+      "unchanged": true
+    }
+  ],
+  "plugin_changed_only_version_strings": true,
+  "snapshot_archive": {
+    "path": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\snapshots\\installed-0.2.2-20261005T202447Z.source.zip",
+    "sha256": "AB81A19EB4C0BC348443DD44F8C79A304E27800E718C29A545B8304F48B4B278",
+    "bytes": 89740,
+    "entries": 37,
+    "binary_entries": 0
+  },
+  "vendor_or_game_binaries_copied": false,
+  "remaining_unknowns": [
+    "Knurl/Slug raw regen level/difficulty placement",
+    "Transcendence final health/shield conversion and capacity",
+    "Other item/buff/mod stat hooks, floors and cached payouts",
+    "Native input/pause/hover/Unity lifecycle; no live test",
+    "All remaining buff timers; no exact multiplayer countdown"
+  ]
+}

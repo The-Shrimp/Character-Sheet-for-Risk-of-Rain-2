@@ -1,0 +1,1 @@
+Separate 0.2.5 glossary pass. Installed 0.2.2 and all reported 0.2.3/0.2.4 builds stay frozen. Only original buff definitions, uncertainty/metadata presentation and read-only public data adapter changes are in scope. No native UI architecture, runtime, deployment, game/profile/bootstrap or power/security changes. External game/loader references remain external.

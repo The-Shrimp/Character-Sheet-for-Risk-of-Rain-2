@@ -1,0 +1,366 @@
+--- 0.2.2.2/src/Core/Calculation.cs
++++ 0.2.2.3/src/Core/Calculation.cs
+@@ -48,11 +48,15 @@
+         {
+             Func<double,string> format=value=>detailed?NumberFormatting.Exact(value):NumberFormatting.Display(value);
+             string text=string.Join("\n",terms.Select(t=>
+-                t.Source+": "+format(t.After)+(detailed&&t.Stage!=CalculationStage.Baseline
++                t.Source+": "+(t.Stage==CalculationStage.Baseline?format(t.After):
++                    t.Stage==CalculationStage.Flat||t.Stage==CalculationStage.LateFlat||t.Stage==CalculationStage.Final?
++                    (t.Operand>0?"+":"")+format(t.Operand):
++                    t.Stage==CalculationStage.AdditiveMultiplier?(t.Operand>0?"+":"")+format(t.Operand*100)+"%":
++                    "x"+format(t.Operand))+(detailed&&t.Stage!=CalculationStage.Baseline
+                     ? " ("+format(t.Before)+" -> "+format(t.After)+"; "+t.Stage+")" : "")));
+             var attribution=AttributionPresentation.Create(live,Predicted,complete);
+             if(attribution.Quality!=AttributionQuality.Complete)
+-                text+="\nIncomplete attribution: unmodeled effects/conversions/hooks.\nLive \u2212 modeled: "+(live>Predicted?"+":"")+format(live-Predicted);
++                text+="\nPartial attribution; effects or conversions may be unmodeled.\nLive \u2212 modeled: "+(live>Predicted?"+":"")+format(live-Predicted);
+             return text+"\nAuthoritative live total: "+format(live);
+         }
+     }
+--- 0.2.2.2/src/Core/ItemTooltipPresentation.cs
++++ 0.2.2.3/src/Core/ItemTooltipPresentation.cs
+@@ -1,4 +1,5 @@
+ using System;
++using System.Linq;
+ namespace Alexander.CharacterSheet.Core
+ {
+     // Original presentation template for a caller-supplied additive scaling example.
+@@ -18,20 +19,29 @@
+     public sealed class ItemTooltipView
+     {
+         public readonly string Title, Headline, Equation, CountLabel, NextLabel, NextEquation, FullMath, LuckMark, LuckText;
++        public readonly string CompactValue,StackHint,SemanticStyle;
+         public readonly double? CurrentValue, NextValue;
+         public readonly long? AdditionalCopies;
+         public readonly TooltipContent Content;
+         public readonly ComparisonView Comparison;
+         internal ItemTooltipView(string title,string headline,string equation,string countLabel,string nextLabel,string nextEquation,
+-            string fullMath,string luckMark,string luckText,double? current,double? next,long? additional,TooltipContent content,ComparisonView comparison)
++            string fullMath,string luckMark,string luckText,double? current,double? next,long? additional,TooltipContent content,ComparisonView comparison,string compactValue,string stackHint,string semanticStyle)
+         {Title=title;Headline=headline;Equation=equation;CountLabel=countLabel;NextLabel=nextLabel;NextEquation=nextEquation;
+-         FullMath=fullMath;LuckMark=luckMark;LuckText=luckText;CurrentValue=current;NextValue=next;AdditionalCopies=additional;Content=content;Comparison=comparison;}
++         FullMath=fullMath;LuckMark=luckMark;LuckText=luckText;CurrentValue=current;NextValue=next;AdditionalCopies=additional;Content=content;Comparison=comparison;CompactValue=compactValue;StackHint=stackHint;SemanticStyle=semanticStyle;}
+     }
+     public static class ItemTooltipPresentation
+     {
+         static bool Known(double? number) => number.HasValue&&NumberFormatting.IsFinite(number.Value);
+         static string Noun(long count,ItemScalingInput input) => TooltipText.SingleLine(count==1 ? input.CopySingular : input.CopyPlural);
+         static string Value(double value,ItemScalingInput input) => NumberFormatting.Exact(value)+ComparisonPresentation.UnitSuffix(input.Unit,false);
++        static string Semantic(ItemScalingInput input)
++        {
++            string label=(input.Verb+" "+input.ValueLabel).ToLowerInvariant();
++            if(input.Unit==ValueUnit.Health||new[]{"health","shield","barrier","block","reduction","prevention"}.Any(s=>label.Contains(s)))return "cIsHealing";
++            if(input.Unit==ValueUnit.Seconds||input.Unit==ValueUnit.Meters)return "cIsUtility";
++            if(new[]{"damage","crit","attack-speed","bleed","collapse","strikes","chain targets"}.Any(s=>label.Contains(s)))return "cIsDamage";
++            return "cIsUtility";
++        }
+         public static ItemTooltipView Create(ItemScalingInput input)
+         {
+             if(input==null)throw new ArgumentNullException(nameof(input));
+@@ -103,7 +113,13 @@
+                 new[]{new TooltipSection("Scaling",equation),new TooltipSection("Per-copy math",fullMath),
+                     new TooltipSection("Conditions",input.Conditions),new TooltipSection("Luck",luckText)},
+                 detailedCurrent:comparison.CurrentExact,detailedNext:comparison.NextExact,detailedDifference:comparison.DifferenceExact);
+-            return new ItemTooltipView(title,headline,equation,countLabel,nextLabel,nextEquation,fullMath,luckMark,luckText,current,next,additional,content,comparison);
++            string compactValue=current.HasValue?TooltipText.SingleLine(input.Verb)+" "+NumberFormatting.Display(current)+suffix+
++                (TooltipText.SingleLine(input.ValueLabel).Length>0?" "+TooltipText.SingleLine(input.ValueLabel):""):"Current component unavailable";
++            string stackHint=knownFormula&&!custom&&input.PerAdditionalCopy.Value!=0?
++                "("+Value(input.BaseValue.Value,input)+(input.PerAdditionalCopy.Value>=0?" + ":" - ")+
++                Value(Math.Abs(input.PerAdditionalCopy.Value),input)+"/extra "+TooltipText.SingleLine(input.CopySingular)+")":"";
++            return new ItemTooltipView(title,headline,equation,countLabel,nextLabel,nextEquation,fullMath,luckMark,luckText,current,next,additional,content,comparison,
++                compactValue,stackHint,Semantic(input));
+         }
+     }
+ }
+--- 0.2.2.2/src/Plugin.cs
++++ 0.2.2.3/src/Plugin.cs
+@@ -10,7 +10,7 @@
+ using UnityEngine.SceneManagement;
+ namespace Alexander.CharacterSheet
+ {
+-    [BepInPlugin(Id,"Alexander's Character Sheet","0.2.2.2")]
++    [BepInPlugin(Id,"Alexander's Character Sheet","0.2.2.3")]
+     public sealed class Plugin:BaseUnityPlugin
+     {
+         public const string Id="alexander.charactersheet";
+@@ -45,7 +45,7 @@
+             {
+                 harmony=new Harmony(Id);harmony.PatchAll(typeof(Plugin).Assembly);
+                 SceneManager.activeSceneChanged+=SceneChanged;subscribed=true;initialized=true;
+-                Logger.LogInfo("Native Tab-extension source 0.2.2.2; HUD branch placement and held-Info re-entry guards; in-game fix verification pending.");
++                Logger.LogInfo("Native Tab-extension source 0.2.2.3; HUD branch placement and held-Info re-entry guards; in-game fix verification pending.");
+             }
+             catch(Exception error)
+             {
+--- 0.2.2.2/src/Presentation/NativeHoverPopup.cs
++++ 0.2.2.3/src/Presentation/NativeHoverPopup.cs
+@@ -9,69 +9,83 @@
+     internal sealed class NativeHoverPopup:IDisposable
+     {
+         readonly Canvas canvas;
+-        readonly RectTransform canvasRect,root,content,luckDetail;
+-        readonly TextMeshProUGUI title,body,luck,luckText;
++        readonly RectTransform canvasRect,root,content,luckDetail,heading,viewport,footer;
++        readonly TextMeshProUGUI title,body,luck,luckText,note;
+         readonly ScrollRect scroll;
++        readonly Image panelImage,headerImage;
++        readonly NativeTooltipStyle nativeStyle=new NativeTooltipStyle();
++        readonly float scale;
+         SheetRow row;
+         bool lastFull;
+         internal bool PointerInside;
+-        internal NativeHoverPopup(RectTransform ownedHost,Canvas eventCanvas,NativeUiStyle style,float scale)
++        internal NativeHoverPopup(RectTransform ownedHost,Canvas eventCanvas,NativeUiStyle style,float presentationScale)
+         {
+-            canvas=eventCanvas;canvasRect=ownedHost;
++            canvas=eventCanvas;canvasRect=ownedHost;scale=presentationScale;
+             root=NativeUiStyle.Rect(canvasRect,"AlexanderItemHover",Vector2.zero,Vector2.zero);root.pivot=new Vector2(0,1);
+-            root.gameObject.AddComponent<LayoutElement>().ignoreLayout=true;style.Background(root,true);
++            root.gameObject.AddComponent<LayoutElement>().ignoreLayout=true;panelImage=style.Background(root,true);
+             root.gameObject.AddComponent<PopupPresence>().Popup=this;
+-            var heading=NativeUiStyle.Rect(root,"Header",new Vector2(0,1),Vector2.one);
+-            heading.pivot=new Vector2(0,1);heading.sizeDelta=new Vector2(0,42);heading.anchoredPosition=Vector2.zero;
+-            title=style.Text(heading,"",20*scale);title.rectTransform.offsetMin=new Vector2(14,4);title.rectTransform.offsetMax=new Vector2(-14,-4);
+-            var viewport=NativeUiStyle.Rect(root,"BodyViewport",Vector2.zero,Vector2.one);
+-            viewport.offsetMin=new Vector2(14,62);viewport.offsetMax=new Vector2(-14,-48);
++            heading=NativeUiStyle.Rect(root,"Header",new Vector2(0,1),Vector2.one);heading.pivot=new Vector2(0,1);
++            headerImage=heading.gameObject.AddComponent<Image>();headerImage.color=Color.clear;headerImage.raycastTarget=false;
++            title=style.Text(heading,"",(style.BodyFontSize+2)*scale);
++            title.rectTransform.offsetMin=new Vector2(12*scale,4*scale);title.rectTransform.offsetMax=new Vector2(-12*scale,-4*scale);
++            title.enableWordWrapping=false;title.overflowMode=TextOverflowModes.Ellipsis;
++            viewport=NativeUiStyle.Rect(root,"BodyViewport",Vector2.zero,Vector2.one);
+             viewport.gameObject.AddComponent<Image>().color=Color.clear;viewport.gameObject.AddComponent<RectMask2D>();
+             content=NativeUiStyle.Rect(viewport,"Body",new Vector2(0,1),Vector2.one);content.pivot=new Vector2(.5f,1);
+-            body=style.Text(content,"",15*scale);body.alignment=TextAlignmentOptions.TopLeft;
++            body=style.Text(content,"",style.BodyFontSize*scale);body.alignment=TextAlignmentOptions.TopLeft;
+             scroll=viewport.gameObject.AddComponent<ScrollRect>();scroll.viewport=viewport;scroll.content=content;
+             scroll.horizontal=false;scroll.movementType=ScrollRect.MovementType.Clamped;scroll.scrollSensitivity=24;
+-            var footer=NativeUiStyle.Rect(root,"Footer",Vector2.zero,new Vector2(1,0));
+-            footer.pivot=Vector2.zero;footer.sizeDelta=new Vector2(0,50);
+-            var note=style.Text(footer,"Shift: full math\nScroll for longer details",11*scale);
+-            note.rectTransform.anchorMax=new Vector2(.52f,1);note.rectTransform.offsetMin=new Vector2(14,7);
+-            var badge=NativeUiStyle.Rect(footer,"Luck",new Vector2(.53f,.12f),new Vector2(.97f,.92f));
+-            style.Background(badge,true);badge.gameObject.AddComponent<LuckPresence>().Popup=this;
++            footer=NativeUiStyle.Rect(root,"Footer",Vector2.zero,new Vector2(1,0));footer.pivot=Vector2.zero;
++            note=style.Text(footer,"Shift: details",Mathf.Max(12,style.BodyFontSize-3)*scale);
++            note.rectTransform.anchorMax=new Vector2(.6f,1);note.rectTransform.offsetMin=new Vector2(12*scale,0);note.alpha=.7f;
++            var badge=NativeUiStyle.Rect(footer,"Luck",new Vector2(.64f,.08f),new Vector2(.97f,.92f));
++            badge.gameObject.AddComponent<Image>().color=Color.clear;badge.gameObject.AddComponent<LuckPresence>().Popup=this;
+             var index=ItemCatalog.FindItemIndex("Clover");var def=index==ItemIndex.None?null:ItemCatalog.GetItemDef(index);
+-            var iconRect=NativeUiStyle.Rect(badge,"Clover",new Vector2(.02f,.1f),new Vector2(.21f,.9f));
++            var iconRect=NativeUiStyle.Rect(badge,"Clover",new Vector2(0,.08f),new Vector2(.24f,.92f));
+             if(def){var image=iconRect.gameObject.AddComponent<Image>();image.sprite=def.pickupIconSprite;image.preserveAspect=true;image.raycastTarget=false;}
+-            luck=style.Text(badge,"? Unverified",11*scale);luck.rectTransform.anchorMin=new Vector2(.23f,0);
+-            luckDetail=NativeUiStyle.Rect(root,"LuckDetail",new Vector2(1,0),new Vector2(1,0));
+-            luckDetail.pivot=Vector2.one;luckDetail.sizeDelta=new Vector2(290,220);luckDetail.anchoredPosition=new Vector2(-12,60);
+-            style.Background(luckDetail,false);luckDetail.gameObject.AddComponent<RectMask2D>();luckText=style.Text(luckDetail,"",12*scale);luckText.overflowMode=TextOverflowModes.Ellipsis;luckText.alignment=TextAlignmentOptions.TopLeft;
+-            luckText.rectTransform.offsetMin=new Vector2(12,12);luckText.rectTransform.offsetMax=new Vector2(-12,-12);
++            luck=style.Text(badge,"?",Mathf.Max(12,style.BodyFontSize-3)*scale);luck.rectTransform.anchorMin=new Vector2(.28f,0);
++            luckDetail=NativeUiStyle.Rect(root,"LuckDetail",new Vector2(1,0),new Vector2(1,0));luckDetail.pivot=Vector2.one;
++            style.Background(luckDetail,false);luckDetail.gameObject.AddComponent<RectMask2D>();
++            luckText=style.Text(luckDetail,"",style.BodyFontSize*scale);luckText.overflowMode=TextOverflowModes.Ellipsis;luckText.alignment=TextAlignmentOptions.TopLeft;
++            luckText.rectTransform.offsetMin=new Vector2(12*scale,12*scale);luckText.rectTransform.offsetMax=new Vector2(-12*scale,-12*scale);
+             luckDetail.gameObject.SetActive(false);root.gameObject.SetActive(false);
+         }
+         internal void Set(SheetRow source,bool full,bool followPointer)
+         {
+             if(source==null){Hide();return;}
+             bool changed=row==null||row.Id!=source.Id||lastFull!=full;
+-            row=source;lastFull=full;title.text=TooltipText.SingleLine(source.Title);
+-            string text=TooltipText.Clean(full?source.FullTooltip??source.ShortTooltip:source.ShortTooltip);
+-            bool textChanged=changed||body.text!=text;body.text=text;
+-            luck.text=source.LuckMark+" "+source.LuckLabel;luckText.text=TooltipText.Clip(source.LuckTooltip,700);
+-            float width=Mathf.Min(470,canvasRect.rect.width-24),height=Mathf.Min(full?580:320,canvasRect.rect.height-24);
+-            root.sizeDelta=new Vector2(width,height);
+-            if(textChanged)
++            row=source;lastFull=full;nativeStyle.Refresh(title,body,panelImage,headerImage,scale);
++            title.text=TooltipText.SingleLine(source.Title);if(source.Icon)title.color=source.Color;
++            string raw=full?source.FullRichTooltip:source.ShortRichTooltip;
++            string text=TooltipMarkup.Render(raw??TooltipMarkup.Literal(full?source.FullTooltip??source.ShortTooltip:source.ShortTooltip),nativeStyle.CanStyle);
++            body.text=text;note.text=full?"Release Shift: summary":"Shift: details";
++            luck.text=source.LuckMark=="mix"?"Mixed":source.LuckMark=="x"?"No":source.LuckMark=="\u2713"?"Yes":source.LuckMark;
++            luckText.text=TooltipText.Clip(source.LuckTooltip,700);
++            float width=Mathf.Min(nativeStyle.PreferredWidth*scale,canvasRect.rect.width-24*scale);
++            float headerHeight=title.fontSize*1.4f+8*scale,footerHeight=Mathf.Max(24*scale,note.fontSize+8*scale);
++            double preferred=body.GetPreferredValues(body.text,Mathf.Max(20,width-24*scale),0).y;
++            CompactTooltipSize sizing;
++            if(!CompactTooltipSizing.TryCreate(canvasRect.rect.width,canvasRect.rect.height,width,preferred,headerHeight,footerHeight,scale,full,out sizing)){Hide();return;}
++            root.sizeDelta=new Vector2((float)sizing.Width,(float)sizing.Height);
++            heading.sizeDelta=new Vector2(0,headerHeight);heading.anchoredPosition=Vector2.zero;
++            footer.sizeDelta=new Vector2(0,footerHeight);
++            viewport.offsetMin=new Vector2(12*scale,footerHeight+8*scale);viewport.offsetMax=new Vector2(-12*scale,-headerHeight-8*scale);
++            content.sizeDelta=new Vector2(0,Mathf.Max((float)sizing.ViewportHeight,(float)preferred));
++            float luckWidth=Mathf.Min(320*scale,(float)sizing.Width-24*scale);
++            float luckHeight=Mathf.Min(Mathf.Min(320*scale,(float)sizing.Height-footerHeight-20*scale),luckText.GetPreferredValues(luckText.text,Mathf.Max(20,luckWidth-24*scale),0).y+24*scale);
++            luckDetail.sizeDelta=new Vector2(luckWidth,Mathf.Max(48*scale,luckHeight));luckDetail.anchoredPosition=new Vector2(-12*scale,footerHeight+8*scale);
++            if(changed)scroll.verticalNormalizedPosition=1;
++            root.gameObject.SetActive(true);root.SetAsLastSibling();Position(followPointer&&!PointerInside);
++        }
++        void Position(bool followPointer)
++        {
++            Vector2 point=root.anchoredPosition+new Vector2(canvasRect.rect.xMin,canvasRect.rect.yMin);
++            if(followPointer)
+             {
+-                Canvas.ForceUpdateCanvases();
+-                float textHeight=Mathf.Max(height-110,body.GetPreferredValues(body.text,Mathf.Max(20,width-28),0).y+8);
+-                content.sizeDelta=new Vector2(0,textHeight);
++                RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect,Input.mousePosition,
++                    canvas.renderMode==RenderMode.ScreenSpaceOverlay?null:canvas.worldCamera,out point);
++                point+=new Vector2(18,-18);
+             }
+-            if(changed)scroll.verticalNormalizedPosition=1;
+-            root.gameObject.SetActive(true);root.SetAsLastSibling();if(followPointer&&!PointerInside)Position();
+-        }
+-        void Position()
+-        {
+-            Vector2 point;
+-            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect,Input.mousePosition,
+-                canvas.renderMode==RenderMode.ScreenSpaceOverlay?null:canvas.worldCamera,out point);
+-            point+=new Vector2(18,-18);
+             point.x=Mathf.Clamp(point.x,canvasRect.rect.xMin+12,canvasRect.rect.xMax-root.rect.width-12);
+             point.y=Mathf.Clamp(point.y,canvasRect.rect.yMin+root.rect.height+12,canvasRect.rect.yMax-12);
+             root.anchoredPosition=new Vector2(point.x-canvasRect.rect.xMin,point.y-canvasRect.rect.yMin);
+--- 0.2.2.2/src/Presentation/SheetData.cs
++++ 0.2.2.3/src/Presentation/SheetData.cs
+@@ -10,7 +10,8 @@
+ {
+     internal sealed class SheetRow
+     {
+-        public string Id, Title, Detail, ShortTooltip, FullTooltip, LuckTooltip, Group="Utility / passive", LuckLabel="Unverified";
++        public string Id, Title, Detail, ShortTooltip, FullTooltip, ShortRichTooltip, FullRichTooltip, LuckTooltip, Group="Utility / passive", LuckLabel="Unverified";
++        public bool FormulaRegistered;
+         public Sprite Icon;
+         public Color Color = Color.white;
+         public string LuckMark = "?";
+@@ -72,8 +73,12 @@
+                     if (count > 0) calculation.Apply("Lens-Maker's Glasses (" + count + " effective)", CalculationStage.Flat, count * 10);
+                 }
+             }
++            string compactStat=CompactTooltipPresentation.Stat(explanation,live,calculation,
++                name=="Damage"||name=="Critical chance"||name=="Attack speed"?"cIsDamage":
++                name=="Health"||name=="Regeneration"?"cIsHealing":"cIsUtility",
++                critical?"%":name=="Regeneration"?" /s":name=="Movement speed"?" m/s":name=="Attack speed"?"x":"",name);
+             rows.Add(new SheetRow { Id = name, Title = name, Detail = F(live) + (critical ? "%" : ""),
+-                ShortTooltip = explanation + "\n" + calculation.Describe(live, false, false),
++                ShortTooltip=TooltipMarkup.Render(compactStat,null),ShortRichTooltip=compactStat,
+                 FullTooltip = explanation + "\n" + calculation.Describe(live, false, true) +
+                     "\nBaseline is an explanation reference, not a replacement stat calculation. Later buffs, items, conversions, and other mods may remain unattributed.",
+                 LuckMark=critical?"mix":"x", LuckLabel=critical?"Mixed scope":"Unaffected total",
+@@ -102,21 +107,16 @@
+                 var definition=OriginalItemDefinitions.Find(def.name);
+                 IReadOnlyList<ItemTooltipView> terms=definition?.CreateTerms(name,effective,definition.Id=="BoostAllStats"?OwnEligibleBuffTypes(body):null);
+                 ItemTooltipView scaling=terms!=null?terms[0]:null;
+-                string shortText=NativeText(def.pickupToken)+"\n"+current+"\n"+next;
+-                string fullText=NativeText(def.descriptionToken)+"\n\n"+formula;
++                string fullText=formula;
+                 string luckLabel="Unverified";
+                 if(scaling!=null)
+                 {
+                     group=definition.Group;
+-                    shortText=string.Join("\n\n",terms.Select(t=>t.Headline+"\n"+t.NextLabel))+
+-                        "\n"+scaling.CountLabel+"\nPublic snapshot component estimate; installed build unverified. Shift shows conditions.";
+-                    if(definition.TriggerContext.Length>0)shortText+="\n"+definition.TriggerContext;
+-                    if(definition.Id=="BoostAllStats")shortText+="\nAuthoritative live Nectar counter: "+body.currentGrowthNectarBuffCount+" / "+body.maxGrowthNectarBuffCount+"; modeled terms use the observed metadata set.";
+-                    fullText=string.Join("\n\n",terms.Select(t=>t.Headline+"\n"+t.FullMath+"\n"+t.Comparison.Confidence))+
++                    fullText=string.Join("\n\n",terms.Select(t=>t.CompactValue+"\n"+t.NextLabel+"\n"+t.FullMath+"\n"+t.Comparison.Confidence))+
+                         "\n"+definition.TriggerContext+"\nDefinition source: "+definition.Source+
+                         "\nReference revision: "+definition.Revision+
+-                        (definition.SupplementarySource.Length>0?"\nSupplementary public mechanics (reviewed 2026-10-05): "+definition.SupplementarySource:"")+
+-                        "\nNative description: "+NativeText(def.descriptionToken);
++                        (definition.SupplementarySource.Length>0?"\nSupplementary public mechanics (reviewed 2026-10-05): "+definition.SupplementarySource:"");
++                    if(definition.Id=="BoostAllStats")fullText+="\nLive qualifying-type count: "+body.currentGrowthNectarBuffCount+" / "+body.maxGrowthNectarBuffCount+"; observed metadata and model remain separate.";
+                     luck=scaling.LuckText;mark=scaling.LuckMark;
+                     luckLabel=mark=="x"?"Unaffected term":mark=="mix"?"Mixed scope":mark=="\u2713"?"Affected roll":"Unverified";
+                 }
+@@ -125,14 +125,15 @@
+                     mark="!";luckLabel=LuckEvidence.Label(LuckEvidenceState.ReportedBug);
+                     luck=LuckEvidence.SaleStarReport+"\nReport source: "+LuckEvidence.SaleStarReportSource+
+                         "\nReported "+LuckEvidence.SaleStarReportDate+"; installed build not verified.";
+-                    shortText+="\nLuck: "+luckLabel;fullText+="\n"+luck;
+-                }
+-                rows.Add(new SheetRow { Id = "item:" + i, Title = (effects ? group + " · " : "") + name + " ×" + effective,
++                    fullText+="\n"+luck;
++                }
++                string compact=CompactTooltipPresentation.Item(terms,Language.GetString(def.pickupToken),effective,owned);
++                string detailed=Language.GetString(def.descriptionToken)+"\n\n"+TooltipMarkup.Literal(fullText+
++                    "\nOwned: "+owned+" | Effective: "+effective);
++                rows.Add(new SheetRow { FormulaRegistered=scaling!=null,ShortRichTooltip=compact,FullRichTooltip=detailed,Id = "item:" + i, Title = (effects ? group + " · " : "") + name + " ×" + effective,
+                     Detail = scaling!=null ? scaling.NextLabel : current+" - "+next, Icon = def.pickupIconSprite,
+-                    Color = ItemTierCatalog.GetItemTierDef(def.tier) ? ColorCatalog.GetColor(ItemTierCatalog.GetItemTierDef(def.tier).colorIndex) : Color.white, ShortTooltip = shortText,
+-                    FullTooltip = fullText +
+-                        "\nPermanent count: " + owned + ". Effective count: " + effective +
+-                        ". Effective includes the game's currently active temporary/channeled/suppressed rules. No inventory order or contents are changed.",
++                    Color = ItemTierCatalog.GetItemTierDef(def.tier) ? ColorCatalog.GetColor(ItemTierCatalog.GetItemTierDef(def.tier).colorIndex) : Color.white, ShortTooltip = TooltipText.Clean(Regex.Replace(compact,"<[^>]*>","")),
++                    FullTooltip = NativeText(def.descriptionToken)+"\n\n"+fullText+"\nOwned: "+owned+" | Effective: "+effective,
+                     Group=group, LuckMark=mark, LuckLabel=luckLabel, LuckTooltip=luck });
+             }
+             return rows.OrderBy(r => effects ? r.Group : "")
+@@ -185,7 +186,10 @@
+                     Detail = kind + " · " + duration + " · Nectar: " + (nectar ? "eligible type" : "excluded"),
+                     Icon = def.iconSprite, Color = def.buffColor, LuckMark = "?",
+                     LuckTooltip = "Buff effects are context dependent; no generic luck claim is made.",
+-                    ShortTooltip = effect + "\n" + duration,
++                    ShortTooltip = CompactBuff(glossary?.Id)+"\n"+kind+" | Nectar: "+(nectar?"eligible":"excluded")+"\nTimer unavailable",
++                    ShortRichTooltip=TooltipMarkup.Literal(CompactBuff(glossary?.Id))+"\n"+
++                        TooltipMarkup.Style(kind+" | Nectar: "+(nectar?"eligible":"excluded"),"cStack")+"\n"+
++                        TooltipMarkup.Style("Timer unavailable"+(glossary!=null?" | Reference effect":""),"cStack"),
+                     FullTooltip = effect + "\nInternal definition: " + def.name + "\nStacks: " + stacks +
+                         (def.canStack ? " (stackable)" : " (does not stack normally)") + "\n" + kind +
+                         "\n" + duration + "\nGrowth Nectar counts qualifying active types, not individual stacks." +
+@@ -212,6 +216,21 @@
+             return types;
+         }
+ 
++        static string CompactBuff(string id)
++        {
++            switch(id)
++            {
++                case "RoR2Content.Buffs.FullCrit":return "+100 raw crit points before conversions.";
++                case "DLC2Content.Buffs.BoostAllStatsBuff":return "Qualifying buff TYPES, not stacks. Reference: 4% per type.";
++                case "DLC2Content.Buffs.ExtraStatsOnLevelUpBuff":return "Stored level gains; removal payout depends on cached state.";
++                case "ElusiveAntlersSpeedBuff":return "Reference: +12% movement bonus per active stack.";
++                case "SpeedOnPickup":return "Reference: +3% stat-bonus component per active stack.";
++                case "ImmuneToDebuff":return "Ready charges prevent eligible temporary debuffs.";
++                case "ImmuneToDebuffConsumed":return "Consumed charges recharging; no active defense multiplier.";
++                case "Energized":return "Equipment-triggered attack-speed buff; magnitude unverified.";
++                default:return "Effect unverified";
++            }
++        }
+         static string Remaining(CharacterBody body, BuffIndex index)
+         {
+             return "Remaining duration unavailable: public per-stack timer adapter pending";
+--- 0.2.2.2/src/Presentation/SheetView.cs
++++ 0.2.2.3/src/Presentation/SheetView.cs
+@@ -31,6 +31,7 @@
+         bool effectsExpanded;
+         TextMeshProUGUI effectsHeading;
+         internal string Status{get;private set;}="Waiting for the native own-player strip.";
++        string hoverCoverage="Own item hover coverage pending.";
+         internal SheetView(HUD source,float presentationScale){hud=source;scale=presentationScale;}
+         internal bool IsOwnIcon(ItemIcon icon)
+         {
+@@ -159,6 +160,10 @@
+             }
+             foreach(var pair in bindings.ToArray())if(!pair.Key||!visible.Contains(pair.Key))
+             {if(pair.Value){pair.Value.Detach();UnityEngine.Object.Destroy(pair.Value);}bindings.Remove(pair.Key);}
++            int routed=bindings.Values.Count(h=>h&&h.CanShow);
++            hoverCoverage="Own item hover targets: "+routed+"/"+visible.Count+" ready; "+
++                items.Values.Count(r=>r.FormulaRegistered)+"/"+items.Count+" registered formula definitions. "+
++                "Native buff/equipment/skill targets are outside this candidate.";
+         }
+         void DetachBindings()
+         {
+@@ -189,9 +194,9 @@
+             if(fits)
+             {
+                 root.anchoredPosition=new Vector2((float)dock.X,(float)dock.Y);root.sizeDelta=new Vector2((float)dock.Width,(float)dock.Height);
+-                Status="Compact native Tab stats attached below own strip; runtime layout verification pending.";
+-            }
+-            else Status="No safe region below own strip; native panels retained and item hovers remain attached.";
++                Status="Compact native Tab stats attached below own strip; runtime layout verification pending. "+hoverCoverage;
++            }
++            else Status="No safe region below own strip; native panels retained and item hovers remain attached. "+hoverCoverage;
+         }
+         internal bool EnterItem(NativeItemHover source)
+         {

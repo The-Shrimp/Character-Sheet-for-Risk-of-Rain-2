@@ -1,0 +1,7 @@
+Compact tooltip coverage: 96 sizing cases; 23 item definitions; native-style safety and conditional context.
+Additive Details coverage:24 Tab sessions x16 items, pointer transfers, exact-once native exits, 36 placement cases and zero modifier-key input.
+Simple stat display: 24 level/stat/bonus examples, coefficients, negative modifiers, ordered Details, both item ownership paths and unknown-formula omission.
+Hierarchy coverage: 44 item routes, 128 collapse states, 96 sizing cases; Defense semantics, ability exclusions, proc conditions, duplicates and keyboard focus.
+Visual revision: 256 collapse states; 108 footer/scroll sizing cases; float residuals; Nectar eligibility/cap/unknowns; individual-before-stack Details.
+PASS 15142 assertions: lifecycle/ownership, ordered stat math, n=1/4/10 item components, caps/proc/luck, Nectar and buff uncertainty.
+

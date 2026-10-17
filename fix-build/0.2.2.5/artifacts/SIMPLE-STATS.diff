@@ -1,0 +1,513 @@
+--- 0.2.2.4/src\Core\CompactTooltipPresentation.cs
++++ 0.2.2.5/src\Core\CompactTooltipPresentation.cs
+@@ -58,29 +58,7 @@
+             lines.Add(TooltipMarkup.Style(terms.Length==0?"Scaling unverified":"Reference components","cStack"));
+             return string.Join("\n",lines);
+         }
+-        public static string Stat(string explanation,double live,Calculation calculation,string semanticStyle,string suffix="",string statName="stat")
+-        {
+-            if(calculation==null)throw new ArgumentNullException(nameof(calculation));
+-            string name=TooltipText.SingleLine(statName).ToLowerInvariant();
+-            var lines=new List<string>{TooltipMarkup.Style("Total "+name+": "+NumberFormatting.Display(live)+suffix,semanticStyle)};
+-            var baseline=calculation.Terms.FirstOrDefault(t=>t.Stage==CalculationStage.Baseline);
+-            if(baseline!=null)lines.Add(TooltipMarkup.Style("Base "+name+": "+NumberFormatting.Display(baseline.After)+suffix,"cStack"));
+-            foreach(var term in calculation.Terms.Where(t=>t.Stage==CalculationStage.Flat&&t.Source.StartsWith("Level",StringComparison.Ordinal)))
+-                if(term.Operand!=0)lines.Add(TooltipMarkup.Style("Level growth: "+NumberFormatting.Signed(term.Operand)+suffix,"cStack"));
+-            // Compact categories never reorder or recalculate the underlying ordered term list.
+-            foreach(var term in calculation.Terms.Where(t=>t.Stage==CalculationStage.Flat||t.Stage==CalculationStage.LateFlat||t.Stage==CalculationStage.Final))
+-                if(!term.Source.StartsWith("Level",StringComparison.Ordinal)&&term.Operand!=0)
+-                    lines.Add(TooltipMarkup.Literal("Flat / "+term.Source+": ")+TooltipMarkup.Style(NumberFormatting.Signed(term.Operand)+suffix,semanticStyle));
+-            foreach(var term in calculation.Terms.Where(t=>t.Stage!=CalculationStage.Baseline&&t.Stage!=CalculationStage.Flat&&t.Stage!=CalculationStage.LateFlat&&t.Stage!=CalculationStage.Final))
+-            {
+-                string value=term.Stage==CalculationStage.AdditiveMultiplier?NumberFormatting.Signed(term.Operand*100)+"%":
+-                    "x"+NumberFormatting.Display(term.Operand);
+-                lines.Add(TooltipMarkup.Literal("Modifier / "+term.Source+": ")+TooltipMarkup.Style(value,semanticStyle));
+-            }
+-            double residual=live-calculation.Predicted;
+-            if(residual!=0)lines.Add(TooltipMarkup.Style("Unattributed: "+NumberFormatting.Signed(residual)+suffix+" (partial)","cStack"));
+-            return string.Join("\n",lines);
+-        }
++
+     }
+     public struct CompactTooltipSize
+     {
+--- 0.2.2.4/src\Core\ItemDetailsPresentation.cs
++++ 0.2.2.5/src\Core\ItemDetailsPresentation.cs
+@@ -8,15 +8,15 @@
+     {
+         public static string Create(IEnumerable<ItemTooltipView> source,long effective,long permanent,string triggerContext="")
+         {
+-            var terms=(source??Enumerable.Empty<ItemTooltipView>()).Where(t=>t!=null).ToArray();
++            var terms=(source??Enumerable.Empty<ItemTooltipView>()).Where(t=>t!=null&&t.CurrentValue.HasValue&&NumberFormatting.IsFinite(t.CurrentValue.Value)).ToArray();
++            if(terms.Length==0)return "";
+             var lines=new List<string>{TooltipMarkup.Style("Current stack ("+NumberFormatting.Count(effective)+" effective)","cStack")};
+             if(effective!=permanent)lines.Add(TooltipMarkup.Style(NumberFormatting.Count(permanent)+" owned","cStack"));
+-            if(terms.Length==0)lines.Add("Scaling unverified; no quantitative next-copy prediction.");
+             foreach(var term in terms)
+             {
+                 lines.Add(TooltipMarkup.Style(term.CompactValue,term.SemanticStyle)+
+                     (term.StackHint.Length>0?" "+TooltipMarkup.Style(term.StackHint,"cStack"):""));
+-                lines.Add(TooltipMarkup.Style(term.NextLabel,term.SemanticStyle));
++                if(term.NextValue.HasValue)lines.Add(TooltipMarkup.Style(term.NextLabel,term.SemanticStyle));
+                 if(term.CurrentValue.HasValue)lines.Add(TooltipMarkup.Style(term.Equation,"cStack"));
+             }
+             foreach(string conditions in terms.Select(t=>t.Comparison.Confidence).Distinct(StringComparer.Ordinal))
+--- 0.2.2.4/src\Core\NativeItemSurfacePolicy.cs
++++ 0.2.2.5/src\Core\NativeItemSurfacePolicy.cs
+@@ -0,0 +1,14 @@
++using System;
++namespace Alexander.CharacterSheet.Core
++{
++    public static class NativeItemSurfacePolicy
++    {
++        public static bool OwnSurface(object localMaster,object scoreboardMaster,object hudMaster,
++            bool inScoreboard,bool inTopHud)=>
++            localMaster!=null&&(inScoreboard?ReferenceEquals(localMaster,scoreboardMaster):
++                inTopHud&&ReferenceEquals(localMaster,hudMaster));
++        public static bool KnownLuck(string mark)=>mark=="x"||mark=="mix"||mark=="\u2713"||mark=="!";
++        public static bool HasAddition(string details,string luckMark)=>
++            !string.IsNullOrWhiteSpace(details)||KnownLuck(luckMark);
++    }
++}
+--- 0.2.2.4/src\Core\StatTooltipPresentation.cs
++++ 0.2.2.5/src\Core\StatTooltipPresentation.cs
+@@ -0,0 +1,39 @@
++using System;
++using System.Collections.Generic;
++using System.Linq;
++namespace Alexander.CharacterSheet.Core
++{
++    // Display groups never recalculate or reorder Calculation.Terms.
++    public static class StatTooltipPresentation
++    {
++        static bool Flat(CalculationStage stage)=>stage==CalculationStage.Flat||stage==CalculationStage.LateFlat||stage==CalculationStage.Final;
++        public static string Create(double live,double perLevelGrowth,Calculation calculation,string semanticStyle,
++            string suffix="",string growthSource="Level growth (level - 1)")
++        {
++            if(calculation==null)throw new ArgumentNullException(nameof(calculation));
++            var baseline=calculation.Terms.First(t=>t.Stage==CalculationStage.Baseline);
++            string growth=(perLevelGrowth<0?" - ":" + ")+NumberFormatting.Display(Math.Abs(perLevelGrowth))+suffix+" per level";
++            var lines=new List<string>{
++                "Total: "+TooltipMarkup.Style(NumberFormatting.Display(live)+suffix,semanticStyle),
++                "Base: "+TooltipMarkup.Style(NumberFormatting.Display(baseline.Operand)+suffix+growth,"cStack")
++            };
++            var bonuses=new List<string>();
++            var terms=calculation.Terms.Where(t=>t.Stage!=CalculationStage.Baseline&&
++                !(t.Stage==CalculationStage.Flat&&string.Equals(t.Source,growthSource,StringComparison.Ordinal))).ToArray();
++            foreach(var term in terms.Where(t=>Flat(t.Stage)&&t.Operand!=0))
++                bonuses.Add(TooltipMarkup.Literal(term.Source)+": "+TooltipMarkup.Style(NumberFormatting.Signed(term.Operand)+suffix,semanticStyle));
++            foreach(var term in terms.Where(t=>!Flat(t.Stage)))
++            {
++                double percent=(term.Stage==CalculationStage.AdditiveMultiplier?term.Operand:term.Operand-1)*100;
++                if(percent!=0)bonuses.Add(TooltipMarkup.Literal(term.Source)+": "+TooltipMarkup.Style(NumberFormatting.Signed(percent)+"%",semanticStyle));
++            }
++            // This is a difference after the known operations, not an inferred early flat source.
++            double residual=live-calculation.Predicted;
++            if(!NumberFormatting.IsFinite(residual)||residual!=0)
++                bonuses.Add("Other/unknown: "+TooltipMarkup.Style(NumberFormatting.Signed(residual)+suffix,"cStack"));
++            if(bonuses.Count==0)lines.Add("Bonuses: None");
++            else {lines.Add("Bonuses:");lines.AddRange(bonuses);}
++            return string.Join("\n",lines);
++        }
++    }
++}
+--- 0.2.2.4/src\Plugin.cs
++++ 0.2.2.5/src\Plugin.cs
+@@ -10,7 +10,7 @@
+ using UnityEngine.SceneManagement;
+ namespace Alexander.CharacterSheet
+ {
+-    [BepInPlugin(Id,"Alexander's Character Sheet","0.2.2.4")]
++    [BepInPlugin(Id,"Alexander's Character Sheet","0.2.2.5")]
+     public sealed class Plugin:BaseUnityPlugin
+     {
+         public const string Id="alexander.charactersheet";
+@@ -45,7 +45,7 @@
+             {
+                 harmony=new Harmony(Id);harmony.PatchAll(typeof(Plugin).Assembly);
+                 SceneManager.activeSceneChanged+=SceneChanged;subscribed=true;initialized=true;
+-                Logger.LogInfo("Native Tab-extension source 0.2.2.4; HUD branch placement and held-Info re-entry guards; in-game fix verification pending.");
++                Logger.LogInfo("Native Tab-extension source 0.2.2.5; HUD branch placement and held-Info re-entry guards; in-game fix verification pending.");
+             }
+             catch(Exception error)
+             {
+--- 0.2.2.4/src\Presentation\NativeHoverPopup.cs
++++ 0.2.2.5/src\Presentation\NativeHoverPopup.cs
+@@ -10,7 +10,7 @@
+     internal sealed class NativeHoverPopup:IDisposable
+     {
+         readonly Canvas canvas;
+-        readonly RectTransform canvasRect,root,content,luckDetail,heading,viewport,footer;
++        readonly RectTransform canvasRect,root,content,luckDetail,luckBadge,heading,viewport,footer;
+         readonly TextMeshProUGUI title,body,luck,luckText,detailsLabel;
+         readonly ScrollRect scroll;
+         readonly Image panelImage,headerImage;
+@@ -48,7 +48,7 @@
+             var navigation=detailsButton.navigation;navigation.mode=Navigation.Mode.None;detailsButton.navigation=navigation;
+             detailsLabel=style.Text(control,"Details  >",Mathf.Max(14,style.BodyFontSize-1)*scale);
+             detailsButton.onClick.AddListener(()=>interaction.Toggle(CursorAvailable(),true));
+-            var badge=NativeUiStyle.Rect(footer,"Luck",new Vector2(.66f,.08f),new Vector2(.97f,.92f));
++            luckBadge=NativeUiStyle.Rect(footer,"Luck",new Vector2(.66f,.08f),new Vector2(.97f,.92f));var badge=luckBadge;
+             badge.gameObject.AddComponent<Image>().color=Color.clear;badge.gameObject.AddComponent<LuckPresence>().Popup=this;
+             var index=ItemCatalog.FindItemIndex("Clover");var def=index==ItemIndex.None?null:ItemCatalog.GetItemDef(index);
+             var iconRect=NativeUiStyle.Rect(badge,"Clover",new Vector2(0,.08f),new Vector2(.24f,.92f));
+@@ -82,18 +82,22 @@
+             if(source==null||!interaction.Active||interaction.Key!=source.Id){Hide();return false;}
+             if(source.IsItem)
+             {
++                if(!source.HasItemAddition){Hide();return false;}
+                 if(!provider){Hide();return false;}
+                 if(itemAnchor==null||!ReferenceEquals(itemAnchor.Provider,provider)||!itemAnchor.Current)
+                     itemAnchor=NativeTooltipAnchor.Find(provider,canvasRect,canvas);
+                 if(itemAnchor==null||!itemAnchor.Current){root.gameObject.SetActive(false);return false;}
+             }
+-            bool full=interaction.Expanded,changed=row==null||row.Id!=source.Id||lastFull!=full;
++            bool hasDetails=!source.IsItem||!string.IsNullOrWhiteSpace(source.ItemDetailsRichTooltip);
++            bool full=interaction.Expanded&&hasDetails,changed=row==null||row.Id!=source.Id||lastFull!=full;
+             row=source;lastFull=full;nativeStyle.Refresh(title,body,panelImage,headerImage,scale,source.IsItem?itemAnchor.Controller:null);
+             heading.gameObject.SetActive(!source.IsItem);
+             if(!source.IsItem){title.text=TooltipText.SingleLine(source.Title);if(source.Icon)title.color=source.Color;}
+             string raw=source.IsItem?full?source.ItemDetailsRichTooltip:"":full?source.FullRichTooltip:source.ShortRichTooltip;
+             string text=source.IsItem?raw:raw??TooltipMarkup.Literal(full?source.FullTooltip??source.ShortTooltip:source.ShortTooltip);
+             body.text=TooltipMarkup.Render(text,nativeStyle.CanStyle);
++            detailsButton.gameObject.SetActive(hasDetails);
++            luckBadge.gameObject.SetActive(!source.IsItem||NativeItemSurfacePolicy.KnownLuck(source.LuckMark));
+             detailsLabel.text=full?"Details  v":"Details  >";detailsButton.interactable=CursorAvailable();
+             detailsLabel.font=body.font;detailsLabel.fontSharedMaterial=body.fontSharedMaterial;detailsLabel.color=body.color;
+             luck.text=source.LuckMark=="mix"?"Mixed":source.LuckMark=="x"?"No":source.LuckMark=="\u2713"?"Yes":source.LuckMark;
+--- 0.2.2.4/src\Presentation\SheetData.cs
++++ 0.2.2.5/src\Presentation\SheetData.cs
+@@ -13,6 +13,7 @@
+         public string Id, Title, Detail, ShortTooltip, FullTooltip, ShortRichTooltip, FullRichTooltip, LuckTooltip, Group="Utility / passive", LuckLabel="Unverified";
+         public bool FormulaRegistered,IsItem;
+         public string ItemDetailsRichTooltip;
++        internal bool HasItemAddition=>NativeItemSurfacePolicy.HasAddition(ItemDetailsRichTooltip,LuckMark);
+         public Sprite Icon;
+         public Color Color = Color.white;
+         public string LuckMark = "?";
+@@ -35,22 +36,21 @@
+ 
+         public static List<SheetRow> Character(CharacterBody body)
+         {
+-            float levels = Mathf.Max(0, body.level - 1);
+             var rows = new List<SheetRow>();
+-            AddStat(rows, "Health", body.maxHealth, body.baseMaxHealth, body.levelMaxHealth * levels,
++            AddStat(rows, "Health", body.maxHealth, body.baseMaxHealth, body.levelMaxHealth,
+                 "Maximum health. Current health: " + F(body.healthComponent.health), body, false);
+-            AddStat(rows, "Damage", body.damage, body.baseDamage, body.levelDamage * levels,
++            AddStat(rows, "Damage", body.damage, body.baseDamage, body.levelDamage,
+                 "Damage coefficient basis; conditional hit damage is separate.", body, false);
+-            AddStat(rows, "Regeneration", body.regen, body.baseRegen, body.levelRegen * levels,
++            AddStat(rows, "Regeneration", body.regen, body.baseRegen, body.levelRegen,
+                 "Health per second before heal-event rules.", body, false);
+-            AddStat(rows, "Armor", body.armor, body.baseArmor, body.levelArmor * levels,
++            AddStat(rows, "Armor", body.armor, body.baseArmor, body.levelArmor,
+                 "Damage multiplier from armor alone: " + F(body.armor >= 0 ? 100.0 / (100 + body.armor) : 2 - 100.0 / (100 - body.armor)), body, false);
+-            AddStat(rows, "Critical chance", body.crit, body.baseCrit, body.levelCrit * levels,
++            AddStat(rows, "Critical chance", body.crit, body.baseCrit, body.levelCrit,
+                 "Raw crit stat: " + F(body.crit) + "%. Standard roll after luck: " +
+                 F(100 * LuckMath.EffectiveChance(body.crit / 100.0, body.master ? body.master.luck : 0)) + "%.", body, true);
+-            AddStat(rows, "Attack speed", body.attackSpeed, body.baseAttackSpeed, body.levelAttackSpeed * levels,
++            AddStat(rows, "Attack speed", body.attackSpeed, body.baseAttackSpeed, body.levelAttackSpeed,
+                 "Live attack-speed multiplier.", body, false);
+-            AddStat(rows, "Movement speed", body.moveSpeed, body.baseMoveSpeed, body.levelMoveSpeed * levels,
++            AddStat(rows, "Movement speed", body.moveSpeed, body.baseMoveSpeed, body.levelMoveSpeed,
+                 "Live movement speed in meters per second.", body, false);
+             rows.Add(new SheetRow { Id = "barrier", Title = "Shield / barrier",
+                 Detail = F(body.healthComponent.shield) + " / " + F(body.healthComponent.barrier),
+@@ -60,11 +60,11 @@
+             return rows;
+         }
+ 
+-        static void AddStat(List<SheetRow> rows, string name, double live, double baseline, double growth,
++        static void AddStat(List<SheetRow> rows, string name, double live, double baseline, double perLevelGrowth,
+             string explanation, CharacterBody body, bool critical)
+         {
+             var calculation = new Calculation("Survivor baseline", baseline);
+-            calculation.Apply("Level growth (level − 1)", CalculationStage.Flat, growth);
++            calculation.Apply("Level growth (level - 1)", CalculationStage.Flat, (float)perLevelGrowth * Mathf.Max(0,body.level-1));
+             if (critical && body.inventory)
+             {
+                 ItemIndex index = ItemCatalog.FindItemIndex("CritGlasses");
+@@ -74,12 +74,13 @@
+                     if (count > 0) calculation.Apply("Lens-Maker's Glasses (" + count + " effective)", CalculationStage.Flat, count * 10);
+                 }
+             }
+-            string compactStat=CompactTooltipPresentation.Stat(explanation,live,calculation,
++            string compactStat=StatTooltipPresentation.Create(live,perLevelGrowth,calculation,
+                 name=="Damage"||name=="Critical chance"||name=="Attack speed"?"cIsDamage":
+                 name=="Health"||name=="Regeneration"?"cIsHealing":"cIsUtility",
+-                critical?"%":name=="Regeneration"?" /s":name=="Movement speed"?" m/s":name=="Attack speed"?"x":"",name);
++                critical?"%":name=="Regeneration"?" /s":name=="Movement speed"?" m/s":name=="Attack speed"?"x":"");
+             rows.Add(new SheetRow { Id = name, Title = name, Detail = F(live) + (critical ? "%" : ""),
+                 ShortTooltip=TooltipMarkup.Render(compactStat,null),ShortRichTooltip=compactStat,
++                FullRichTooltip=compactStat+"\n\n"+TooltipMarkup.Literal(explanation+"\n"+calculation.Describe(live,false,true)),
+                 FullTooltip = explanation + "\n" + calculation.Describe(live, false, true) +
+                     "\nBaseline is an explanation reference, not a replacement stat calculation. Later buffs, items, conversions, and other mods may remain unattributed.",
+                 LuckMark=critical?"mix":"x", LuckLabel=critical?"Mixed scope":"Unaffected total",
+@@ -100,8 +101,6 @@
+                 if (owned <= 0 && effective <= 0) continue;
+                 string name = NativeText(def.nameToken);
+                 string group = Group(def);
+-                string current = "Current: " + effective + " effective";
+-                string next = "Next copy: formula unavailable";
+                 string formula = "No verified quantitative stack formula is registered for this item/build. Native description follows.";
+                 string luck = "Luck applicability is unverified for this item's individual effects.";
+                 string mark = "?";
+@@ -132,7 +131,7 @@
+                 string detailed=Language.GetString(def.descriptionToken)+"\n\n"+TooltipMarkup.Literal(fullText+
+                     "\nOwned: "+owned+" | Effective: "+effective);
+                 rows.Add(new SheetRow { IsItem=true,ItemDetailsRichTooltip=ItemDetailsPresentation.Create(terms,effective,owned,definition?.TriggerContext??""),FormulaRegistered=scaling!=null,ShortRichTooltip=compact,FullRichTooltip=detailed,Id = "item:" + i, Title = (effects ? group + " · " : "") + name + " ×" + effective,
+-                    Detail = scaling!=null ? scaling.NextLabel : current+" - "+next, Icon = def.pickupIconSprite,
++                    Detail = scaling!=null ? scaling.NextLabel : "", Icon = def.pickupIconSprite,
+                     Color = ItemTierCatalog.GetItemTierDef(def.tier) ? ColorCatalog.GetColor(ItemTierCatalog.GetItemTierDef(def.tier).colorIndex) : Color.white, ShortTooltip = TooltipText.Clean(Regex.Replace(compact,"<[^>]*>","")),
+                     FullTooltip = NativeText(def.descriptionToken)+"\n\n"+fullText+"\nOwned: "+owned+" | Effective: "+effective,
+                     Group=group, LuckMark=mark, LuckLabel=luckLabel, LuckTooltip=luck });
+--- 0.2.2.4/src\Presentation\SheetView.cs
++++ 0.2.2.5/src\Presentation\SheetView.cs
+@@ -34,12 +34,16 @@
+         internal SheetView(HUD source,float presentationScale){hud=source;scale=presentationScale;}
+         internal bool IsOwnIcon(ItemIcon icon)
+         {
+-            if(!body||!body.master||!body.inventory||!icon)return false;
+-            var strip=icon.GetComponentInParent<ScoreboardStrip>();if(!strip)return false;
+-            var identity=strip.GetComponent<NativeStripIdentity>();
+-            if(!identity||identity.OwnMaster!=body.master)return false;
++            if(!body||!body.master||!body.inventory||!hud||!icon)return false;
++            var strip=icon.GetComponentInParent<ScoreboardStrip>();
++            var identity=strip?strip.GetComponent<NativeStripIdentity>():null;
++            var top=hud.itemInventoryDisplay;
++            bool ownScoreboard=strip&&strip==ownStrip&&strip.itemInventoryDisplay&&icon.transform.IsChildOf(strip.itemInventoryDisplay.transform);
++            bool topHud=!strip&&top&&icon.transform.IsChildOf(top.transform)&&icon.GetComponentInParent<HUD>()==hud;
++            if(strip&&!ownScoreboard)return false;
++            if(!NativeItemSurfacePolicy.OwnSurface(body.master,identity?identity.OwnMaster:null,hud.targetMaster,ownScoreboard,topHud))return false;
+             var def=ItemCatalog.GetItemDef(icon.itemIndex);
+-            return def&&NativeTabPolicy.OwnVisibleItem(body.master,identity.OwnMaster,def.hidden,
++            return def&&NativeTabPolicy.OwnVisibleItem(body.master,body.master,def.hidden,
+                 body.inventory.GetItemCountPermanent(def),body.inventory.GetItemCountEffective(def));
+         }
+         internal bool CanHandleIcon(ItemIcon icon)=>IsOwnIcon(icon)&&items.ContainsKey("item:"+(int)icon.itemIndex);
+@@ -162,8 +166,10 @@
+         void ClearEffects(){foreach(var row in effectRows)if(row){row.SetActive(false);UnityEngine.Object.Destroy(row);}effectRows.Clear();}
+         void RefreshBindings()
+         {
+-            var native=ownStrip.itemInventoryDisplay;var visible=new HashSet<ItemIcon>();
+-            if(native)foreach(var icon in native.GetComponentsInChildren<ItemIcon>(false))if(IsOwnIcon(icon))
++            var visible=new HashSet<ItemIcon>();
++            var surfaces=new[]{ownStrip.itemInventoryDisplay,hud.targetMaster==body.master?hud.itemInventoryDisplay:null};
++            foreach(var native in surfaces.Where(s=>s).Distinct())
++            foreach(var icon in native.GetComponentsInChildren<ItemIcon>(false))if(IsOwnIcon(icon))
+             {
+                 visible.Add(icon);
+                 NativeItemHover existing;
+@@ -180,7 +186,9 @@
+             foreach(var pair in bindings.ToArray())if(!pair.Key||!visible.Contains(pair.Key))
+             {if(pair.Value){pair.Value.Detach();UnityEngine.Object.Destroy(pair.Value);}bindings.Remove(pair.Key);}
+             int routed=bindings.Values.Count(h=>h&&h.CanShow);
+-            hoverCoverage="Own item hover targets: "+routed+"/"+visible.Count+" ready; "+
++            int scoreboard=bindings.Keys.Count(i=>i&&i.GetComponentInParent<ScoreboardStrip>());
++            int topHud=bindings.Keys.Count(i=>i&&!i.GetComponentInParent<ScoreboardStrip>());
++            hoverCoverage="Own scoreboard/top-HUD item targets: "+scoreboard+"/"+topHud+"; "+routed+"/"+visible.Count+" ready; "+
+                 items.Values.Count(r=>r.FormulaRegistered)+"/"+items.Count+" registered formula definitions. "+
+                 "Native buff/equipment/skill targets are outside this candidate.";
+         }
+@@ -227,6 +235,7 @@
+         {
+             if(popup==null||!source||!source.CanShow)return false;SheetRow row;
+             if(!items.TryGetValue(source.RowId,out row))return false;
++            if(!row.HasItemAddition){EndHover();return false;}
+             if(!ReferenceEquals(hovered,source))EndHover();
+             hovered=source;hoveredRow=row;popup.Enter(source,row.Id);return true;
+         }
+--- 0.2.2.4/tests\AdditiveDetailsTests.cs
++++ 0.2.2.5/tests\AdditiveDetailsTests.cs
+@@ -85,10 +85,10 @@
+         var beads=OriginalItemDefinitions.Find("ExtraStatsOnLevelUp").Create("Beads",4);
+         addedText=ItemDetailsPresentation.Create(new[]{beads},4,4);
+         assert(addedText.Contains("35%")&&addedText.Contains("5%/extra bead")&&addedText.Contains("40%"),"Click details retains correct n-1 additive current/formula/next terms");
+-        assert(ItemDetailsPresentation.Create(null,0,3).Contains("Scaling unverified")&&!ItemDetailsPresentation.Create(null,0,3).Contains("Next copy: 0"),"Unsupported scaling does not fabricate a next benefit");
++        assert(ItemDetailsPresentation.Create(null,0,3)=="","Unsupported scaling does not fabricate a next benefit");
+         var calculation=new Calculation("Base",110);calculation.Apply("Level growth",CalculationStage.Flat,99);
+-        string stat=TooltipMarkup.Render(CompactTooltipPresentation.Stat("",209,calculation,"cIsHealing",statName:"health"),s=>false);
+-        assert(stat.Split((char)10).SequenceEqual(new[]{"Total health: 209","Base health: 110","Level growth: +99"}),"Clickable stat details preserve the latest compact health structure");
++        string stat=TooltipMarkup.Render(StatTooltipPresentation.Create(209,33,calculation,"cIsHealing",growthSource:"Level growth"),s=>false);
++        assert(stat.Split((char)10).SequenceEqual(new[]{"Total: 209","Base: 110 + 33 per level","Bonuses: None"}),"Clickable stat details preserve the latest compact health structure");
+         Console.WriteLine("Additive Details coverage:24 Tab sessions x16 items, pointer transfers, exact-once native exits, "+layouts+" placement cases and zero modifier-key input.");
+     }
+ }
+--- 0.2.2.4/tests\CompactTooltipTests.cs
++++ 0.2.2.5/tests\CompactTooltipTests.cs
+@@ -23,7 +23,7 @@
+         assert(compact.Contains("35%")&&compact.Contains("(20% + 5%/extra bead)"),"Current stack result and additional-copy wording use n-1");
+         assert(!compact.Contains("Next copy")&&!compact.Contains("Definition source")&&!compact.Contains("4 total beads"),"Default body omits next-copy math, source notes and repeated count");
+         assert(compact.Contains("Reference components"),"Conditional terms remain visibly identified in the short body");
+-        assert(term.FullMath.Contains("4 - 1 = 3")&&term.NextLabel.Contains("40%"),"Shift data keeps exact copy arithmetic and next-copy result");
++        assert(term.FullMath.Contains("4 - 1 = 3")&&term.NextLabel.Contains("40%"),"optional Details data keeps exact copy arithmetic and next-copy result");
+         var unsupported=ItemTooltipPresentation.Create(new ItemScalingInput {Name="Missing",OwnedCopies=2});
+         compact=CompactTooltipPresentation.Item(new[]{unsupported},"Native pickup.",2,2);
+         assert(compact.Contains("Current component unavailable")&&!compact.Contains("Provides 0"),"Absent formula stays unavailable instead of becoming zero");
+@@ -32,7 +32,7 @@
+         var bleed=OriginalItemDefinitions.Find("BleedOnHit").Create("Bleed",12);
+         compact=CompactTooltipPresentation.Item(new[]{bleed},"Bleed.",12,12);
+         assert(compact.Contains("100%")&&compact.Contains("attack proc coefficient 1, luck 0"),"A capped reference does not lose its required attack/luck assumptions");
+-        assert(!compact.Contains("min(100%")&&bleed.FullMath.Contains("min(100%"),"Nonlinear equations remain in Shift details");
++        assert(!compact.Contains("min(100%")&&bleed.FullMath.Contains("min(100%"),"Nonlinear equations remain in optional Details details");
+         assert(OriginalItemDefinitions.EstimateAttackRoll("BleedOnHit",12,null,0)==null,"Compact presentation does not invent missing attack context");
+         var multi=OriginalItemDefinitions.Find("ChainLightning").CreateTerms("Chain",3);
+         compact=CompactTooltipPresentation.Item(multi,"Chain lightning.",3,3);
+@@ -47,18 +47,18 @@
+                 assert(!item.CompactValue.Contains("NaN")&&!item.CompactValue.Contains("Infinity"),"Invalid numbers cannot reach compact component text: "+id);
+         }
+         var calculation=new Calculation("Baseline",100);calculation.Apply("Level",CalculationStage.Flat,20);
+-        string stat=CompactTooltipPresentation.Stat("Maximum health.",150,calculation,"cIsHealing",statName:"health");
+-        assert(stat.Contains("Total health: 150")&&stat.Contains("Base health: 100")&&stat.Contains("Level growth: +20")&&stat.Contains("Unattributed: +30 (partial)"),"Compact live stat distinguishes the partial subtotal and discrepancy");
+-        stat=CompactTooltipPresentation.Stat("Maximum health.",120,calculation,"cIsHealing",statName:"health");
+-        assert(!stat.Contains("Partial attribution")&&!stat.Contains("Unattributed: 0"),"Matching subtotal adds no zero-remainder warning to the default view");
+-        assert(calculation.Describe(120,false,true).Contains("Partial attribution"),"Coverage limits remain in Shift even when the subtotal matches");
++        string stat=TooltipMarkup.Render(StatTooltipPresentation.Create(150,20,calculation,"cIsHealing",growthSource:"Level"),s=>false);
++        assert(stat=="Total: 150\nBase: 100 + 20 per level\nBonuses:\nOther/unknown: +30","Simple stat distinguishes the live total, base coefficient and unknown bonus");
++        stat=StatTooltipPresentation.Create(120,20,calculation,"cIsHealing",growthSource:"Level");
++        assert(stat.Contains("Bonuses: None")&&!stat.Contains("Other/unknown"),"Matching values add no zero-difference warning");
++        assert(calculation.Describe(120,false,true).Contains("Partial attribution"),"Coverage limits remain in optional Details even when values match");
+         var screenshotHealth=new Calculation("Survivor baseline",110);
+         screenshotHealth.Apply("Level growth (level - 1)",CalculationStage.Flat,33*(4-1));
+-        string health=TooltipMarkup.Render(CompactTooltipPresentation.Stat("",209,screenshotHealth,"cIsHealing",statName:"health"),s=>false);
+-        assert(health.Split((char)10).SequenceEqual(new[]{"Total health: 209","Base health: 110","Level growth: +99"}),"Screenshot health has exactly total209, base110 and growth99 without repeated subtotal or warning");
++        string health=TooltipMarkup.Render(StatTooltipPresentation.Create(209,33,screenshotHealth,"cIsHealing"),s=>false);
++        assert(health.Split((char)10).SequenceEqual(new[]{"Total: 209","Base: 110 + 33 per level","Bonuses: None"}),"Screenshot health uses the exact simple display contract");
+         string expandedHealth=screenshotHealth.Describe(209,false,true);
+-        assert(expandedHealth.Contains("Level growth (level - 1): +99")&&!expandedHealth.Contains("Level growth (level - 1): 209"),"Expanded growth label is its contribution rather than cumulative209");
+-        assert(screenshotHealth.Predicted==209&&screenshotHealth.Terms[1].After==209&&screenshotHealth.Terms[1].Operand==99,"Presentation correction preserves ordered calculation semantics");
++        assert(expandedHealth.Contains("Level growth (level - 1): +99")&&!expandedHealth.Contains("Level growth (level - 1): 209"),"Details growth remains the contribution rather than cumulative209");
++        assert(screenshotHealth.Predicted==209&&screenshotHealth.Terms[1].After==209&&screenshotHealth.Terms[1].Operand==99,"Simple presentation preserves calculation semantics");
+         var dagger=OriginalItemDefinitions.Find("BleedOnHit").Create("Tri-Tip Dagger",1);
+         string daggerShort=TooltipMarkup.Render(CompactTooltipPresentation.Item(new[]{dagger},"Chance to bleed enemies.",1,1),s=>false);
+         assert(daggerShort.Contains("10%")&&!daggerShort.Contains("20%")&&!daggerShort.Contains("additional")&&!daggerShort.Contains("Public snapshot"),"Screenshot dagger default shows current10% without next20% or repeated snapshot/count boilerplate");
+@@ -75,8 +75,8 @@
+         ordered.Apply("Item A",CalculationStage.Flat,25);ordered.Apply("Item B",CalculationStage.AdditiveMultiplier,.2);
+         ordered.Apply("Later buff",CalculationStage.LateFlat,30);ordered.Apply("Nectar",CalculationStage.LateMultiplier,1.16);
+         string originalStages=string.Join(",",ordered.Terms.Select(t=>t.Stage));
+-        string grouped=CompactTooltipPresentation.Stat("",208.8,ordered,"cIsHealing",statName:"health");
+-        assert(grouped.Contains("Flat / Item A:")&&grouped.Contains("Modifier / Item B:")&&grouped.Contains("+20%"),"Only present sources appear in applicable flat/modifier categories");
++        string grouped=StatTooltipPresentation.Create(208.8,0,ordered,"cIsHealing",growthSource:"Level growth");
++        assert(grouped.Contains("Item A:")&&grouped.Contains("Item B:")&&grouped.Contains("+20%"),"Only present sources appear in applicable flat/modifier categories");
+         assert(!grouped.Contains("Level growth:"),"Zero growth does not add an inapplicable default row");
+         assert(string.Join(",",ordered.Terms.Select(t=>t.Stage))==originalStages&&Math.Abs(ordered.Predicted-208.8)<1e-9,"Category presentation preserves late-flat and late-multiplier calculation order");
+ 
+@@ -90,7 +90,7 @@
+             bool fits=CompactTooltipSizing.TryCreate(resolution[0],resolution[1],420*scale,bodyHeight*scale,40*scale,26*scale,scale,full,out size);
+             assert(fits&&size.Width<=resolution[0]-24*scale&&size.Height<=resolution[1]-24*scale&&size.ViewportHeight>0,"Popup fits owned canvas with bounded overflow viewport");
+             if(bodyHeight==18)assert(size.Height<200*scale,"Short text does not retain an empty fixed-height card");
+-            if(bodyHeight==2000)assert(size.ViewportHeight<bodyHeight*scale,"Long Shift body is bounded for scrolling");
++            if(bodyHeight==2000)assert(size.ViewportHeight<bodyHeight*scale,"Long optional Details body is bounded for scrolling");
+             matrices++;
+         }
+         CompactTooltipSize invalid;
+--- 0.2.2.4/tests\CoreTests.cs
++++ 0.2.2.5/tests\CoreTests.cs
+@@ -107,6 +107,7 @@
+         CompactSheetLayoutTests.Run(Assert);
+         CompactTooltipTests.Run(Assert);
+         AdditiveDetailsTests.Run(Assert);
++        SimpleStatTooltipTests.Run(Assert);
+         LifecycleCoverageTests.Run(Assert);
+         CoverageFormulaTests.Run(Assert);
+         Console.WriteLine("PASS " + assertions + " assertions: lifecycle/ownership, ordered stat math, n=1/4/10 item components, caps/proc/luck, Nectar and buff uncertainty.");
+--- 0.2.2.4/tests\SimpleStatTooltipTests.cs
++++ 0.2.2.5/tests\SimpleStatTooltipTests.cs
+@@ -0,0 +1,95 @@
++using System;
++using System.Linq;
++using Alexander.CharacterSheet.Core;
++static class SimpleStatTooltipTests
++{
++    const string Growth="Level growth (level - 1)";
++    static string Plain(double live,double growth,Calculation calculation,string suffix="")=>
++        TooltipMarkup.Render(StatTooltipPresentation.Create(live,growth,calculation,"cIsUtility",suffix),s=>false);
++    static Calculation Basis(double baseline,double growth,int level)
++    {
++        var calculation=new Calculation("Survivor baseline",baseline);
++        calculation.Apply(Growth,CalculationStage.Flat,growth*(level-1));return calculation;
++    }
++    public static void Run(Action<bool,string> assert)
++    {
++        var level1=Basis(110,33,1);
++        assert(Plain(110,33,level1)=="Total: 110\nBase: 110 + 33 per level\nBonuses: None","Level1 shows the actual growth coefficient even though no level growth has been applied");
++        var level4=Basis(110,33,4);
++        string plain=Plain(209,33,level4);
++        assert(plain=="Total: 209\nBase: 110 + 33 per level\nBonuses: None","Level4 has total209 and the same base110 +33 per level");
++        assert(!plain.Contains("99")&&!plain.Contains("Base: 209"),"Applied growth is not repeated as a bonus or mislabeled as the base");
++        assert(level4.Terms[1].Operand==99&&level4.Terms[1].After==209&&level4.Predicted==209,"Level growth is applied exactly once");
++        string trace=level4.Describe(209,false,true);
++        assert(trace.Contains("+99")&&trace.Contains("110 -> 209")&&trace.Contains("Flat"),"Optional trace keeps the real growth contribution and ordered transition");
++        var damage=Basis(12,2.4,1);
++        assert(Plain(12,2.4,damage)=="Total: 12\nBase: 12 + 2.4 per level\nBonuses: None","Screenshot level1 damage no longer displays growth12 or a technical explanation");
++        var regen=Basis(1,.2,4);
++        assert(Plain(regen.Predicted,.2,regen," /s")=="Total: 1.6 /s\nBase: 1 /s + 0.2 /s per level\nBonuses: None","Regen retains units without extra commentary");
++        var armor=Basis(0,0,4);
++        assert(Plain(0,0,armor)=="Total: 0\nBase: 0 + 0 per level\nBonuses: None","A zero armor base and growth are actual zero values");
++        var negativeGrowth=Basis(10,-2,4);
++        assert(Plain(4,-2,negativeGrowth).Contains("Base: 10 - 2 per level"),"A negative coefficient uses subtraction");
++
++        var bonuses=Basis(100,10,4);
++        bonuses.Apply("Flat item",CalculationStage.Flat,25);
++        bonuses.Apply("Penalty",CalculationStage.AdditiveMultiplier,-.2);
++        bonuses.Apply("Late flat",CalculationStage.LateFlat,30);
++        bonuses.Apply("Final modifier",CalculationStage.LateMultiplier,1.1);
++        string stages=string.Join(",",bonuses.Terms.Select(t=>t.Stage));
++        double prediction=bonuses.Predicted;
++        string grouped=Plain(prediction,10,bonuses);
++        assert(grouped.StartsWith("Total: "+NumberFormatting.Display(prediction)+"\nBase: 100 + 10 per level\nBonuses:\n"),"Bonus view has exactly the requested top-level labels");
++        assert(grouped.IndexOf("Flat item: +25")<grouped.IndexOf("Late flat: +30")&&grouped.IndexOf("Late flat: +30")<grouped.IndexOf("Penalty: -20%"),"Known flat sources display before percentage modifiers");
++        assert(grouped.Contains("Final modifier: +10%")&&!grouped.Contains("x1.1"),"Multiplicative factors display as readable signed percentages");
++        assert(string.Join(",",bonuses.Terms.Select(t=>t.Stage))==stages&&bonuses.Predicted==prediction,"Display grouping does not reorder the underlying operations");
++        trace=bonuses.Describe(prediction,false,true);
++        assert(trace.IndexOf("Penalty:")<trace.IndexOf("Late flat:")&&trace.IndexOf("Late flat:")<trace.IndexOf("Final modifier:"),"Optional ordered math preserves early modifier then late flat then late modifier");
++        assert(Plain(prediction+5,10,bonuses).EndsWith("Other/unknown: +5"),"A positive unaccounted difference is a short honest bonus label");
++        assert(Plain(prediction-8,10,bonuses).EndsWith("Other/unknown: -8"),"A negative unaccounted difference is not disguised as an item penalty");
++        assert(!Plain(prediction,10,bonuses).Contains("Other/unknown"),"Zero difference does not add a coverage warning");
++        var unknownOnly=Basis(110,33,4);
++        assert(Plain(229,33,unknownOnly).EndsWith("Bonuses:\nOther/unknown: +20"),"Unattributed sources are labeled even when no known bonuses are present");
++        assert(Plain(double.NaN,33,unknownOnly).Contains("Other/unknown: Unavailable"),"Missing live data does not imply zero bonuses");
++        var neutral=Basis(10,0,1);neutral.Apply("Zero flat",CalculationStage.Flat,0);neutral.Apply("Zero percent",CalculationStage.AdditiveMultiplier,0);neutral.Apply("Identity factor",CalculationStage.Multiplier,1);
++        assert(Plain(10,0,neutral).EndsWith("Bonuses: None"),"Neutral operations do not clutter the ordinary view");
++        var cursed=Basis(100,0,1);cursed.Apply("Late factor",CalculationStage.LateMultiplier,1.16);cursed.Apply("Curse",CalculationStage.FinalConversion,.5);
++        assert(Plain(cursed.Predicted,0,cursed).Contains("Curse: -50%"),"A known final conversion keeps a readable percentage");
++        trace=cursed.Describe(cursed.Predicted,false,true);
++        assert(trace.IndexOf("Late factor:")<trace.IndexOf("Curse:")&&Math.Abs(cursed.Predicted-58)<1e-9,"Final conversion is still calculated after the late multiplier");
++        var levelNamedItem=Basis(10,0,1);levelNamedItem.Apply("Level reward item",CalculationStage.Flat,5);
++        assert(Plain(15,0,levelNamedItem).Contains("Level reward item: +5"),"Only the exact growth source is excluded, not every item starting with Level");
++        var unsafeName=Basis(10,0,1);unsafeName.Apply("<link=target>Flat",CalculationStage.Flat,1);
++        assert(!Plain(11,0,unsafeName).Contains("<link="),"Bonus source names cannot inject tooltip markup");
++
++        int examples=0;
++        foreach(int level in new[]{1,4})
++        foreach(var values in new[]{new[]{110d,33d},new[]{12d,2.4d},new[]{1d,.2d},new[]{0d,0d}})
++        foreach(double difference in new[]{0d,7d,-3d})
++        {
++            var calculation=Basis(values[0],values[1],level);
++            string text=Plain(calculation.Predicted+difference,values[1],calculation);
++            assert(text.StartsWith("Total: ")&&text.Contains("\nBase: ")&&text.Contains("\nBonuses:"),"Every requested stat follows Total / Base / Bonuses");
++            assert(text.Contains(NumberFormatting.Display(values[0])+" + "+NumberFormatting.Display(values[1])+" per level"),"Base always uses the coefficient, independently of level and bonus difference");
++            assert(!new[]{"authoritative","modeled","hooks","evidence","partial","coefficient","unverified","Shift","Level growth:"}.Any(s=>text.IndexOf(s,StringComparison.OrdinalIgnoreCase)>=0),"Ordinary stat body contains no diagnostics or expansion shortcut");
++            assert((difference==0)==text.EndsWith("Bonuses: None"),"Only actual zero differences use the empty bonus label");
++            examples++;
++        }
++        object own=new object(),other=new object();
++        assert(NativeItemSurfacePolicy.OwnSurface(own,own,other,true,false),"Own scoreboard identity takes precedence over the HUD target");
++        assert(NativeItemSurfacePolicy.OwnSurface(own,null,own,false,true),"Exact own top HUD display is an eligible native item surface");
++        assert(!NativeItemSurfacePolicy.OwnSurface(own,other,own,true,true),"Another player's scoreboard cannot be admitted through the top HUD branch");
++        assert(!NativeItemSurfacePolicy.OwnSurface(own,null,other,false,true),"A spectated foreign HUD target is excluded");
++        assert(!NativeItemSurfacePolicy.OwnSurface(null,null,null,true,true),"Missing local ownership is excluded");
++        assert(!NativeItemSurfacePolicy.OwnSurface(own,own,own,false,false),"Unrelated item surfaces are excluded");
++        assert(ItemDetailsPresentation.Create(null,1,1)=="","Unsupported items produce no unavailable-formula body");
++        var missing=ItemTooltipPresentation.Create(new ItemScalingInput{Name="Missing",OwnedCopies=1});
++        assert(ItemDetailsPresentation.Create(new[]{missing},1,1)=="","An unsupported supplied component is also omitted");
++        assert(!NativeItemSurfacePolicy.HasAddition("","?"),"Unknown formula and luck retain the native tooltip alone");
++        assert(NativeItemSurfacePolicy.HasAddition("","!")&&!NativeItemSurfacePolicy.KnownLuck("?"),"Explicit scoped luck information may add the small clover without a formula button");
++        var dagger=OriginalItemDefinitions.Find("BleedOnHit").Create("Native name",1);
++        string addition=ItemDetailsPresentation.Create(new[]{missing,dagger},1,1);
++        assert(addition.Contains("10%")&&addition.Contains("20%")&&!addition.Contains("unavailable")&&!addition.Contains("Native name"),"Available calculations extend the native tooltip without duplicating its title or missing-formula filler");
++        Console.WriteLine("Simple stat display: "+examples+" level/stat/bonus examples, coefficients, negative modifiers, ordered Details, both item ownership paths and unknown-formula omission.");
++    }
++}

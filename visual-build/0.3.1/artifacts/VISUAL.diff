@@ -1,0 +1,838 @@
+--- 0.3.0/src\Core\DisplayResidual.cs
++++ 0.3.1/src\Core\DisplayResidual.cs
+@@ -0,0 +1,16 @@
++using System;
++namespace Alexander.CharacterSheet.Core
++{
++    // Only the unattributed compact display residual is filtered. Live values, known terms and traces are untouched.
++    public static class DisplayResidual
++    {
++        public const double AbsoluteTolerance=1e-12,RelativeTolerance=6e-8;
++        public static double ForDisplay(double live,double modeled)
++        {
++            double residual=live-modeled;
++            if(!NumberFormatting.IsFinite(live)||!NumberFormatting.IsFinite(modeled)||!NumberFormatting.IsFinite(residual))return residual;
++            double tolerance=Math.Max(AbsoluteTolerance,RelativeTolerance*Math.Max(Math.Abs(live),Math.Abs(modeled)));
++            return Math.Abs(residual)<=tolerance?0:residual;
++        }
++    }
++}
+--- 0.3.0/src\Core\IndividualItemDetails.cs
++++ 0.3.1/src\Core\IndividualItemDetails.cs
+@@ -0,0 +1,42 @@
++using System;
++using System.Collections.Generic;
++using System.Linq;
++namespace Alexander.CharacterSheet.Core
++{
++    public static class IndividualItemDetails
++    {
++        static ItemTooltipView[] Known(IEnumerable<ItemTooltipView> terms)=>
++            (terms??Enumerable.Empty<ItemTooltipView>()).Where(t=>t!=null&&t.CurrentValue.HasValue&&NumberFormatting.IsFinite(t.CurrentValue.Value)).ToArray();
++        public static string Create(IEnumerable<ItemTooltipView> singleSource,IEnumerable<ItemTooltipView> currentSource,
++            long effective,long permanent,string conditions="")
++        {
++            var single=Known(singleSource);var current=Known(currentSource);
++            if(current.Length==0&&single.Length==0)return "";
++            var lines=new List<string>();
++            // At one copy the unchanged native description already supplies the individual effect.
++            // A multi-copy comparison needs an explicit numeric reference before its combined current-stack block.
++            if(effective>1)
++            {
++                if(single.Length>0)
++                {
++                    lines.Add(TooltipMarkup.Style("Single-copy components","cStack"));
++                    foreach(var term in single)lines.Add(TooltipMarkup.Style(term.CompactValue,term.SemanticStyle));
++                }
++                if(current.Length>0)
++                {
++                    lines.Add(TooltipMarkup.Style("Current stack ("+NumberFormatting.Count(effective)+" effective)","cStack"));
++                    foreach(var term in current)
++                        lines.Add(TooltipMarkup.Style(term.CompactValue,term.SemanticStyle)+
++                            (term.StackHint.Length>0?" "+TooltipMarkup.Style(term.StackHint,"cStack"):""));
++                }
++            }
++            if(effective!=permanent)lines.Add(TooltipMarkup.Style(NumberFormatting.Count(permanent)+" owned; "+NumberFormatting.Count(effective)+" effective","cStack"));
++            foreach(var term in current)
++                if(term.NextValue.HasValue)lines.Add(TooltipMarkup.Style(term.NextLabel,term.SemanticStyle));
++            foreach(string confidence in current.Select(t=>t.Comparison.Confidence).Distinct(StringComparer.Ordinal))
++                lines.Add(TooltipMarkup.Literal(confidence));
++            if(!string.IsNullOrWhiteSpace(conditions))lines.Add(TooltipMarkup.Literal(conditions));
++            return string.Join("\n",lines);
++        }
++    }
++}
+--- 0.3.0/src\Core\NectarCounterPresentation.cs
++++ 0.3.1/src\Core\NectarCounterPresentation.cs
+@@ -0,0 +1,79 @@
++using System;
++using System.Collections.Generic;
++using System.Linq;
++namespace Alexander.CharacterSheet.Core
++{
++    public sealed class NectarBuffObservation
++    {
++        public string Id;
++        public long? Stacks;
++        public bool? Hidden,DefinitionIgnored,CatalogIgnored,SelfCounter;
++    }
++    public sealed class NectarCounterView
++    {
++        public readonly long? EligibleTypes,ReferenceCap,Used,ObservedCap;
++        public readonly double? BonusPercent;
++        public readonly bool Discrepancy;
++        public readonly string Compact,Details;
++        internal NectarCounterView(long? eligible,long? referenceCap,long? used,long? observedCap,double? bonus,
++            bool discrepancy,string compact,string details)
++        {EligibleTypes=eligible;ReferenceCap=referenceCap;Used=used;ObservedCap=observedCap;BonusPercent=bonus;
++         Discrepancy=discrepancy;Compact=compact;Details=details;}
++    }
++    public static class NectarCounterPresentation
++    {
++        public const double PercentPerType=4;
++        public static long? EligibleTypes(IEnumerable<NectarBuffObservation> observations)
++        {
++            if(observations==null)return null;
++            var unique=new Dictionary<string,NectarBuffObservation>(StringComparer.Ordinal);
++            foreach(var entry in observations)
++            {
++                if(entry==null||string.IsNullOrEmpty(entry.Id))return null;
++                NectarBuffObservation prior;
++                if(unique.TryGetValue(entry.Id,out prior))
++                {
++                    if(prior.Stacks!=entry.Stacks||prior.Hidden!=entry.Hidden||prior.DefinitionIgnored!=entry.DefinitionIgnored||
++                        prior.CatalogIgnored!=entry.CatalogIgnored||prior.SelfCounter!=entry.SelfCounter)return null;
++                }
++                else unique.Add(entry.Id,entry);
++            }
++            long count=0;
++            foreach(var entry in unique.Values)
++            {
++                if(entry.Stacks==0||entry.Hidden==true||entry.DefinitionIgnored==true||entry.CatalogIgnored==true||entry.SelfCounter==true)continue;
++                if(!entry.Stacks.HasValue||entry.Stacks<0||!entry.Hidden.HasValue||!entry.DefinitionIgnored.HasValue||
++                    !entry.CatalogIgnored.HasValue||!entry.SelfCounter.HasValue)return null;
++                count++;
++            }
++            return count;
++        }
++        static long? Valid(long? value)=>value.HasValue&&value>=0?value:null;
++        static string Count(long? value)=>value.HasValue?NumberFormatting.Count(value):"Unknown";
++        public static NectarCounterView Create(long? copies,IEnumerable<NectarBuffObservation> observations,
++            long? observedCount,long? observedCap,bool? counterActive,bool formulaVerified)
++        {
++            long? eligible=EligibleTypes(observations),cap=Valid(observedCap),raw=Valid(observedCount);
++            long? referenceCap=formulaVerified&&copies.HasValue&&copies>=0&&copies<=long.MaxValue/4?copies*4:null;
++            long? used=raw.HasValue&&cap.HasValue?Math.Min(raw.Value,cap.Value):(long?)null;
++            bool discrepancy=(referenceCap.HasValue&&cap.HasValue&&referenceCap!=cap)||
++                (eligible.HasValue&&cap.HasValue&&used.HasValue&&Math.Min(eligible.Value,cap.Value)!=used.Value);
++            double? bonus=null;
++            if(formulaVerified&&referenceCap.HasValue&&cap==referenceCap&&used.HasValue&&counterActive.HasValue)
++                bonus=counterActive.Value?PercentPerType*used.Value:0;
++            string compact="Effective buffs: "+Count(used)+" / "+Count(cap);
++            if(!eligible.HasValue)compact+="\nEligible types: Unknown";
++            else if(cap.HasValue&&eligible>cap)compact+="\nEligible types: "+Count(eligible)+" (over cap)";
++            compact+="\nNectar bonus: "+(bonus.HasValue?NumberFormatting.Signed(bonus)+"%"+(counterActive==false?" (inactive)":""):"Unknown");
++            if(discrepancy)compact+="\nCounter/model differs; game counter shown.";
++            string details="Distinct active eligible buff types: "+Count(eligible)+
++                "\nObserved game counter: "+Count(raw)+" / "+Count(cap)+
++                "\nReference capacity (4 x effective copies): "+Count(referenceCap)+
++                "\nNectar counter buff active: "+(counterActive.HasValue?(counterActive.Value?"yes":"no"):"Unknown")+
++                "\nEligibility excludes hidden definitions, definition/catalog ignoreGrowthNectar flags and Nectar's own counter. A type counts once, independently of stacks."+
++                "\nBonus is the public 4%-per-used-type Nectar component when its counter buff is active; it is not full final stat attribution."+
++                "\nGame observations remain authoritative. Unavailable metadata, formula or activation is labeled Unknown.";
++            return new NectarCounterView(eligible,referenceCap,used,cap,bonus,discrepancy,compact,details);
++        }
++    }
++}
+--- 0.3.0/src\Core\SheetHierarchy.cs
++++ 0.3.1/src\Core\SheetHierarchy.cs
+@@ -3,7 +3,7 @@
+ using System.Linq;
+ namespace Alexander.CharacterSheet.Core
+ {
+-    public enum SheetGlyph { None,Shield,Sword,Runner,Clover,Burst,Skull }
++    public enum SheetGlyph { None,Shield,Sword,Runner,Clover,Burst,Skull,CrossedSwords,Misc }
+     public sealed class SheetNode
+     {
+         public readonly string Id,Parent,Title,Payload;
+@@ -78,10 +78,12 @@
+     public sealed class SheetExpansionState
+     {
+         readonly Dictionary<string,bool> values=new Dictionary<string,bool>(StringComparer.Ordinal);
++        readonly bool referenceDefaults;
++        public SheetExpansionState(bool referenceDefaults=false){this.referenceDefaults=referenceDefaults;}
+         public bool IsOpen(string id)
+         {
+             bool value;if(values.TryGetValue(id??"",out value))return value;
+-            return id==SheetHierarchy.Base||id==SheetHierarchy.Defense||id==SheetHierarchy.Offense||id==SheetHierarchy.Movement||id==SheetHierarchy.Luck;
++            return id==SheetHierarchy.Defense||(!referenceDefaults&&(id==SheetHierarchy.Base||id==SheetHierarchy.Offense||id==SheetHierarchy.Movement||id==SheetHierarchy.Luck));
+         }
+         public bool Set(string id,bool value)
+         {if(!SheetHierarchy.Headers.Any(n=>n.Id==id))return false;values[id]=value;return true;}
+--- 0.3.0/src\Core\StatTooltipPresentation.cs
++++ 0.3.1/src\Core\StatTooltipPresentation.cs
+@@ -28,7 +28,7 @@
+                 if(percent!=0)bonuses.Add(TooltipMarkup.Literal(term.Source)+": "+TooltipMarkup.Style(NumberFormatting.Signed(percent)+"%",semanticStyle));
+             }
+             // This is a difference after the known operations, not an inferred early flat source.
+-            double residual=live-calculation.Predicted;
++            double residual=DisplayResidual.ForDisplay(live,calculation.Predicted);
+             if(!NumberFormatting.IsFinite(residual)||residual!=0)
+                 bonuses.Add("Other/unknown: "+TooltipMarkup.Style(NumberFormatting.Signed(residual)+suffix,"cStack"));
+             if(bonuses.Count==0)lines.Add("Bonuses: None");
+--- 0.3.0/src\Core\VisualSheetStructure.cs
++++ 0.3.1/src\Core\VisualSheetStructure.cs
+@@ -0,0 +1,59 @@
++using System;
++using System.Collections.Generic;
++using System.Linq;
++namespace Alexander.CharacterSheet.Core
++{
++    public static class VisualSheetStructure
++    {
++        public const string FooterId="stat:Luck";
++        public static bool IsFooter(SheetNode node)=>node!=null&&node.Id==FooterId;
++        static readonly string[] order={SheetHierarchy.Defense,SheetHierarchy.Offense,SheetHierarchy.Movement,
++            SheetHierarchy.Hit,SheetHierarchy.Kill,SheetHierarchy.Combat,SheetHierarchy.Sprint,SheetHierarchy.Other};
++        public static IReadOnlyList<SheetNode> Project(IEnumerable<SheetNode> original)
++        {
++            if(original==null)throw new ArgumentNullException(nameof(original));
++            var nodes=original.ToArray();var result=new List<SheetNode>();
++            foreach(string id in order)
++            {
++                var header=nodes.Single(n=>n.Id==id&&n.Header);
++                string parent="";
++                string title=id==SheetHierarchy.Hit?"On-Hit Effects":id==SheetHierarchy.Kill?"On-Kill Effects":
++                    id==SheetHierarchy.Other?"Misc Effects":header.Title;
++                SheetGlyph glyph=id==SheetHierarchy.Offense?SheetGlyph.CrossedSwords:
++                    id==SheetHierarchy.Other?SheetGlyph.Misc:header.Glyph;
++                result.Add(new SheetNode(id,parent,title,true,0,glyph:glyph));
++                foreach(var row in nodes.Where(n=>!n.Header&&(n.Parent==id||(id==SheetHierarchy.Other&&n.Parent==SheetHierarchy.Damage))))
++                    result.Add(new SheetNode(row.Id,id,row.Title,false,1,row.Payload,row.Glyph));
++            }
++            var luck=nodes.Single(n=>n.Id==FooterId&&!n.Header);
++            result.Add(new SheetNode(luck.Id,"",luck.Title,false,0,luck.Payload,SheetGlyph.Clover));
++            return result;
++        }
++        public static string ToggleLabel(bool open)=>open?"Collapse":"Expand";
++    }
++    public readonly struct VisualSheetRegions
++    {
++        public readonly double FooterHeight,ViewportBottom,ViewportTop,ViewportHeight;
++        public VisualSheetRegions(double panelHeight,double titleHeight,double footerHeight,double padding)
++        {
++            if(new[]{panelHeight,titleHeight,footerHeight,padding}.Any(v=>!NumberFormatting.IsFinite(v))||
++                titleHeight<=0||footerHeight<=0||padding<0||panelHeight<=titleHeight+footerHeight+2*padding)
++                throw new ArgumentOutOfRangeException();
++            FooterHeight=footerHeight;ViewportBottom=footerHeight+padding;
++            ViewportTop=panelHeight-titleHeight-padding;ViewportHeight=ViewportTop-ViewportBottom;
++        }
++    }
++    public static class VisualSheetSizing
++    {
++        public const double BackgroundOpacity=.8;
++        public static double PanelHeight(double canvasHeight,int headers,int rows,double rowHeight,double bandHeight,
++            double titleHeight,double footerHeight,double padding,double minHeight)
++        {
++            if(new[]{canvasHeight,rowHeight,bandHeight,titleHeight,footerHeight,padding,minHeight}.Any(v=>!NumberFormatting.IsFinite(v))||
++                canvasHeight<=0||headers<0||rows<0||rowHeight<=0||bandHeight<=0||titleHeight<=0||footerHeight<=0||padding<0||minHeight<=0)
++                throw new ArgumentOutOfRangeException();
++            double content=titleHeight+footerHeight+headers*bandHeight+rows*rowHeight+2*padding;
++            return Math.Max(minHeight,Math.Min(content,Math.Max(minHeight,canvasHeight*.5)));
++        }
++    }
++}
+--- 0.3.0/src\Plugin.cs
++++ 0.3.1/src\Plugin.cs
+@@ -10,7 +10,7 @@
+ using UnityEngine.SceneManagement;
+ namespace Alexander.CharacterSheet
+ {
+-    [BepInPlugin(Id,"Alexander's Character Sheet","0.3.0")]
++    [BepInPlugin(Id,"Alexander's Character Sheet","0.3.1")]
+     public sealed class Plugin:BaseUnityPlugin
+     {
+         public const string Id="alexander.charactersheet";
+@@ -28,7 +28,7 @@
+         PauseStopController capturedPause;
+         bool capturedBeforePause,capturedOpen,sheetOpen,hasFocus=true,initialized,subscribed,faulted;
+         SheetView view;
+-        readonly SheetExpansionState sheetExpansion=new SheetExpansionState();
++        readonly SheetExpansionState sheetExpansion=new SheetExpansionState(true);
+         LocalUser local;
+         CharacterBody body;
+         float nextRefresh;
+@@ -46,7 +46,7 @@
+             {
+                 harmony=new Harmony(Id);harmony.PatchAll(typeof(Plugin).Assembly);
+                 SceneManager.activeSceneChanged+=SceneChanged;subscribed=true;initialized=true;
+-                Logger.LogInfo("Native Tab-extension source 0.3.0; HUD branch placement and held-Info re-entry guards; in-game fix verification pending.");
++                Logger.LogInfo("Native Tab-extension source 0.3.1; HUD branch placement and held-Info re-entry guards; in-game fix verification pending.");
+             }
+             catch(Exception error)
+             {
+--- 0.3.0/src\Presentation\NativeHoverPopup.cs
++++ 0.3.1/src\Presentation\NativeHoverPopup.cs
+@@ -1,4 +1,5 @@
+ using System;
++using System.Linq;
+ using Alexander.CharacterSheet.Core;
+ using RoR2;
+ using RoR2.UI;
+@@ -89,12 +90,12 @@
+                     itemAnchor=NativeTooltipAnchor.Find(provider,canvasRect,canvas);
+                 if(itemAnchor==null||!itemAnchor.Current){root.gameObject.SetActive(false);return false;}
+             }
+-            bool hasDetails=!source.IsItem||!string.IsNullOrWhiteSpace(source.ItemDetailsRichTooltip);
++            bool hasDetails=!source.IsItem||!string.IsNullOrWhiteSpace(source.ItemDetailsRichTooltip)||!string.IsNullOrWhiteSpace(source.ExpandedItemNote);
+             bool full=interaction.Expanded&&hasDetails,changed=row==null||row.Id!=source.Id||lastFull!=full;
+             row=source;lastFull=full;nativeStyle.Refresh(title,body,panelImage,headerImage,scale,source.IsItem?itemAnchor.Controller:null);
+             heading.gameObject.SetActive(!source.IsItem);
+             if(!source.IsItem){title.text=TooltipText.SingleLine(source.Title);if(source.Icon)title.color=source.Color;}
+-            string raw=source.IsItem?full?string.Join("\n",new[]{source.ItemHoverNote,source.ItemDetailsRichTooltip}):source.ItemHoverNote??"":full?source.FullRichTooltip:source.ShortRichTooltip;
++            string raw=source.IsItem?full?string.Join("\n",new[]{source.CombinedItemNote,source.ExpandedItemNote,source.ItemDetailsRichTooltip}.Where(s=>!string.IsNullOrWhiteSpace(s))):source.CombinedItemNote:full?source.FullRichTooltip:source.ShortRichTooltip;
+             string text=source.IsItem?raw:raw??TooltipMarkup.Literal(full?source.FullTooltip??source.ShortTooltip:source.ShortTooltip);
+             body.text=TooltipMarkup.Render(text,nativeStyle.CanStyle);
+             detailsButton.gameObject.SetActive(hasDetails);
+@@ -107,7 +108,7 @@
+             width=Mathf.Min(width,canvasRect.rect.width-24*scale);
+             bool hasFooter=hasDetails||luckBadge.gameObject.activeSelf;footer.gameObject.SetActive(hasFooter);
+             float headerHeight=source.IsItem?0:title.fontSize*1.4f+8*scale,footerHeight=hasFooter?Mathf.Max(30*scale,detailsLabel.fontSize+10*scale):0;
+-            bool showBody=!source.IsItem||full||!string.IsNullOrWhiteSpace(source.ItemHoverNote);
++            bool showBody=!source.IsItem||full||!string.IsNullOrWhiteSpace(source.CombinedItemNote);
+             viewport.gameObject.SetActive(showBody);
+             float preferred=showBody?body.GetPreferredValues(body.text,Mathf.Max(20,width-24*scale),0).y:0;
+             CompactTooltipSize sizing;
+--- 0.3.0/src\Presentation\NectarObservationAdapter.cs
++++ 0.3.1/src\Presentation\NectarObservationAdapter.cs
+@@ -0,0 +1,37 @@
++using System.Collections.Generic;
++using System.Linq;
++using Alexander.CharacterSheet.Core;
++using RoR2;
++namespace Alexander.CharacterSheet
++{
++    internal static class NectarObservationAdapter
++    {
++        internal static NectarCounterView Read(CharacterBody body,long effectiveCopies)
++        {
++            if(!body)return NectarCounterPresentation.Create(effectiveCopies,null,null,null,null,true);
++            var self=DLC2Content.Buffs.BoostAllStatsBuff;
++            List<NectarBuffObservation> observations=null;
++            if(BuffCatalog.buffCount>0)
++            {
++                observations=new List<NectarBuffObservation>();
++                var ignored=BuffCatalog.ignoreGrowthNectarIndices;
++                for(int i=0;i<BuffCatalog.buffCount;i++)
++                {
++                    var index=(BuffIndex)i;int stacks=body.GetBuffCount(index);
++                    if(stacks<=0)continue;
++                    var definition=BuffCatalog.GetBuffDef(index);
++                    observations.Add(new NectarBuffObservation{
++                        Id="buff:"+i,Stacks=stacks,
++                        Hidden=definition?(bool?)definition.isHidden:null,
++                        DefinitionIgnored=definition?(bool?)definition.ignoreGrowthNectar:null,
++                        CatalogIgnored=ignored!=null?(bool?)ignored.Contains(index):null,
++                        SelfCounter=definition&&self?(bool?)(definition==self):null
++                    });
++                }
++            }
++            return NectarCounterPresentation.Create(effectiveCopies,observations,
++                body.currentGrowthNectarBuffCount,body.maxGrowthNectarBuffCount,
++                self?(bool?)body.HasBuff(self):null,true);
++        }
++    }
++}
+--- 0.3.0/src\Presentation\SheetData.cs
++++ 0.3.1/src\Presentation\SheetData.cs
+@@ -12,8 +12,9 @@
+     {
+         public string Id, Title, Detail, ShortTooltip, FullTooltip, ShortRichTooltip, FullRichTooltip, LuckTooltip, Group="Utility / passive", LuckLabel="Unverified";
+         public bool FormulaRegistered,IsItem;
+-        public string ItemDetailsRichTooltip,ItemHoverNote;
+-        internal bool HasItemAddition=>NativeItemSurfacePolicy.HasAddition(ItemDetailsRichTooltip,LuckMark)||!string.IsNullOrWhiteSpace(ItemHoverNote);
++        public string ItemDetailsRichTooltip,ItemHoverNote,LiveItemNote,ExpandedItemNote;
++        internal string CombinedItemNote=>string.Join("\n",new[]{LiveItemNote,ItemHoverNote}.Where(s=>!string.IsNullOrWhiteSpace(s)));
++        internal bool HasItemAddition=>NativeItemSurfacePolicy.HasAddition(ItemDetailsRichTooltip,LuckMark)||!string.IsNullOrWhiteSpace(CombinedItemNote)||!string.IsNullOrWhiteSpace(ExpandedItemNote);
+         public Sprite Icon;
+         public Color Color = Color.white;
+         public string LuckMark = "?";
+@@ -105,7 +106,9 @@
+                 string luck = "Luck applicability is unverified for this item's individual effects.";
+                 string mark = "?";
+                 var definition=OriginalItemDefinitions.Find(def.name);
+-                IReadOnlyList<ItemTooltipView> terms=definition?.CreateTerms(name,effective,definition.Id=="BoostAllStats"?OwnEligibleBuffTypes(body):null);
++                var nectar=definition?.Id=="BoostAllStats"?NectarObservationAdapter.Read(body,effective):null;
++                IReadOnlyList<ItemTooltipView> terms=definition?.CreateTerms(name,effective,nectar?.EligibleTypes);
++                IReadOnlyList<ItemTooltipView> singleTerms=definition?.CreateTerms(name,1,nectar?.EligibleTypes);
+                 ItemTooltipView scaling=terms!=null?terms[0]:null;
+                 string fullText=formula;
+                 string luckLabel="Unverified";
+@@ -130,7 +133,7 @@
+                 string compact=CompactTooltipPresentation.Item(terms,Language.GetString(def.pickupToken),effective,owned);
+                 string detailed=Language.GetString(def.descriptionToken)+"\n\n"+TooltipMarkup.Literal(fullText+
+                     "\nOwned: "+owned+" | Effective: "+effective);
+-                rows.Add(new SheetRow { IsItem=true,ItemDetailsRichTooltip=ItemDetailsPresentation.Create(terms,effective,owned,definition?.TriggerContext??""),FormulaRegistered=scaling!=null,ShortRichTooltip=compact,FullRichTooltip=detailed,Id = "item:" + i, Title = (effects ? group + " · " : "") + name + " ×" + effective,
++                rows.Add(new SheetRow { IsItem=true,LiveItemNote=nectar==null?"":TooltipMarkup.Literal(nectar.Compact),ExpandedItemNote=nectar==null?"":TooltipMarkup.Literal(nectar.Details),ItemDetailsRichTooltip=IndividualItemDetails.Create(singleTerms,terms,effective,owned,definition?.TriggerContext??""),FormulaRegistered=scaling!=null,ShortRichTooltip=compact,FullRichTooltip=detailed,Id = "item:" + i, Title = (effects ? group + " · " : "") + name + " ×" + effective,
+                     Detail = scaling!=null ? scaling.NextLabel : "", Icon = def.pickupIconSprite,
+                     Color = ItemTierCatalog.GetItemTierDef(def.tier) ? ColorCatalog.GetColor(ItemTierCatalog.GetItemTierDef(def.tier).colorIndex) : Color.white, ShortTooltip = TooltipText.Clean(Regex.Replace(compact,"<[^>]*>","")),
+                     FullTooltip = NativeText(def.descriptionToken)+"\n\n"+fullText+"\nOwned: "+owned+" | Effective: "+effective,
+@@ -161,7 +164,12 @@
+                 if (!def || def.isHidden) continue;
+                 bool counter=def==DLC2Content.Buffs.BoostAllStatsBuff;
+                 bool beadCounter=def==DLC2Content.Buffs.ExtraStatsOnLevelUpBuff;
+-                bool nectar=BuffGlossaryRules.NectarEligible(def.isHidden,def.ignoreGrowthNectar,BuffCatalog.ignoreGrowthNectarIndices.Contains(index),counter);
++                var exclusions=BuffCatalog.ignoreGrowthNectarIndices;
++                long? assessed=NectarCounterPresentation.EligibleTypes(new[]{new NectarBuffObservation{
++                    Id="buff:"+i,Stacks=stacks,Hidden=def.isHidden,DefinitionIgnored=def.ignoreGrowthNectar,
++                    CatalogIgnored=exclusions!=null?(bool?)exclusions.Contains(index):null,
++                    SelfCounter=DLC2Content.Buffs.BoostAllStatsBuff?(bool?)counter:null}});
++                string nectar=assessed.HasValue?(assessed>0?"eligible":"excluded"):"unknown";
+                 string kind=beadCounter?"Counter (stored level gains)":BuffGlossaryRules.Kind(def.isDebuff,def.isCooldown,counter);
+                 string duration = Remaining(body, index);
+                 string publicId=def==RoR2Content.Buffs.FullCrit?"RoR2Content.Buffs.FullCrit":
+@@ -170,8 +178,7 @@
+                 if(glossary?.Id=="ImmuneToDebuff")kind="Charges (ready)";
+                 else if(glossary?.Id=="ImmuneToDebuffConsumed")kind="Recharge / charge state";
+                 string effect=glossary?.Describe(stacks)??"Effect formula is not yet verified; authoritative totals are shown in the live stats panel.";
+-                if(counter)effect+="\nLive qualifying-type counter: "+body.currentGrowthNectarBuffCount+" / "+body.maxGrowthNectarBuffCount+
+-                    ". Public bonus component reference: "+F(4.0*body.currentGrowthNectarBuffCount)+"%; not complete final stat attribution.";
++                if(counter){var snapshot=NectarObservationAdapter.Read(body,SheetStructureData.Count(body,"BoostAllStats"));effect+="\n"+snapshot.Compact+"\n"+snapshot.Details;}
+                 if(beadCounter&&body.inventory)
+                 {
+                     ItemIndex beadIndex=ItemCatalog.FindItemIndex("ExtraStatsOnLevelUp");
+@@ -183,12 +190,12 @@
+                     }
+                 }
+                 rows.Add(new SheetRow { Id = "buff:" + i, Title = (glossary?.Name??Friendly(def.name)) + " ×" + stacks,
+-                    Detail = kind + " · " + duration + " · Nectar: " + (nectar ? "eligible type" : "excluded"),
++                    Detail = kind + " · " + duration + " · Nectar: " + nectar,
+                     Icon = def.iconSprite, Color = def.buffColor, LuckMark = "?",
+                     LuckTooltip = "Buff effects are context dependent; no generic luck claim is made.",
+-                    ShortTooltip = CompactBuff(glossary?.Id)+"\n"+kind+" | Nectar: "+(nectar?"eligible":"excluded")+"\nTimer unavailable",
++                    ShortTooltip = CompactBuff(glossary?.Id)+"\n"+kind+" | Nectar: "+nectar+"\nTimer unavailable",
+                     ShortRichTooltip=TooltipMarkup.Literal(CompactBuff(glossary?.Id))+"\n"+
+-                        TooltipMarkup.Style(kind+" | Nectar: "+(nectar?"eligible":"excluded"),"cStack")+"\n"+
++                        TooltipMarkup.Style(kind+" | Nectar: "+nectar,"cStack")+"\n"+
+                         TooltipMarkup.Style("Timer unavailable"+(glossary!=null?" | Reference effect":""),"cStack"),
+                     FullTooltip = effect + "\nInternal definition: " + def.name + "\nStacks: " + stacks +
+                         (def.canStack ? " (stackable)" : " (does not stack normally)") + "\n" + kind +
+@@ -201,19 +208,7 @@
+ 
+         static long? OwnEligibleBuffTypes(CharacterBody body)
+         {
+-            if(!body||BuffCatalog.buffCount<=0)return null;
+-            long types=0;
+-            for(int i=0;i<BuffCatalog.buffCount;i++)
+-            {
+-                var index=(BuffIndex)i;
+-                if(body.GetBuffCount(index)<=0)continue;
+-                var def=BuffCatalog.GetBuffDef(index);
+-                if(!def)return null;
+-                if(def.isHidden)continue;
+-                if(BuffGlossaryRules.NectarEligible(def.isHidden,def.ignoreGrowthNectar,
+-                    BuffCatalog.ignoreGrowthNectarIndices.Contains(index),def==DLC2Content.Buffs.BoostAllStatsBuff))types++;
+-            }
+-            return types;
++            return NectarObservationAdapter.Read(body,SheetStructureData.Count(body,"BoostAllStats")).EligibleTypes;
+         }
+ 
+         static string CompactBuff(string id)
+--- 0.3.0/src\Presentation\SheetGlyphGraphic.cs
++++ 0.3.1/src\Presentation\SheetGlyphGraphic.cs
+@@ -12,7 +12,19 @@
+             mesh.Clear();
+             if(Kind==SheetGlyph.Shield)Polygon(mesh,new[]{new Vector2(.15f,.9f),new Vector2(.85f,.9f),new Vector2(.8f,.4f),new Vector2(.5f,.08f),new Vector2(.2f,.4f)});
+             else if(Kind==SheetGlyph.Sword){Line(mesh,new Vector2(.22f,.15f),new Vector2(.82f,.86f),.11f);Line(mesh,new Vector2(.12f,.4f),new Vector2(.48f,.1f),.09f);}
+-            else if(Kind==SheetGlyph.Runner){Line(mesh,new Vector2(.12f,.28f),new Vector2(.88f,.28f),.13f);Line(mesh,new Vector2(.23f,.31f),new Vector2(.31f,.7f),.19f);Line(mesh,new Vector2(.32f,.58f),new Vector2(.72f,.28f),.13f);}
++            else if(Kind==SheetGlyph.Runner){
++                Circle(mesh,new Vector2(.63f,.84f),.11f);
++                Line(mesh,new Vector2(.57f,.68f),new Vector2(.45f,.43f),.14f);
++                Line(mesh,new Vector2(.57f,.66f),new Vector2(.32f,.62f),.09f);Line(mesh,new Vector2(.32f,.62f),new Vector2(.22f,.48f),.09f);
++                Line(mesh,new Vector2(.54f,.65f),new Vector2(.75f,.49f),.09f);
++                Line(mesh,new Vector2(.46f,.43f),new Vector2(.7f,.3f),.12f);Line(mesh,new Vector2(.7f,.3f),new Vector2(.83f,.12f),.12f);
++                Line(mesh,new Vector2(.47f,.43f),new Vector2(.32f,.18f),.12f);Line(mesh,new Vector2(.32f,.18f),new Vector2(.13f,.18f),.1f);
++            }
++            else if(Kind==SheetGlyph.CrossedSwords){
++                Line(mesh,new Vector2(.2f,.16f),new Vector2(.83f,.87f),.1f);Line(mesh,new Vector2(.16f,.4f),new Vector2(.4f,.16f),.08f);
++                Line(mesh,new Vector2(.8f,.16f),new Vector2(.17f,.87f),.1f);Line(mesh,new Vector2(.6f,.16f),new Vector2(.84f,.4f),.08f);
++            }
++            else if(Kind==SheetGlyph.Misc){Circle(mesh,new Vector2(.2f,.5f),.1f);Circle(mesh,new Vector2(.5f,.5f),.1f);Circle(mesh,new Vector2(.8f,.5f),.1f);}
+             else if(Kind==SheetGlyph.Clover){Circle(mesh,new Vector2(.33f,.65f),.2f);Circle(mesh,new Vector2(.67f,.65f),.2f);Circle(mesh,new Vector2(.33f,.33f),.2f);Circle(mesh,new Vector2(.67f,.33f),.2f);Line(mesh,new Vector2(.5f,.4f),new Vector2(.5f,.05f),.07f);}
+             else if(Kind==SheetGlyph.Skull){Circle(mesh,new Vector2(.5f,.6f),.35f);Line(mesh,new Vector2(.32f,.25f),new Vector2(.68f,.25f),.2f);Circle(mesh,new Vector2(.37f,.61f),.08f,Color.black);Circle(mesh,new Vector2(.63f,.61f),.08f,Color.black);}
+             else if(Kind==SheetGlyph.Burst){for(int i=0;i<8;i++){float a=i*Mathf.PI/4;Line(mesh,new Vector2(.5f,.5f)+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*.13f,new Vector2(.5f,.5f)+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*.45f,.075f);}}
+--- 0.3.0/src\Presentation\SheetStructureData.cs
++++ 0.3.1/src\Presentation\SheetStructureData.cs
+@@ -87,7 +87,9 @@
+                 row.Title=System.Text.RegularExpressions.Regex.Replace(Language.GetString(def.nameToken)??"","<[^>]*>","");
+                 row.Detail="x"+NumberFormatting.Count(Count(body,def.name));
+                 var rule=CharacterEffectCatalog.Item(def.name);
+-                row.ItemHoverNote=rule?.HoverNote(body.outOfDanger,body.outOfCombat,body.isSprinting)??"";
++                string effectNote=rule?.HoverNote(body.outOfDanger,body.outOfCombat,body.isSprinting)??"";
++                if(rule!=null&&rule.Section==SheetHierarchy.Damage){row.ItemHoverNote="";row.ExpandedItemNote=TooltipMarkup.Literal(GeneralDamageNote(def.name));}
++                else row.ItemHoverNote=effectNote;
+                 routed[CharacterEffectCatalog.Route(def.name,EffectOrigin.Item)].Add(row);
+             }
+             var passive=body.skillLocator?body.skillLocator.passiveSkill:default(SkillLocator.PassiveSkill);
+@@ -114,6 +116,24 @@
+             }
+             return entries;
+         }
++        internal static IReadOnlyList<SheetStructureEntry> VisualBuild(CharacterBody body,List<SheetRow> inventory)
++        {
++            var original=Build(body,inventory);var rows=original.ToDictionary(e=>e.Node.Id,e=>e.Row);
++            return VisualSheetStructure.Project(original.Select(e=>e.Node)).Select(n=>new SheetStructureEntry(n,rows[n.Id])).ToArray();
++        }
++        static string GeneralDamageNote(string id)
++        {
++            switch(id)
++            {
++                case "Crowbar":return "Conditional hit bonus against high-health targets. The native tooltip gives the threshold; no enemy health is inspected.";
++                case "NearbyDamageBonus":return "Requires the native item proximity condition. Applies to eligible hits, not a universal damage-stat multiplier.";
++                case "FragileDamageBonus":return "The bonus belongs to an unbroken watch; the native item description gives its break condition.";
++                case "BossDamageBonus":return "Damage component applies to the native item's specified enemy category; no hidden enemy state is read.";
++                case "RandomDamageZone":return "Conditional zone effect. Position, activation and eligible-hit conditions remain separate from the live Damage total.";
++                case "IncreaseDamageOnMultiKill":return "Conditional multi-kill effect. Native trigger requirements and active state are separate from a universal damage multiplier.";
++                default:return "Conditional damage component; native trigger and target requirements apply.";
++            }
++        }
+         static Calculation ShieldCalculation(CharacterBody body)
+         {
+             var c=new Calculation("Base",body.baseMaxShield);c.Apply("Level growth (level - 1)",CalculationStage.Flat,body.levelMaxShield*Mathf.Max(0,body.level-1));return c;
+--- 0.3.0/src\Presentation\SheetView.cs
++++ 0.3.1/src\Presentation\SheetView.cs
+@@ -18,7 +18,7 @@
+             internal SheetFocusButton Button;
+             internal AddedRowHover Hover;
+             internal TextMeshProUGUI Label,Value;
+-            internal Image Icon,FocusLine;
++            internal Image Icon,FocusLine,Rule;
+             internal SheetGlyphGraphic Glyph;
+             internal RectTransform Rect;
+         }
+@@ -34,7 +34,7 @@
+         ScoreboardStrip ownStrip;
+         Canvas canvas;
+         NativeUiStyle style;
+-        RectTransform root,content,viewport;
++        RectTransform root,content,viewport,luckFooter;
+         NativeSheetLayer layer;
+         NativeHoverPopup popup;
+         ScrollRect scroll;
+@@ -83,7 +83,7 @@
+             RefreshBindings();
+             var previousNodes=allNodes;var previousFocused=focused;
+             var previousContext=focusedContext;bool ownedSelection=previousFocused&&previousContext&&ReferenceEquals(previousContext.currentSelectedGameObject,previousFocused.gameObject);
+-            var structure=SheetStructureData.Build(body,inventory);
++            var structure=SheetStructureData.VisualBuild(body,inventory);
+             entries.Clear();foreach(var entry in structure)entries.Add(entry.Node.Id,entry);
+             allNodes=structure.Select(e=>e.Node).ToList();visibleNodes=SheetHierarchy.Visible(allNodes,expansion).ToList();
+             var visibleIds=new HashSet<string>(visibleNodes.Select(n=>n.Id));
+@@ -97,6 +97,7 @@
+             LayoutRebuilder.ForceRebuildLayoutImmediate(content);
+             Dock(strips);
+             if(root.gameObject.activeInHierarchy)LayoutRebuilder.ForceRebuildLayoutImmediate(content);
++            content.anchoredPosition=new Vector2(content.anchoredPosition.x,Mathf.Clamp(content.anchoredPosition.y,0,Mathf.Max(0,content.rect.height-viewport.rect.height)));
+             scrollHint.text=content.rect.height>viewport.rect.height+1?"Scroll":"";
+             if(previousFocused&&(!visibleIds.Contains(previousFocused.NodeId)||!previousFocused.gameObject.activeInHierarchy))
+             {
+@@ -114,44 +115,58 @@
+             var metrics=Metrics;
+             root=NativeUiStyle.Rect(layer.Root,"AlexanderCharacterSheet",Vector2.zero,Vector2.zero);root.pivot=Vector2.zero;root.gameObject.SetActive(false);
+             root.gameObject.AddComponent<LayoutElement>().ignoreLayout=true;
+-            var background=style.Background(root,true);var color=background.color;
+-            background.color=new Color(color.r,color.g,color.b,(float)HierarchySheetSizing.BackgroundOpacity);
++            float footerHeight=(float)metrics.RowHeight+10*scale;
++            var bodyBackground=NativeUiStyle.Rect(root,"SheetBodyBackground",Vector2.zero,Vector2.one);
++            bodyBackground.offsetMin=new Vector2(0,footerHeight);
++            var background=style.Background(bodyBackground,true);var color=background.color;
++            background.color=new Color(color.r,color.g,color.b,(float)VisualSheetSizing.BackgroundOpacity);
+             style.Border(root,scale);
+-            var header=NativeUiStyle.Rect(root,"CharacterSheetHeader",new Vector2(0,1),Vector2.one);header.pivot=new Vector2(.5f,1);header.sizeDelta=new Vector2(0,(float)metrics.HeaderHeight);
+-            var title=style.Text(header,"Character Sheet",(style.BodyFontSize+2)*scale);title.fontStyle=FontStyles.Bold;
+-            title.rectTransform.offsetMin=new Vector2((float)metrics.Padding,0);title.rectTransform.anchorMax=new Vector2(.82f,1);title.enableWordWrapping=false;Opaque(title);
+-            scrollHint=style.Text(header,"",Mathf.Max(12,style.BodyFontSize-4)*scale);scrollHint.rectTransform.anchorMin=new Vector2(.82f,0);
+-            scrollHint.rectTransform.offsetMax=new Vector2(-(float)metrics.Padding,0);scrollHint.alignment=TextAlignmentOptions.MidlineRight;Opaque(scrollHint);
++            var header=NativeUiStyle.Rect(root,"StatsHeader",new Vector2(0,1),Vector2.one);header.pivot=new Vector2(.5f,1);header.sizeDelta=new Vector2(0,(float)metrics.HeaderHeight);
++            var title=style.Text(header,"Stats",(style.BodyFontSize+4)*scale);title.fontStyle=FontStyles.Bold|FontStyles.Underline;
++            title.alignment=TextAlignmentOptions.Center;title.rectTransform.offsetMin=new Vector2((float)metrics.Padding,0);
++            title.rectTransform.offsetMax=new Vector2(-(float)metrics.Padding,0);title.enableWordWrapping=false;Opaque(title);
++            scrollHint=style.Text(header,"",Mathf.Max(10,style.BodyFontSize-7)*scale);scrollHint.rectTransform.anchorMin=new Vector2(.82f,0);
++            scrollHint.rectTransform.offsetMax=new Vector2(-(float)metrics.Padding,0);scrollHint.alignment=TextAlignmentOptions.BottomRight;Opaque(scrollHint);
+             viewport=NativeUiStyle.Rect(root,"SheetViewport",Vector2.zero,Vector2.one);
+-            viewport.offsetMin=Vector2.one*(float)metrics.Padding;viewport.offsetMax=new Vector2(-(float)metrics.Padding,-(float)(metrics.HeaderHeight+metrics.Padding));
++            viewport.offsetMin=new Vector2(0,footerHeight+(float)metrics.Padding);
++            viewport.offsetMax=new Vector2(0,-(float)(metrics.HeaderHeight+metrics.Padding));
+             var surface=viewport.gameObject.AddComponent<Image>();surface.color=Color.clear;
+             viewport.gameObject.AddComponent<RectMask2D>();
+             content=NativeUiStyle.Rect(viewport,"SheetContent",new Vector2(0,1),Vector2.one);content.pivot=new Vector2(.5f,1);
+-            var layout=content.gameObject.AddComponent<VerticalLayoutGroup>();layout.spacing=(float)metrics.Spacing;
++            var layout=content.gameObject.AddComponent<VerticalLayoutGroup>();layout.spacing=0;
+             layout.childControlWidth=true;layout.childControlHeight=true;layout.childForceExpandHeight=false;layout.childForceExpandWidth=true;
+             content.gameObject.AddComponent<ContentSizeFitter>().verticalFit=ContentSizeFitter.FitMode.PreferredSize;
+             scroll=viewport.gameObject.AddComponent<ScrollRect>();scroll.viewport=viewport;scroll.content=content;scroll.horizontal=false;
+             scroll.movementType=ScrollRect.MovementType.Clamped;scroll.scrollSensitivity=24;
++            luckFooter=NativeUiStyle.Rect(root,"FixedLuckFooter",Vector2.zero,new Vector2(1,0));luckFooter.pivot=Vector2.zero;
++            luckFooter.sizeDelta=new Vector2(0,footerHeight);
++            var green=luckFooter.gameObject.AddComponent<Image>();green.color=new Color(.16f,.72f,.08f,(float)VisualSheetSizing.BackgroundOpacity);
++            green.raycastTarget=true;
++            var rule=NativeUiStyle.Rect(luckFooter,"LuckTopRule",new Vector2(0,1),Vector2.one);rule.pivot=new Vector2(.5f,1);rule.sizeDelta=new Vector2(0,scale);
++            var line=rule.gameObject.AddComponent<Image>();line.color=Color.white;line.raycastTarget=false;
+         }
+         static void Opaque(TMP_Text text){var c=text.color;text.color=new Color(c.r,c.g,c.b,1);}
+         Control CreateControl(SheetNode node)
+         {
+-            var c=new Control();c.Rect=NativeUiStyle.Rect(content,node.Id,Vector2.zero,Vector2.one);c.Rect.gameObject.SetActive(false);
+-            c.Rect.gameObject.AddComponent<LayoutElement>().preferredHeight=(float)Metrics.RowHeight;
++            var c=new Control();bool fixedFooter=VisualSheetStructure.IsFooter(node);
++            c.Rect=NativeUiStyle.Rect(fixedFooter?luckFooter:content,node.Id,Vector2.zero,Vector2.one);c.Rect.gameObject.SetActive(false);
++            var element=c.Rect.gameObject.AddComponent<LayoutElement>();element.ignoreLayout=fixedFooter;
++            element.preferredHeight=node.Header?(float)Metrics.RowHeight+12*scale:(float)Metrics.RowHeight;
+             var image=c.Rect.gameObject.AddComponent<Image>();image.color=Color.clear;
+             c.Button=c.Rect.gameObject.AddComponent<SheetFocusButton>();c.Button.Owner=this;c.Button.NodeId=node.Id;c.Button.targetGraphic=image;
+             foreach(var auto in c.Rect.GetComponents<TooltipProvider>())auto.enabled=false;
+             c.Button.onClick.AddListener(()=>{if(c.Node.Header)Toggle(c.Node.Id);});
+-            c.Label=style.Text(c.Rect,"",style.BodyFontSize*scale);Opaque(c.Label);
+-            c.Value=style.Text(c.Rect,"",style.BodyFontSize*scale);Opaque(c.Value);c.Value.alignment=TextAlignmentOptions.MidlineRight;
++            c.Label=style.Text(c.Rect,"",style.BodyFontSize*scale);c.Label.color=Color.white;
++            c.Value=style.Text(c.Rect,"",style.BodyFontSize*scale);c.Value.color=Color.white;c.Value.alignment=TextAlignmentOptions.MidlineRight;
+             c.Label.enableWordWrapping=c.Value.enableWordWrapping=false;c.Label.overflowMode=c.Value.overflowMode=TextOverflowModes.Ellipsis;
+-            c.Value.rectTransform.anchorMin=new Vector2(.73f,0);c.Value.rectTransform.offsetMax=new Vector2(-4*scale,0);
+-            var iconRect=NativeUiStyle.Rect(c.Rect,"MarginIcon",Vector2.zero,new Vector2(0,1));iconRect.pivot=new Vector2(0,.5f);iconRect.sizeDelta=new Vector2(20*scale,0);
+-            c.Glyph=iconRect.gameObject.AddComponent<SheetGlyphGraphic>();c.Glyph.raycastTarget=false;c.Glyph.color=c.Label.color;
+-            var itemRect=NativeUiStyle.Rect(c.Rect,"ItemIcon",Vector2.zero,new Vector2(0,1));itemRect.pivot=new Vector2(0,.5f);itemRect.sizeDelta=new Vector2(20*scale,0);
++            var iconRect=NativeUiStyle.Rect(c.Rect,"MarginIcon",new Vector2(0,.5f),new Vector2(0,.5f));iconRect.pivot=new Vector2(0,.5f);
++            c.Glyph=iconRect.gameObject.AddComponent<SheetGlyphGraphic>();c.Glyph.raycastTarget=false;c.Glyph.color=Color.white;
++            var itemRect=NativeUiStyle.Rect(c.Rect,"ItemIcon",new Vector2(0,.5f),new Vector2(0,.5f));itemRect.pivot=new Vector2(0,.5f);itemRect.sizeDelta=new Vector2(20*scale,20*scale);
+             c.Icon=itemRect.gameObject.AddComponent<Image>();c.Icon.raycastTarget=false;c.Icon.preserveAspect=true;c.Icon.color=Color.white;
+             var focusRect=NativeUiStyle.Rect(c.Rect,"Focus",Vector2.zero,new Vector2(0,1));focusRect.pivot=new Vector2(0,.5f);focusRect.sizeDelta=new Vector2(2*scale,0);
+-            c.FocusLine=focusRect.gameObject.AddComponent<Image>();c.FocusLine.raycastTarget=false;c.FocusLine.color=c.Label.color;c.FocusLine.gameObject.SetActive(false);
++            c.FocusLine=focusRect.gameObject.AddComponent<Image>();c.FocusLine.raycastTarget=false;c.FocusLine.color=Color.white;c.FocusLine.gameObject.SetActive(false);
++            var rule=NativeUiStyle.Rect(c.Rect,"CategoryBottomRule",Vector2.zero,new Vector2(1,0));rule.pivot=Vector2.zero;rule.sizeDelta=new Vector2(0,scale);
++            c.Rule=rule.gameObject.AddComponent<Image>();c.Rule.color=Color.white;c.Rule.raycastTarget=false;c.Rule.gameObject.SetActive(node.Header);
+             if(!node.Header)
+             {
+                 c.Hover=c.Rect.gameObject.AddComponent<AddedRowHover>();c.Hover.Owner=this;c.Hover.Label=c.Label;c.Hover.Value=c.Value;c.Button.Hover=c.Hover;
+@@ -160,15 +175,24 @@
+         }
+         void UpdateControl(Control c,SheetStructureEntry entry)
+         {
+-            var node=entry.Node;c.Node=node;
+-            float indent=(4+node.Depth*12)*scale,iconWidth=node.Header&&node.Glyph!=SheetGlyph.None||entry.Row!=null&&entry.Row.Icon?24*scale:0;
+-            c.Label.fontStyle=node.Header?FontStyles.Bold:FontStyles.Normal;
+-            c.Label.text=node.Header?(expansion.IsOpen(node.Id)?"v  ":">  ")+node.Title:TooltipText.SingleLine(entry.Row.Title);
+-            c.Value.text=node.Header?"":TooltipText.SingleLine(entry.Row.Detail??"");c.Value.gameObject.SetActive(!node.Header);
+-            c.Label.rectTransform.anchorMax=new Vector2(node.Header?1:.73f,1);
+-            c.Label.rectTransform.offsetMin=new Vector2(indent+iconWidth,0);c.Label.rectTransform.offsetMax=new Vector2(-4*scale,0);
+-            c.Glyph.Kind=node.Glyph;c.Glyph.gameObject.SetActive(node.Header&&node.Glyph!=SheetGlyph.None);c.Glyph.rectTransform.anchoredPosition=new Vector2(indent,0);c.Glyph.SetVerticesDirty();
+-            c.Icon.sprite=entry.Row?.Icon;c.Icon.gameObject.SetActive(!node.Header&&c.Icon.sprite);c.Icon.rectTransform.anchoredPosition=new Vector2(indent,0);
++            var node=entry.Node;c.Node=node;bool fixedFooter=VisualSheetStructure.IsFooter(node);
++            float indent=(node.Header||fixedFooter?10:36)*scale;
++            float iconWidth=node.Header&&node.Glyph!=SheetGlyph.None||fixedFooter?40*scale:entry.Row!=null&&entry.Row.Icon?24*scale:0;
++            c.Label.fontStyle=node.Header||fixedFooter?FontStyles.Bold:FontStyles.Normal;
++            c.Label.fontSize=(node.Header||fixedFooter?style.BodyFontSize+3:Mathf.Max(18,style.BodyFontSize-2))*scale;
++            c.Value.fontSize=(node.Header?Mathf.Max(13,style.BodyFontSize-5):style.BodyFontSize)*scale;
++            c.Label.text=node.Header?node.Title:TooltipText.SingleLine(entry.Row.Title);
++            c.Value.text=node.Header?VisualSheetStructure.ToggleLabel(expansion.IsOpen(node.Id)):TooltipText.SingleLine(entry.Row.Detail??"");
++            c.Value.gameObject.SetActive(true);
++            c.Label.rectTransform.anchorMin=Vector2.zero;c.Label.rectTransform.anchorMax=new Vector2(node.Header?1:.66f,1);
++            c.Label.rectTransform.offsetMin=new Vector2(indent+iconWidth,0);
++            c.Label.rectTransform.offsetMax=new Vector2(node.Header?-98*scale:-2*scale,0);
++            c.Value.rectTransform.anchorMin=new Vector2(node.Header?1:.66f,0);c.Value.rectTransform.anchorMax=Vector2.one;
++            c.Value.rectTransform.offsetMin=new Vector2(node.Header?-92*scale:0,0);c.Value.rectTransform.offsetMax=new Vector2(-12*scale,0);
++            c.Glyph.Kind=node.Glyph;c.Glyph.gameObject.SetActive(node.Header&&node.Glyph!=SheetGlyph.None||fixedFooter);
++            c.Glyph.rectTransform.sizeDelta=new Vector2(32*scale,32*scale);c.Glyph.rectTransform.anchoredPosition=new Vector2(indent,0);c.Glyph.SetVerticesDirty();
++            c.Icon.sprite=entry.Row?.Icon;c.Icon.gameObject.SetActive(!node.Header&&!fixedFooter&&c.Icon.sprite);c.Icon.rectTransform.anchoredPosition=new Vector2(indent,0);
++            c.Rule.gameObject.SetActive(node.Header);
+             if(c.Hover){c.Hover.Row=entry.Row;if(entry.Row.IsItem)RefreshAddedItemProvider(c.Hover);}
+         }
+         void ConnectNavigation()
+@@ -236,7 +260,7 @@
+         }
+         void EnsureVisible(SheetFocusButton source)
+         {
+-            if(!content||!viewport||!source)return;
++            if(!content||!viewport||!source||source.NodeId==VisualSheetStructure.FooterId)return;
+             LayoutRebuilder.ForceRebuildLayoutImmediate(content);
+             var bounds=RectTransformUtility.CalculateRelativeRectTransformBounds(viewport,source.transform);
+             double top=bounds.max.y-viewport.rect.yMin,bottom=bounds.min.y-viewport.rect.yMin;
+@@ -311,11 +335,18 @@
+             foreach(var bar in hud.GetComponentsInChildren<ExpBar>(false))if(BoundsOf(bar.transform,out area))occupied.Add(area);
+             foreach(var buffs in hud.GetComponentsInChildren<BuffDisplay>(false))if(BoundsOf(buffs.transform,out area))occupied.Add(area);
+             var metrics=Metrics;UiRect dock;
+-            double preferredHeight=HierarchySheetSizing.PanelHeight(canvasRect.rect.height,visibleNodes.Count,metrics.RowHeight,metrics.HeaderHeight,metrics.Spacing,metrics.Padding,metrics.MinHeight);
+-            double width=Math.Max(metrics.Width,380*scale),minimum=Math.Max(metrics.MinWidth,300*scale);
+-            bool fits=CompactSheetPlacement.TryBelowOwn(canvasRect.rect.width,canvasRect.rect.height,own,occupied,width,preferredHeight,minimum,metrics.MinHeight,12*scale,out dock);
++            int headerCount=visibleNodes.Count(n=>n.Header),rowCount=visibleNodes.Count(n=>!n.Header&&!VisualSheetStructure.IsFooter(n));
++            double footerHeight=metrics.RowHeight+10*scale;
++            double minimumHeight=Math.Max(metrics.MinHeight,metrics.HeaderHeight+footerHeight+2*metrics.Padding+metrics.RowHeight);
++            double preferredHeight=VisualSheetSizing.PanelHeight(canvasRect.rect.height,headerCount,rowCount,metrics.RowHeight,metrics.RowHeight+12*scale,metrics.HeaderHeight,footerHeight,metrics.Padding,minimumHeight);
++            double width=425*scale,minimum=330*scale;
++            bool fits=CompactSheetPlacement.TryBelowOwn(canvasRect.rect.width,canvasRect.rect.height,own,occupied,width,preferredHeight,minimum,minimumHeight,12*scale,out dock);
+             root.gameObject.SetActive(fits);
+-            if(fits){root.anchoredPosition=new Vector2((float)dock.X,(float)dock.Y);root.sizeDelta=new Vector2((float)dock.Width,(float)dock.Height);Status="Hierarchical Character Sheet attached; live layout verification pending. "+hoverCoverage;}
++            if(fits){root.anchoredPosition=new Vector2((float)dock.X,(float)dock.Y);root.sizeDelta=new Vector2((float)dock.Width,(float)dock.Height);
++                var regions=new VisualSheetRegions(dock.Height,metrics.HeaderHeight,footerHeight,metrics.Padding);
++                viewport.offsetMin=new Vector2(0,(float)regions.ViewportBottom);
++                viewport.offsetMax=new Vector2(0,(float)(regions.ViewportTop-dock.Height));
++                luckFooter.sizeDelta=new Vector2(0,(float)regions.FooterHeight);Status="Figma-structure Stats sheet attached with fixed Luck footer; live visual verification pending. "+hoverCoverage;}
+             else Status="No safe region below own strip; native item hovers retained. "+hoverCoverage;
+         }
+         void EndHover()
+--- 0.3.0/tests\CoreTests.cs
++++ 0.3.1/tests\CoreTests.cs
+@@ -109,6 +109,7 @@
+         AdditiveDetailsTests.Run(Assert);
+         SimpleStatTooltipTests.Run(Assert);
+         HierarchyTests.Run(Assert);
++        VisualRevisionTests.Run(Assert);
+         LifecycleCoverageTests.Run(Assert);
+         CoverageFormulaTests.Run(Assert);
+         Console.WriteLine("PASS " + assertions + " assertions: lifecycle/ownership, ordered stat math, n=1/4/10 item components, caps/proc/luck, Nectar and buff uncertainty.");
+--- 0.3.0/tests\VisualRevisionTests.cs
++++ 0.3.1/tests\VisualRevisionTests.cs
+@@ -0,0 +1,144 @@
++using System;
++using System.Collections.Generic;
++using System.Linq;
++using Alexander.CharacterSheet.Core;
++static class VisualRevisionTests
++{
++    static List<SheetNode> Example(bool shield=true)
++    {
++        var nodes=SheetHierarchy.Headers.ToList();
++        foreach(var group in SheetHierarchy.Stats)
++        foreach(string stat in group.Value)
++            if(shield||stat!="Shield")nodes.Add(new SheetNode("stat:"+stat,group.Key,stat,false,2,stat));
++        nodes.Add(new SheetNode("effect:crowbar",SheetHierarchy.Damage,"Crowbar",false,1,"item:crowbar"));
++        nodes.Add(new SheetNode("effect:slug",SheetHierarchy.Combat,"Slug",false,1,"item:slug"));
++        nodes.Add(new SheetNode("effect:quail",SheetHierarchy.Sprint,"Quail",false,1,"item:quail"));
++        nodes.Add(new SheetNode("effect:buff",SheetHierarchy.Other,"Visible buff",false,1,"buff:1"));
++        return nodes;
++    }
++    static string Plain(string text)=>TooltipMarkup.Render(text,s=>false);
++    static NectarBuffObservation Buff(string id,long count=1,bool? hidden=false,bool? ignored=false,bool? catalog=false,bool? self=false)=>
++        new NectarBuffObservation{Id=id,Stacks=count,Hidden=hidden,DefinitionIgnored=ignored,CatalogIgnored=catalog,SelfCounter=self};
++    static bool Throws(Action action){try{action();return false;}catch(ArgumentOutOfRangeException){return true;}}
++    public static void Run(Action<bool,string> assert)
++    {
++        var projected=VisualSheetStructure.Project(Example()).ToArray();
++        string[] order={"defense","offense","movement","on-hit","on-kill","out-of-combat","sprinting","other"};
++        assert(projected.Where(n=>n.Header).Select(n=>n.Id).SequenceEqual(order),"Flat category order follows the final user grouping");
++        assert(projected.Where(n=>n.Header).All(n=>n.Parent==""&&n.Depth==0),"No outer accordion or hidden nested category");
++        assert(!projected.Any(n=>n.Id==SheetHierarchy.Base||n.Id==SheetHierarchy.Damage||n.Id==SheetHierarchy.Luck),"Removed presentation headers do not survive the projection");
++        assert(projected.Single(n=>n.Id==SheetHierarchy.Other).Title=="Misc Effects","Final scroll section is Misc Effects");
++        assert(projected.Single(n=>n.Id==SheetHierarchy.Hit).Title=="On-Hit Effects"&&projected.Single(n=>n.Id==SheetHierarchy.Kill).Title=="On-Kill Effects","Effect section labels follow the reference");
++        assert(projected.Single(n=>n.Id==SheetHierarchy.Offense).Glyph==SheetGlyph.CrossedSwords,"Offense uses crossed swords");
++        assert(projected.Single(n=>n.Id==SheetHierarchy.Movement).Glyph==SheetGlyph.Runner,"Movement uses running-person geometry");
++        assert(projected.Last().Id==VisualSheetStructure.FooterId&&VisualSheetStructure.IsFooter(projected.Last()),"Luck is a dedicated final focus target");
++        assert(!projected.Last().Header&&projected.Last().Parent==""&&projected.Last().Glyph==SheetGlyph.Clover,"Luck remains independent of all collapse states");
++        assert(projected.Single(n=>n.Id=="effect:crowbar").Parent==SheetHierarchy.Other,"Damage-item information is retained without a separate damage category");
++        assert(projected.Single(n=>n.Id=="effect:slug").Parent==SheetHierarchy.Combat&&projected.Single(n=>n.Id=="effect:quail").Parent==SheetHierarchy.Sprint,"Conditional effects stay standalone before Misc Effects");
++        assert(projected.Where(n=>!n.Header).Select(n=>n.Id).OrderBy(n=>n).SequenceEqual(Example().Where(n=>!n.Header).Select(n=>n.Id).OrderBy(n=>n)),"Every original functional row is retained exactly once");
++        var defaults=new SheetExpansionState(true);
++        var initial=SheetHierarchy.Visible(projected,defaults);
++        assert(defaults.IsOpen(SheetHierarchy.Defense)&&!defaults.IsOpen(SheetHierarchy.Offense)&&!defaults.IsOpen(SheetHierarchy.Movement),"Reference defaults expand Defense only");
++        assert(initial.Any(n=>n.Id=="stat:Health")&&!initial.Any(n=>n.Id=="stat:Damage")&&initial.Any(VisualSheetStructure.IsFooter),"Defense totals and Luck are visible initially");
++        assert(VisualSheetStructure.ToggleLabel(true)=="Collapse"&&VisualSheetStructure.ToggleLabel(false)=="Expand","Explicit controls replace visual chevrons");
++        for(int mask=0;mask<256;mask++)
++        {
++            var state=new SheetExpansionState(true);
++            for(int i=0;i<order.Length;i++)state.Set(order[i],(mask&(1<<i))!=0);
++            var visible=SheetHierarchy.Visible(projected,state);
++            assert(visible.Count(n=>n.Header)==8&&visible.Count(VisualSheetStructure.IsFooter)==1,"Headers and fixed footer survive every collapse combination");
++            foreach(var row in projected.Where(n=>!n.Header&&!VisualSheetStructure.IsFooter(n)))
++                assert(visible.Any(n=>n.Id==row.Id)==state.IsOpen(row.Parent),"Collapse affects only its own rows");
++            assert(visible.Last().Id==VisualSheetStructure.FooterId,"Navigation ends at fixed Luck for every collapse combination");
++        }
++        defaults.Set(SheetHierarchy.Defense,false);
++        assert(SheetHierarchy.RestoreFocus("stat:Shield",projected,SheetHierarchy.Visible(projected,defaults))==SheetHierarchy.Defense,"Collapsing a focused stat restores its visible category");
++        var noShield=VisualSheetStructure.Project(Example(false));
++        assert(!noShield.Any(n=>n.Id=="stat:Shield")&&noShield.Any(VisualSheetStructure.IsFooter),"Conditional shield removal cannot remove or duplicate Luck");
++        int sizing=0;
++        foreach(double canvas in new[]{640d,720d,1080d,1440d})
++        foreach(double scale in new[]{.7,1,1.2})
++        foreach(double font in new[]{18d,22d,24d})
++        foreach(int rows in new[]{0,32,128})
++        {
++            var metrics=new CompactSheetMetrics(font,scale);
++            double footer=metrics.RowHeight+10*scale;
++            double minimum=Math.Max(metrics.MinHeight,metrics.HeaderHeight+footer+2*metrics.Padding+metrics.RowHeight);
++            double height=VisualSheetSizing.PanelHeight(canvas,8,rows,metrics.RowHeight,metrics.RowHeight+12*scale,
++                metrics.HeaderHeight,footer,metrics.Padding,minimum);
++            var regions=new VisualSheetRegions(height,metrics.HeaderHeight,footer,metrics.Padding);
++            assert(height>=minimum&&height<=Math.Max(minimum,canvas*.5),"Long content remains bounded across scales and resolutions");
++            assert(regions.ViewportBottom>regions.FooterHeight&&regions.ViewportHeight>0,"Masked content never extends behind the fixed footer");
++            assert(regions.ViewportTop<height&&regions.ViewportTop>regions.ViewportBottom,"Title and footer leave a positive scroll region");
++            assert(VisualSheetSizing.BackgroundOpacity==.8,"Body and green footer backgrounds use the accepted opacity");
++            double offset=HierarchySheetSizing.EnsureVisible(regions.ViewportHeight+30,-20,regions.ViewportHeight,400,800);
++            assert(offset>=0&&offset<=Math.Max(0,800-regions.ViewportHeight),"Scroll-to-focus remains bounded to scroll content");
++            sizing++;
++        }
++        assert(Throws(()=>new VisualSheetRegions(20,30,30,4))&&Throws(()=>new VisualSheetRegions(double.NaN,30,30,4)),"Insufficient/nonfinite footer layouts are rejected");
++        assert(Throws(()=>VisualSheetSizing.PanelHeight(1080,-1,0,28,40,32,38,10,140)),"Negative section counts cannot create layout geometry");
++        var regen=new Calculation("Base",1);regen.Apply("Level growth (level - 1)",CalculationStage.Flat,(double)(float).2);
++        double live=(double)(float)1.2,prediction=regen.Predicted;
++        assert(live-prediction!=0&&DisplayResidual.ForDisplay(live,prediction)==0,"Actual float32 regen discrepancy is suppressed only for display");
++        string hover=Plain(StatTooltipPresentation.Create(live,.2,regen,"cIsHealing"," /s"));
++        assert(hover.EndsWith("Bonuses: None")&&!hover.Contains("e-8"),"Ordinary Regen hover does not show roundoff as an unknown bonus");
++        assert(regen.Predicted==prediction&&regen.Describe(live,false,true).Contains(NumberFormatting.Exact(live)),"Authoritative value and exact math trace remain intact");
++        assert(DisplayResidual.ForDisplay(1+1e-7,1)!=0&&DisplayResidual.ForDisplay(1-1e-7,1)!=0,"Real small positive and negative discrepancies above float precision remain visible");
++        assert(DisplayResidual.ForDisplay(1e-10,0)==1e-10,"Real tiny values near zero are not erased by a broad absolute threshold");
++        var tiny=new Calculation("Base",0);tiny.Apply("Known small bonus",CalculationStage.Flat,1e-10);
++        assert(Plain(StatTooltipPresentation.Create(1e-10,0,tiny,"cIsHealing")).Contains("Known small bonus"),"Known small bonuses are never passed through residual filtering");
++        assert(double.IsNaN(DisplayResidual.ForDisplay(double.NaN,1))&&double.IsInfinity(DisplayResidual.ForDisplay(double.PositiveInfinity,1)),"Unavailable/nonfinite observations do not become zero bonuses");
++        foreach(double magnitude in new[]{1e-6,.1,1,1e3,1e6})
++        {
++            assert(DisplayResidual.ForDisplay(magnitude*(1+2e-8),magnitude)==0,"Relative float noise is filtered at each scale");
++            assert(DisplayResidual.ForDisplay(magnitude*(1+1e-5),magnitude)!=0,"Material relative residuals remain at each scale");
++        }
++        var active=new[]{Buff("a",50),Buff("b",1),Buff("c",7)};
++        assert(NectarCounterPresentation.EligibleTypes(active)==3,"Stacks do not inflate distinct eligible types");
++        assert(NectarCounterPresentation.EligibleTypes(active.Concat(new[]{Buff("a",50)}))==3,"Repeated observations of the same type count once");
++        assert(NectarCounterPresentation.EligibleTypes(active.Concat(new[]{Buff("a",51)}))==null,"Contradictory duplicate observations are unknown");
++        var exclusions=new[]{Buff("hidden",4,true,null,null,null),Buff("definition",3,false,true,null,null),
++            Buff("catalog",2,false,false,true,null),Buff("self",12,false,false,false,true),Buff("inactive",0,null,null,null,null)};
++        assert(NectarCounterPresentation.EligibleTypes(active.Concat(exclusions))==3,"Hidden/ignored/self counters and inactive types are excluded");
++        assert(NectarCounterPresentation.EligibleTypes(new[]{Buff("unknown",2,false,false,null,false)})==null,"Missing active eligibility metadata is unknown");
++        assert(NectarCounterPresentation.EligibleTypes(null)==null&&NectarCounterPresentation.EligibleTypes(Array.Empty<NectarBuffObservation>())==0,"Missing snapshot is distinguished from a verified empty set");
++        var seven=Enumerable.Range(0,7).Select(i=>Buff("type:"+i,i+1)).ToArray();
++        var one=NectarCounterPresentation.Create(1,seven,4,4,true,true);
++        assert(one.EligibleTypes==7&&one.Used==4&&one.ReferenceCap==4&&one.BonusPercent==16,"One copy uses four eligible types for its active reference component");
++        assert(one.Compact.Contains("Effective buffs: 4 / 4")&&one.Compact.Contains("Eligible types: 7 (over cap)")&&one.Compact.Contains("+16%"),"Compact counter includes over-cap eligibility and known active bonus");
++        var two=NectarCounterPresentation.Create(2,seven,7,8,true,true);
++        assert(two.Used==7&&two.ReferenceCap==8&&two.BonusPercent==28&&!two.Discrepancy,"Capacity grows four per effective copy");
++        var inactive=NectarCounterPresentation.Create(1,active,3,4,false,true);
++        assert(inactive.BonusPercent==0&&inactive.Compact.Contains("(inactive)"),"An absent self counter cannot claim its active bonus");
++        var unavailable=NectarCounterPresentation.Create(null,null,null,null,null,false);
++        assert(unavailable.Used==null&&unavailable.ReferenceCap==null&&unavailable.BonusPercent==null&&unavailable.Compact.Contains("Unknown"),"Unavailable formula/counter/metadata never produce a guessed total");
++        var capMismatch=NectarCounterPresentation.Create(1,seven,6,6,true,true);
++        assert(capMismatch.Discrepancy&&capMismatch.Used==6&&capMismatch.BonusPercent==null,"Unexpected live cap preserves the observation and declines reference bonus");
++        var countMismatch=NectarCounterPresentation.Create(1,active,4,4,true,true);
++        assert(countMismatch.Discrepancy&&countMismatch.Used==4&&countMismatch.Compact.Contains("game counter shown"),"Count/model discrepancies retain the game counter");
++        var bad=NectarCounterPresentation.Create(-1,active,-1,-2,null,true);
++        assert(bad.ReferenceCap==null&&bad.Used==null&&bad.BonusPercent==null,"Invalid counts remain unknown");
++        assert(NectarCounterPresentation.Create(long.MaxValue,active,1,4,true,true).ReferenceCap==null,"Unsupported cap arithmetic cannot overflow");
++        var source=OriginalItemDefinitions.Find("BleedOnHit");
++        foreach(long copies in new[]{1L,4L,10L})
++        {
++            var single=source.CreateTerms("Original native title",1);var current=source.CreateTerms("Original native title",copies);
++            string details=Plain(IndividualItemDetails.Create(single,current,copies,copies,source.TriggerContext));
++            assert(details.Contains("Next copy:")&&!details.Contains("Original native title"),"Native title/description are not repeated and next-copy benefit remains");
++            assert(details.Contains("Current stack")== (copies>1),"Combined stack block appears only above one effective copy");
++            assert(details.Contains("Single-copy components")== (copies>1),"At one copy the native individual description is retained without a redundant added block");
++            if(copies>1)assert(details.IndexOf("Single-copy components")<details.IndexOf("Current stack"),"Individual components precede combined stack components");
++        }
++        assert(IndividualItemDetails.Create(null,null,2,2)==""&&IndividualItemDetails.Create(null,null,1,1)=="","Unregistered math leaves the native description intact");
++        var distinct=Plain(IndividualItemDetails.Create(source.CreateTerms("Item",1),source.CreateTerms("Item",3),3,1));
++        assert(distinct.Contains("1 owned; 3 effective"),"Stack math uses effective copies while preserving ownership distinction");
++        var nectarDefinition=OriginalItemDefinitions.Find("BoostAllStats");
++        var nectarTerms=nectarDefinition.CreateTerms("Nectar",1,7);
++        assert(nectarTerms[1].CurrentValue==16&&nectarTerms[1].NextValue==28,"Existing next-copy model uses the same distinct type set and new capacity");
++        var interaction=new DetailsInteraction();object identity=new object();
++        interaction.Enter(identity,"item:nectar");interaction.PopupEnter();interaction.Toggle(true,true);
++        assert(!interaction.Enter(identity,"item:nectar")&&interaction.Expanded,"Dynamic same-item counter updates preserve open Details");
++        Console.WriteLine("Visual revision: 256 collapse states; "+sizing+" footer/scroll sizing cases; float residuals; Nectar eligibility/cap/unknowns; individual-before-stack Details.");
++    }
++}
++

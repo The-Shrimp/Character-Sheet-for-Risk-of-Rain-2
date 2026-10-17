@@ -1,0 +1,192 @@
+{
+  "frozen_version": "0.2.4",
+  "source_root": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\snapshots\\next-0.2.4-frozen-20261005T211242Z\\source",
+  "source_zip": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\snapshots\\next-0.2.4-frozen-20261005T211242Z.source.zip",
+  "source_zip_sha256": "2C6867E2F68A7F488991344875ADE3E2AC192B8991DB7989CF93362CE5B8252B",
+  "candidate": {
+    "path": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\next-build\\0.2.4\\artifacts\\review-native-tab\\Alexander.CharacterSheet.dll",
+    "sha256": "906F140A4EADDF0C4BF886DF9FFEC4203208AB0A4F6E98B636761934BFFF7822",
+    "bytes": 140288,
+    "archive_path": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\snapshots\\next-0.2.4-frozen-20261005T211242Z\\candidate\\Alexander.CharacterSheet.dll"
+  },
+  "source_files": [
+    {
+      "path": ".gitattributes",
+      "sha256": "1A1DBE176BC233B499D35A57DB7513F2941C99AB9759F177830C9149BE99005B"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "C49F156D57704921835778BCD700FD632E882D4D05FD09B0FA059A49D8D7B788"
+    },
+    {
+      "path": "BUILD-MAP.json",
+      "sha256": "A24A64173850D636BF510C60E109251E4E2C90FF5DB5AD38228BBF1F46975AAD"
+    },
+    {
+      "path": "build.ps1",
+      "sha256": "23047DD22EFA2361C7900C1BD1288BF946F5F9E7B8EFF4E9DB05644D5C8AC423"
+    },
+    {
+      "path": "CharacterSheet.csproj",
+      "sha256": "6F441DFCFC2BD20A07713D0EBFE22D3AA1C1BE6A983EC12DEB3A1E78C6D8F24F"
+    },
+    {
+      "path": "DEVELOPMENT-BOUNDARY.md",
+      "sha256": "07C46E2CE4EA2359421E09ABD788C5D69FC2487ADEFF426D8304615707F3BC95"
+    },
+    {
+      "path": "docs/CoreStatModel-0.2.3.md",
+      "sha256": "44EAB4A8598D151445BE9821205B77C3E0B92412A5089436D6432655569810E0"
+    },
+    {
+      "path": "docs/CoreStatModel-0.2.4.md",
+      "sha256": "CB105E04A7BBA4E5DADD40401CC92E8744046C0D73F4B016DCE26B4EC491C7A5"
+    },
+    {
+      "path": "docs/ManualSmokeChecklist.md",
+      "sha256": "C72330D2158D94E66CE17001F8F051826FA139111332A139E420E3E1BF96F547"
+    },
+    {
+      "path": "docs/Readiness-0.2.2.md",
+      "sha256": "144ED59739231187639671F544AD33B239F85CCF16DBFE8278475B976DBED002"
+    },
+    {
+      "path": "docs/Readiness-0.2.3.md",
+      "sha256": "4F02B17ADAED23D0A8034E40C648C39911AC63E14E0BB062AFDA5A41C54BB734"
+    },
+    {
+      "path": "docs/Readiness-0.2.4.md",
+      "sha256": "7A576ED8DD2F76403D44D2EEFFAC948FE8AB9688142136EF63D0C3DA20D5DDA4"
+    },
+    {
+      "path": "docs/SourceCoverage.md",
+      "sha256": "F3BD6EC70FFD6B6B55977D4AEC8A17D072CDC6E6C89E8E698DF4F945CDF3F297"
+    },
+    {
+      "path": "docs/TestCandidate-0.2.2.md",
+      "sha256": "C86841C0D1D43A5D5D081F9A41112575A24B762A284A48E42CA6D0D5F0B3AF8C"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "72A75B179C9AA62A6D9265B0AC9302AC6F7E5FE8E4AD46711AD34C90EEEBA2A2"
+    },
+    {
+      "path": "README.md",
+      "sha256": "2933833FD4966F668AB5AC8C9D16341A0ECD6E240779B757B2369354F6B8B286"
+    },
+    {
+      "path": "src/Core/Calculation.cs",
+      "sha256": "BDBF641C67972C5E7618A302FB6176BA275297D24841A0942EA0C5268A15E99C"
+    },
+    {
+      "path": "src/Core/ComparisonPresentation.cs",
+      "sha256": "6FC5263777F3579EF994C13B3B23FEC048C291F29C5BC9D5F140A76E34A83ACB"
+    },
+    {
+      "path": "src/Core/CoreStatContributions.cs",
+      "sha256": "431533A31508DDD741ECDAA468BF4357CA053E745BEDD636EC59EE786C7E1F1B"
+    },
+    {
+      "path": "src/Core/InventoryPresentation.cs",
+      "sha256": "D51AF4E3CEE7F37F59EFA0FE66020DF624BA6E3D3BDD0DCAA5385C5668C0065D"
+    },
+    {
+      "path": "src/Core/ItemTooltipPresentation.cs",
+      "sha256": "A022955C408CDE259A1E27F6523A30746BA9B1705912CC6FD7CB181FFA218A6B"
+    },
+    {
+      "path": "src/Core/LuckEvidence.cs",
+      "sha256": "03CB9706A0D964606058FD9DF74F3E2FF2BA46D80C6BF2232385324D4BC59B55"
+    },
+    {
+      "path": "src/Core/NativeLifecycle.cs",
+      "sha256": "BC5A07821EF07E6B3D3A4F90FE91A2BACA90573AEEEB6DB0824EB1EEDE0FF51A"
+    },
+    {
+      "path": "src/Core/NativeTabPolicy.cs",
+      "sha256": "4650E0FD1E7DD0CF37B1E5F188759F3768376BA349CD2CFB43CF38C0904FDDDD"
+    },
+    {
+      "path": "src/Core/NumberFormatting.cs",
+      "sha256": "B6800D33710D41CA2D6BA0A58BE7202F7E3CB53B4FE87A9D5FB68FFE167E4915"
+    },
+    {
+      "path": "src/Core/OriginalBuffDefinitions.cs",
+      "sha256": "05F5173AFF9D961B9F94A37139921F2C422CBB7DA9C1CB4320600DA73671FB97"
+    },
+    {
+      "path": "src/Core/OriginalItemDefinitions.cs",
+      "sha256": "D6A9C999371ECD8A3034CA17D5D4C80C62C9DE7A2FEC1275C11D98B8A25D4967"
+    },
+    {
+      "path": "src/Core/PauseLease.cs",
+      "sha256": "07140CA1439307A6F1419DFEBF7122DF7F70ED03767ED25F5522E6E7B387789F"
+    },
+    {
+      "path": "src/Core/TooltipPresentation.cs",
+      "sha256": "F1ACE4AEDDBB485AFE67225A48D21C18F133FDC3F0F39810709E61B57A444A98"
+    },
+    {
+      "path": "src/Core/VerifiedMath.cs",
+      "sha256": "D926DD322C0ACB9EC56E62C948287302B2217C3163B1208CAE187450756F9136"
+    },
+    {
+      "path": "src/Plugin.cs",
+      "sha256": "3DFF0C8B94AD12212F0599D41F37D9F02B1C6360FDF35E8DB8AC08EF90FDC186"
+    },
+    {
+      "path": "src/Presentation/NativeHoverPopup.cs",
+      "sha256": "65FDBE0FD47DB1453F2A788C514CCC782A76A00282D4C11AD128AC519AB01AF6"
+    },
+    {
+      "path": "src/Presentation/NativeItemHover.cs",
+      "sha256": "EAAF68C6F28CAE7F3652AD3DE68FD36EE46B1A61F5B57F624F172ACBFF78EA31"
+    },
+    {
+      "path": "src/Presentation/NativeStripIdentity.cs",
+      "sha256": "C3462E473B5F8A96C606BB3E2C8304A2FD9B94D77505E478D1D7FF8A937B3058"
+    },
+    {
+      "path": "src/Presentation/NativeUiStyle.cs",
+      "sha256": "4DB203A181076501BB137B5F902B23D76C314801E0DA90613C51C8BA9DCF60C2"
+    },
+    {
+      "path": "src/Presentation/SheetData.cs",
+      "sha256": "7FF402FD0C63A129BE2A037511540EF750341B9296DC41047DD711F27AC8E4AE"
+    },
+    {
+      "path": "src/Presentation/SheetView.cs",
+      "sha256": "84872A67B64653BDA54F7A867ECEF008D1BD973B2B67D75468D425F598D26F9C"
+    },
+    {
+      "path": "tests/CoreTests.cs",
+      "sha256": "D3C8AF48B5B56C90050B62AE354F8A9EDB488A7D2A9B0819421CFCDD850FE048"
+    },
+    {
+      "path": "tests/CoverageFormulaTests.cs",
+      "sha256": "46DCCAD96CA760D23475C5C00CD6D0E7CC2F5481D662C7FEEB0BD0597C8C702D"
+    },
+    {
+      "path": "tests/ItemTooltipTests.cs",
+      "sha256": "5CEDAF6F1C7F776D384B70092229E1A6738F7733917AEC48BC19ACFB81644AF3"
+    },
+    {
+      "path": "tests/LifecycleCoverageTests.cs",
+      "sha256": "87D36F65A806F2988537FF09DDC25EC2E0100C9725AECA41F124491E049AD4BC"
+    },
+    {
+      "path": "tests/NativeTabTests.cs",
+      "sha256": "1B49F8CFEF71D318F47CC0B8728BD3246D1DD987A805AA3998833BCDA041FED4"
+    },
+    {
+      "path": "tests/PresentationTests.cs",
+      "sha256": "43B7A01246C145E3CC70CA651D2AAC8114F575546D3B6E7874A9202E28C0F882"
+    },
+    {
+      "path": "tests/StatContributionTests.cs",
+      "sha256": "FB532BA042CBFFB5BC3F622E8C4D493661F7FAFA55D1B5E97A9AD4943705550C"
+    }
+  ],
+  "vendor_or_game_binaries_copied": false,
+  "next_build": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\next-build\\0.2.5"
+}

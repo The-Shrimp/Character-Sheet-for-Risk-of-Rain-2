@@ -1,0 +1,352 @@
+{
+  "CapturedUtc": "2026-10-06T21:33:37.861439+00:00",
+  "ParentVersion": "0.3.0",
+  "ParentDll": {
+    "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\artifacts\\review-native-tab\\Alexander.CharacterSheet.dll",
+    "Bytes": 167936,
+    "SHA256": "9EB121AD7C2808645258A2EF5359CDE538F5E0C9BEA7FD3C8DF84C00B78750C4"
+  },
+  "Installed": {
+    "File": "\\\\localhost\\C$\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\plugins\\Alexander-CharacterSheet\\Alexander.CharacterSheet.dll",
+    "Bytes": 167936,
+    "SHA256": "9EB121AD7C2808645258A2EF5359CDE538F5E0C9BEA7FD3C8DF84C00B78750C4"
+  },
+  "SupportingFiles": [
+    {
+      "File": "\\\\localhost\\C$\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\core\\BepInEx.dll",
+      "Bytes": 135680,
+      "SHA256": "D021965B0FE61EE2BA8F68D931DFE4ADF172075038D220950D811B12A036CA0E",
+      "RelativeFile": "BepInEx\\core\\BepInEx.dll"
+    },
+    {
+      "File": "\\\\localhost\\C$\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\core\\BepInEx.Preloader.dll",
+      "Bytes": 44032,
+      "SHA256": "9E69AEA4F69F8E8364045C5E8784DD92D79F5065F57F661D65F5ACFE7BFBCE2A",
+      "RelativeFile": "BepInEx\\core\\BepInEx.Preloader.dll"
+    },
+    {
+      "File": "\\\\localhost\\C$\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\core\\0Harmony.dll",
+      "Bytes": 204800,
+      "SHA256": "1A21CC03424FC82C3DD1346905D16494536B9595AE4162228D99FB7C285C1031",
+      "RelativeFile": "BepInEx\\core\\0Harmony.dll"
+    },
+    {
+      "File": "\\\\localhost\\C$\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\core\\Newtonsoft.Json.dll",
+      "Bytes": 524200,
+      "SHA256": "4A3D7BBAA2C347C2F98FA06A7324EBF311F696D9965E9BA0A81A56219420CE01",
+      "RelativeFile": "BepInEx\\core\\Newtonsoft.Json.dll"
+    },
+    {
+      "File": "\\\\localhost\\C$\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\core\\Newtonsoft.Json.LICENSE.md",
+      "Bytes": 1104,
+      "SHA256": "B98A397897FF55F76CDDC380041507A95A896B2946E0188703BF0496793D6516",
+      "RelativeFile": "BepInEx\\core\\Newtonsoft.Json.LICENSE.md"
+    },
+    {
+      "File": "\\\\localhost\\C$\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\mods.yml",
+      "Bytes": 1549,
+      "SHA256": "5B81074CDBE64EB45FE83ED4ABC27793A2A266FAF87B5230366F133F50F770C9",
+      "RelativeFile": "mods.yml"
+    },
+    {
+      "File": "\\\\localhost\\C$\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\doorstop_config.ini",
+      "Bytes": 1567,
+      "SHA256": "D9DAB1EB8E541971D5F6ED0DF139F30706E77615E06847FFBBB41B174B8D9C0F",
+      "RelativeFile": "doorstop_config.ini"
+    },
+    {
+      "File": "\\\\localhost\\C$\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\config\\alexander.charactersheet.cfg",
+      "Bytes": 588,
+      "SHA256": "16C25C8599F8A6FA1E22EA47308180E8B92911876EE666861C3628D501D561C3",
+      "RelativeFile": "BepInEx\\config\\alexander.charactersheet.cfg",
+      "MatchesPriorGeneratedHeaderOnly": true
+    },
+    {
+      "File": "\\\\localhost\\C$\\Users\\heale\\AppData\\Roaming\\r2modmanPlus-local\\RiskOfRain2\\profiles\\AlexanderCharacterSheet-Dev\\BepInEx\\config\\BepInEx.cfg",
+      "Bytes": 4969,
+      "SHA256": "E4C147F11B97D4E384DC9A6D4BF52A7154C311141734F7F1974514093B79E232",
+      "RelativeFile": "BepInEx\\config\\BepInEx.cfg"
+    }
+  ],
+  "ParentFiles": {
+    "src\\Plugin.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Plugin.cs",
+      "Bytes": 10654,
+      "SHA256": "DDFBCCC7D2E5AA2A7C238CBA8D8E5AC76F54E7D38906CA21E95DC6D7725507AA"
+    },
+    "src\\Core\\Calculation.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\Calculation.cs",
+      "Bytes": 4077,
+      "SHA256": "26384F712577A346A154BE6082FC9C665F8BE5B4B0CA29D4BF887A8512C52641"
+    },
+    "src\\Core\\CharacterEffectCatalog.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\CharacterEffectCatalog.cs",
+      "Bytes": 5700,
+      "SHA256": "226F616E2CA26740DA4F5C71A0DCA3C1C3D23A0909B83EEFEE6C9264F152091B"
+    },
+    "src\\Core\\CompactSheetLayout.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\CompactSheetLayout.cs",
+      "Bytes": 3863,
+      "SHA256": "9DF0B16401EBF791D71A58460DF5B4995729A3A0829B63180F96F7630B405B8A"
+    },
+    "src\\Core\\CompactTooltipPresentation.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\CompactTooltipPresentation.cs",
+      "Bytes": 5170,
+      "SHA256": "AFE64D12812CA4AB4D90433D0397AA50FD0926E9A99B8EA1A12A9A71B601D856"
+    },
+    "src\\Core\\ComparisonPresentation.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\ComparisonPresentation.cs",
+      "Bytes": 8188,
+      "SHA256": "6FC5263777F3579EF994C13B3B23FEC048C291F29C5BC9D5F140A76E34A83ACB"
+    },
+    "src\\Core\\DetailsInteraction.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\DetailsInteraction.cs",
+      "Bytes": 3127,
+      "SHA256": "EB1A3650718AED79ADC43353FBD2EBC5E55ED6BAEB643607D0CAF01877165173"
+    },
+    "src\\Core\\GeneralCooldownPresentation.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\GeneralCooldownPresentation.cs",
+      "Bytes": 855,
+      "SHA256": "41FD60A80604830EACEEFE756AEE132FFD4443A5F2C090C6C8680CC285984343"
+    },
+    "src\\Core\\InventoryPresentation.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\InventoryPresentation.cs",
+      "Bytes": 5818,
+      "SHA256": "D51AF4E3CEE7F37F59EFA0FE66020DF624BA6E3D3BDD0DCAA5385C5668C0065D"
+    },
+    "src\\Core\\ItemDetailsPresentation.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\ItemDetailsPresentation.cs",
+      "Bytes": 1703,
+      "SHA256": "0D1EE24F6510337235C1ED2E8CA0159EED37F4F1BA4D81CECE811BC97DC53931"
+    },
+    "src\\Core\\ItemTooltipPresentation.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\ItemTooltipPresentation.cs",
+      "Bytes": 10365,
+      "SHA256": "D1086688416EB6691010560F6A09BB34B551D88F06F594C06FA74E27ADE41069"
+    },
+    "src\\Core\\LuckEvidence.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\LuckEvidence.cs",
+      "Bytes": 1511,
+      "SHA256": "03CB9706A0D964606058FD9DF74F3E2FF2BA46D80C6BF2232385324D4BC59B55"
+    },
+    "src\\Core\\NativeAttachmentPolicy.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\NativeAttachmentPolicy.cs",
+      "Bytes": 1617,
+      "SHA256": "9EA976669FD7171E472C3BB157FCC48B1D16222714060D6A35CFAF2771C2E915"
+    },
+    "src\\Core\\NativeItemSurfacePolicy.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\NativeItemSurfacePolicy.cs",
+      "Bytes": 682,
+      "SHA256": "9F4DC05D739F5C6C361FCBD7B43309294B3A7A8626011FA13B3A7D68E843EF1B"
+    },
+    "src\\Core\\NativeLifecycle.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\NativeLifecycle.cs",
+      "Bytes": 3430,
+      "SHA256": "BC5A07821EF07E6B3D3A4F90FE91A2BACA90573AEEEB6DB0824EB1EEDE0FF51A"
+    },
+    "src\\Core\\NativeTabPolicy.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\NativeTabPolicy.cs",
+      "Bytes": 3838,
+      "SHA256": "4650E0FD1E7DD0CF37B1E5F188759F3768376BA349CD2CFB43CF38C0904FDDDD"
+    },
+    "src\\Core\\NativeTooltipAddonPlacement.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\NativeTooltipAddonPlacement.cs",
+      "Bytes": 1114,
+      "SHA256": "649AF79FB92BAC9A5E713B9DBABF9AE284DAB8B5669214C6B36FFC8BAC9401C0"
+    },
+    "src\\Core\\NativeTooltipFillPolicy.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\NativeTooltipFillPolicy.cs",
+      "Bytes": 1406,
+      "SHA256": "F4AA5303186013D83E9EDBC53D28D36791B5FA19426CFE18EFC47F2CD22D28DC"
+    },
+    "src\\Core\\NumberFormatting.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\NumberFormatting.cs",
+      "Bytes": 2691,
+      "SHA256": "B6800D33710D41CA2D6BA0A58BE7202F7E3CB53B4FE87A9D5FB68FFE167E4915"
+    },
+    "src\\Core\\OriginalBuffDefinitions.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\OriginalBuffDefinitions.cs",
+      "Bytes": 5500,
+      "SHA256": "05F5173AFF9D961B9F94A37139921F2C422CBB7DA9C1CB4320600DA73671FB97"
+    },
+    "src\\Core\\OriginalItemDefinitions.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\OriginalItemDefinitions.cs",
+      "Bytes": 20754,
+      "SHA256": "15BDE520A3589BE7C1866B24779F5A691D9A53893725702B840B4A0A831F0E35"
+    },
+    "src\\Core\\PauseLease.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\PauseLease.cs",
+      "Bytes": 2924,
+      "SHA256": "07140CA1439307A6F1419DFEBF7122DF7F70ED03767ED25F5522E6E7B387789F"
+    },
+    "src\\Core\\SheetHierarchy.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\SheetHierarchy.cs",
+      "Bytes": 6572,
+      "SHA256": "FF230196AF0E851FABD62A43C7A485447B0E08B0A805BD3F74E1DF15D42ED469"
+    },
+    "src\\Core\\StatTooltipPresentation.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\StatTooltipPresentation.cs",
+      "Bytes": 2564,
+      "SHA256": "13342FADCDE29A9D76153B21854F932A95B7C0D72507F1D5AF6BF39F83339D9A"
+    },
+    "src\\Core\\TooltipPresentation.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\TooltipPresentation.cs",
+      "Bytes": 5301,
+      "SHA256": "F1ACE4AEDDBB485AFE67225A48D21C18F133FDC3F0F39810709E61B57A444A98"
+    },
+    "src\\Core\\VerifiedMath.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Core\\VerifiedMath.cs",
+      "Bytes": 1359,
+      "SHA256": "D926DD322C0ACB9EC56E62C948287302B2217C3163B1208CAE187450756F9136"
+    },
+    "src\\Presentation\\NativeHoverPopup.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Presentation\\NativeHoverPopup.cs",
+      "Bytes": 12888,
+      "SHA256": "22BAF6B70BBB29F4B62DEF1AD1D5B199B7165E8337AB1D9A2D2D5DE86D619F88"
+    },
+    "src\\Presentation\\NativeItemHover.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Presentation\\NativeItemHover.cs",
+      "Bytes": 9664,
+      "SHA256": "76FE48CF2EBFCA6DC88AB05F5F06BB8678DF986695D7E731E52CF1F5A47C170D"
+    },
+    "src\\Presentation\\NativeSheetLayer.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Presentation\\NativeSheetLayer.cs",
+      "Bytes": 2003,
+      "SHA256": "01A2F22B4908F560DD1B8BE216515B4B89ED0516510563D77E0E0FA13541D24A"
+    },
+    "src\\Presentation\\NativeStripIdentity.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Presentation\\NativeStripIdentity.cs",
+      "Bytes": 285,
+      "SHA256": "C3462E473B5F8A96C606BB3E2C8304A2FD9B94D77505E478D1D7FF8A937B3058"
+    },
+    "src\\Presentation\\NativeTooltipAnchor.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Presentation\\NativeTooltipAnchor.cs",
+      "Bytes": 2550,
+      "SHA256": "76FB083B95BCD963AA5A3D88AD2F39C336679BE4434C7A5A8A2E3ED74D0456F4"
+    },
+    "src\\Presentation\\NativeTooltipStyle.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Presentation\\NativeTooltipStyle.cs",
+      "Bytes": 5204,
+      "SHA256": "C69CA4B5E20D0220174CE2BB78449B422C56E6319C829261953062BE6CDC5C3E"
+    },
+    "src\\Presentation\\NativeUiStyle.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Presentation\\NativeUiStyle.cs",
+      "Bytes": 4091,
+      "SHA256": "DC9D4A927B0B0BE76B3983987E34EEC27404E5A188794A504D3E5F8DD6027616"
+    },
+    "src\\Presentation\\SheetData.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Presentation\\SheetData.cs",
+      "Bytes": 16606,
+      "SHA256": "E27028B0FDD977949EF5F1F0981432D630D7C40ECDC3D4B8E8067B679A956D22"
+    },
+    "src\\Presentation\\SheetFocusButton.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Presentation\\SheetFocusButton.cs",
+      "Bytes": 1034,
+      "SHA256": "E3B93B87CC543B0DB482CD7F34456CBAFFFA1E1AEEA3A638DCD829C87237B37C"
+    },
+    "src\\Presentation\\SheetGlyphGraphic.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Presentation\\SheetGlyphGraphic.cs",
+      "Bytes": 2745,
+      "SHA256": "0B61BB84D0538534F4016ECA606992550E4FC642D446A145E6BF8F86AB997910"
+    },
+    "src\\Presentation\\SheetStructureData.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Presentation\\SheetStructureData.cs",
+      "Bytes": 9934,
+      "SHA256": "D08C7EE2BFC0A6C944FB755072BF841E75FB7690314C4AF68E2A8FEEE20F9E56"
+    },
+    "src\\Presentation\\SheetView.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\src\\Presentation\\SheetView.cs",
+      "Bytes": 26824,
+      "SHA256": "4BB0CD2662CE20BCB1F47F56D7467DA45F3B5A92C2C79E0085BF73DF60828C5D"
+    },
+    "tests\\AdditiveDetailsTests.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\tests\\AdditiveDetailsTests.cs",
+      "Bytes": 8177,
+      "SHA256": "AF6F0DC7233CBBA8DD16155BEC1D017FB37A134BCB857D5D1770DF01477A2886"
+    },
+    "tests\\CompactSheetLayoutTests.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\tests\\CompactSheetLayoutTests.cs",
+      "Bytes": 4726,
+      "SHA256": "854E60FEA13E3480F63C87BA6522A8A83093423F5D1223A6B96E9B46B3A06D84"
+    },
+    "tests\\CompactTooltipTests.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\tests\\CompactTooltipTests.cs",
+      "Bytes": 10834,
+      "SHA256": "5B3FF2896958968F1F60048BB1A48BBFBCF3ACDF93A664562DA920EF1D9CE6C4"
+    },
+    "tests\\CoreTests.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\tests\\CoreTests.cs",
+      "Bytes": 7930,
+      "SHA256": "4668BBC5924436CCBA4C77A7DFDD925CD1104D2177C1139654FB0B04C87E025F"
+    },
+    "tests\\CoverageFormulaTests.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\tests\\CoverageFormulaTests.cs",
+      "Bytes": 11625,
+      "SHA256": "199E54F3D7E5633328A338FB4FD391E849CD8E0AFE37C43069C4F7B82BB55DC9"
+    },
+    "tests\\HierarchyTests.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\tests\\HierarchyTests.cs",
+      "Bytes": 16160,
+      "SHA256": "5E6CB96DF61ACEFB786134493A8B5502647140A1F434C98A20D3078C84D536D1"
+    },
+    "tests\\ItemTooltipTests.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\tests\\ItemTooltipTests.cs",
+      "Bytes": 5235,
+      "SHA256": "5CEDAF6F1C7F776D384B70092229E1A6738F7733917AEC48BC19ACFB81644AF3"
+    },
+    "tests\\LifecycleCoverageTests.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\tests\\LifecycleCoverageTests.cs",
+      "Bytes": 10001,
+      "SHA256": "CC1828CD231DF3AB8851A65D7C440D04AFB1DBE95D139DC420F013D3992C2166"
+    },
+    "tests\\NativeTabRegressionTests.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\tests\\NativeTabRegressionTests.cs",
+      "Bytes": 6584,
+      "SHA256": "E5E82C6629AB6B9DC0F34D12AB814E5C714F8D225C1ACA673B0883B46B0E1761"
+    },
+    "tests\\NativeTabTests.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\tests\\NativeTabTests.cs",
+      "Bytes": 5188,
+      "SHA256": "1B49F8CFEF71D318F47CC0B8728BD3246D1DD987A805AA3998833BCDA041FED4"
+    },
+    "tests\\PresentationTests.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\tests\\PresentationTests.cs",
+      "Bytes": 19845,
+      "SHA256": "43B7A01246C145E3CC70CA651D2AAC8114F575546D3B6E7874A9202E28C0F882"
+    },
+    "tests\\SimpleStatTooltipTests.cs": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\tests\\SimpleStatTooltipTests.cs",
+      "Bytes": 9276,
+      "SHA256": "D08622B0B399E04661AFCADF1DEF3354F83F96E423D03758D05F5E12D8F7E45E"
+    },
+    "build.ps1": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\build.ps1",
+      "Bytes": 3727,
+      "SHA256": "234E707EC58CB74CE2306C0D10841632287AE7AB53965A5AE4DA95EEDA28C7BE"
+    },
+    "CharacterSheet.csproj": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\CharacterSheet.csproj",
+      "Bytes": 1422,
+      "SHA256": "6F441DFCFC2BD20A07713D0EBFE22D3AA1C1BE6A983EC12DEB3A1E78C6D8F24F"
+    },
+    "LICENSE": {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\hierarchy-build\\0.3.0\\LICENSE",
+      "Bytes": 1094,
+      "SHA256": "72A75B179C9AA62A6D9265B0AC9302AC6F7E5FE8E4AD46711AD34C90EEEBA2A2"
+    }
+  },
+  "SeparateCandidates": [
+    {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\next-build\\0.2.6\\artifacts\\review-native-tab\\Alexander.CharacterSheet.dll",
+      "Bytes": 166400,
+      "SHA256": "FDB12A2870582490A059A1F5D230E41AACFB495F8AF5D462E9A63A477F803483"
+    },
+    {
+      "File": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\next-build\\0.2.6.1\\artifacts\\review-native-tab\\Alexander.CharacterSheet.dll",
+      "Bytes": 168448,
+      "SHA256": "24A5747F9737F6663CDC17951D5903BE10230E214F056698626E47708853B020"
+    }
+  ],
+  "ReferenceEvidence": "Parent inspected all three images; verified pixel description supplied. No Windows Library materialization repeated.",
+  "Scope": "Source only; no game/profile writes or interaction."
+}

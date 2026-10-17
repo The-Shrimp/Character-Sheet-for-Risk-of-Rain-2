@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>Alexander.CharacterSheet</AssemblyName>
+    <RootNamespace>Alexander.CharacterSheet</RootNamespace>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <LangVersion>latest</LangVersion>
+    <GameManagedPath Condition="'$(GameManagedPath)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed</GameManagedPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="src\**\*.cs" />
+    <Reference Include="$(GameManagedPath)\*.dll"><Private>false</Private></Reference>
+    <Reference Include="BepInEx"><HintPath>$(LoaderCorePath)\BepInEx.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="0Harmony"><HintPath>$(LoaderCorePath)\0Harmony.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+  <Target Name="ValidateLocalReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(GameManagedPath)\RoR2.dll')" Text="Set GameManagedPath to the installed game's Managed directory." />
+    <Error Condition="!Exists('$(LoaderCorePath)\BepInEx.dll') Or !Exists('$(LoaderCorePath)\0Harmony.dll')" Text="Set LoaderCorePath to reviewed compile-only loader references. No automatic installation is performed." />
+  </Target>
+</Project>
+

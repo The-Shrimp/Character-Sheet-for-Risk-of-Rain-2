@@ -1,0 +1,1 @@
+This is the separate 0.2.4 source-only robustness patch. Installed 0.2.2 and reported 0.2.3 remain frozen. Do not deploy or run. Native UI architecture stays unchanged. Only own stat explanation/uncertainty handling is in scope; existing external references stay external.

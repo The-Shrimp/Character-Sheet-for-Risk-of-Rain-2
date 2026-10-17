@@ -1,0 +1,1 @@
+Separate 0.2.6 native UI implementation review. Installed 0.2.2 and previous candidates remain frozen. Scope: original local HUD buff hover bindings, then native inventory presentation layout if public APIs suffice; synthetic lifecycle checks and compile only. No game decompile, deployment, launch, profiles, settings, bootstrap, or publishing. External references remain external.

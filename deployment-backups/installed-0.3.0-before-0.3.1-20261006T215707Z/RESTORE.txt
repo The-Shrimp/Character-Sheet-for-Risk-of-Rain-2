@@ -1,0 +1,11 @@
+Verified rollback: installed 0.3.0
+Bytes: 167936
+SHA256: 9EB121AD7C2808645258A2EF5359CDE538F5E0C9BEA7FD3C8DF84C00B78750C4
+
+Close Risk of Rain 2 completely before restoring.
+Restore only the custom DLL using:
+Copy-Item -LiteralPath 'C:\Users\heale\Desktop\Not School Stuff\Risk of Rain 2 Stat Sheet\Character Sheet for Risk of Rain 2\deployment-backups\installed-0.3.0-before-0.3.1-20261006T215707Z\Alexander.CharacterSheet.dll' -Destination '\\localhost\C$\Users\heale\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\AlexanderCharacterSheet-Dev\BepInEx\plugins\Alexander-CharacterSheet\Alexander.CharacterSheet.dll' -Force
+
+Verify the destination SHA256 matches the hash above.
+Keep this backup outside BepInEx\plugins.
+Do not replace loader/configuration/game files or mod manifests.

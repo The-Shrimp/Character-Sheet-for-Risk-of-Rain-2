@@ -1,0 +1,265 @@
+{
+  "completed_utc": "2026-10-06T02:14:16.353507+00:00",
+  "version": "0.2.2.2",
+  "base": "0.2.2.1",
+  "dll": {
+    "path": "C:\\Users\\heale\\Desktop\\Not School Stuff\\Risk of Rain 2 Stat Sheet\\Character Sheet for Risk of Rain 2\\fix-build\\0.2.2.2\\artifacts\\review-native-tab\\Alexander.CharacterSheet.dll",
+    "bytes": 116224,
+    "sha256": "6C54A2FACA7A9751DD240EF3514647347C4B2BD86660378177C11F662964A396"
+  },
+  "core_assertions_passed": 2357,
+  "new_geometry_assertions": 412,
+  "geometry_cases": 80,
+  "resolutions": [
+    "1280x720",
+    "1366x768",
+    "1920x1080",
+    "2560x1440",
+    "3440x1440"
+  ],
+  "presentation_scales": [
+    0.7,
+    0.85,
+    1,
+    1.2
+  ],
+  "font_samples": [
+    18,
+    24
+  ],
+  "content_modes": [
+    "collapsed eight stats",
+    "expanded sixty effects"
+  ],
+  "sample_1920x1080": {
+    "native_strip_screen_bounds": [
+      462,
+      289,
+      1457,
+      363
+    ],
+    "card_screen_bounds": [
+      462,
+      375,
+      802,
+      677
+    ],
+    "collapsed_height": 302,
+    "basis": "geometry model using eighteen-unit body font; actual native styling and canvas scaling require runtime verification"
+  },
+  "protected_source_preserved": [
+    {
+      "file": "src/Plugin.cs",
+      "matches_base_except_version": true
+    },
+    {
+      "file": "src/Core/PauseLease.cs",
+      "matches_base_except_version": true
+    },
+    {
+      "file": "src/Core/NativeLifecycle.cs",
+      "matches_base_except_version": true
+    },
+    {
+      "file": "src/Core/NativeAttachmentPolicy.cs",
+      "matches_base_except_version": true
+    },
+    {
+      "file": "src/Presentation/NativeSheetLayer.cs",
+      "matches_base_except_version": true
+    },
+    {
+      "file": "src/Presentation/NativeHoverPopup.cs",
+      "matches_base_except_version": true
+    },
+    {
+      "file": "src/Presentation/SheetData.cs",
+      "matches_base_except_version": true
+    },
+    {
+      "file": "src/Presentation/NativeItemHover.cs",
+      "pointer_logic_unchanged": true,
+      "only_added": "owned label/value text references"
+    }
+  ],
+  "source_files": [
+    {
+      "file": "src\\Core\\Calculation.cs",
+      "sha256": "BDBF641C67972C5E7618A302FB6176BA275297D24841A0942EA0C5268A15E99C"
+    },
+    {
+      "file": "src\\Core\\CompactSheetLayout.cs",
+      "sha256": "9DF0B16401EBF791D71A58460DF5B4995729A3A0829B63180F96F7630B405B8A"
+    },
+    {
+      "file": "src\\Core\\ComparisonPresentation.cs",
+      "sha256": "6FC5263777F3579EF994C13B3B23FEC048C291F29C5BC9D5F140A76E34A83ACB"
+    },
+    {
+      "file": "src\\Core\\InventoryPresentation.cs",
+      "sha256": "D51AF4E3CEE7F37F59EFA0FE66020DF624BA6E3D3BDD0DCAA5385C5668C0065D"
+    },
+    {
+      "file": "src\\Core\\ItemTooltipPresentation.cs",
+      "sha256": "A022955C408CDE259A1E27F6523A30746BA9B1705912CC6FD7CB181FFA218A6B"
+    },
+    {
+      "file": "src\\Core\\LuckEvidence.cs",
+      "sha256": "03CB9706A0D964606058FD9DF74F3E2FF2BA46D80C6BF2232385324D4BC59B55"
+    },
+    {
+      "file": "src\\Core\\NativeAttachmentPolicy.cs",
+      "sha256": "9EA976669FD7171E472C3BB157FCC48B1D16222714060D6A35CFAF2771C2E915"
+    },
+    {
+      "file": "src\\Core\\NativeLifecycle.cs",
+      "sha256": "BC5A07821EF07E6B3D3A4F90FE91A2BACA90573AEEEB6DB0824EB1EEDE0FF51A"
+    },
+    {
+      "file": "src\\Core\\NativeTabPolicy.cs",
+      "sha256": "4650E0FD1E7DD0CF37B1E5F188759F3768376BA349CD2CFB43CF38C0904FDDDD"
+    },
+    {
+      "file": "src\\Core\\NumberFormatting.cs",
+      "sha256": "B6800D33710D41CA2D6BA0A58BE7202F7E3CB53B4FE87A9D5FB68FFE167E4915"
+    },
+    {
+      "file": "src\\Core\\OriginalBuffDefinitions.cs",
+      "sha256": "05F5173AFF9D961B9F94A37139921F2C422CBB7DA9C1CB4320600DA73671FB97"
+    },
+    {
+      "file": "src\\Core\\OriginalItemDefinitions.cs",
+      "sha256": "15BDE520A3589BE7C1866B24779F5A691D9A53893725702B840B4A0A831F0E35"
+    },
+    {
+      "file": "src\\Core\\PauseLease.cs",
+      "sha256": "07140CA1439307A6F1419DFEBF7122DF7F70ED03767ED25F5522E6E7B387789F"
+    },
+    {
+      "file": "src\\Core\\TooltipPresentation.cs",
+      "sha256": "F1ACE4AEDDBB485AFE67225A48D21C18F133FDC3F0F39810709E61B57A444A98"
+    },
+    {
+      "file": "src\\Core\\VerifiedMath.cs",
+      "sha256": "D926DD322C0ACB9EC56E62C948287302B2217C3163B1208CAE187450756F9136"
+    },
+    {
+      "file": "src\\Plugin.cs",
+      "sha256": "94573DD0887E738631AABBC55B8784F8C473F26F14B9341907F13F5EF21ED1AD"
+    },
+    {
+      "file": "src\\Presentation\\NativeHoverPopup.cs",
+      "sha256": "73A51E192B523BC94B4619521632297D317D8477DA3B60BF0DC26D48EC589A6B"
+    },
+    {
+      "file": "src\\Presentation\\NativeItemHover.cs",
+      "sha256": "29A3923B8EF8A914D987A642EAEDF2315B13D7349143BE482947D41E9CA69149"
+    },
+    {
+      "file": "src\\Presentation\\NativeSheetLayer.cs",
+      "sha256": "01A2F22B4908F560DD1B8BE216515B4B89ED0516510563D77E0E0FA13541D24A"
+    },
+    {
+      "file": "src\\Presentation\\NativeStripIdentity.cs",
+      "sha256": "C3462E473B5F8A96C606BB3E2C8304A2FD9B94D77505E478D1D7FF8A937B3058"
+    },
+    {
+      "file": "src\\Presentation\\NativeUiStyle.cs",
+      "sha256": "DC9D4A927B0B0BE76B3983987E34EEC27404E5A188794A504D3E5F8DD6027616"
+    },
+    {
+      "file": "src\\Presentation\\SheetData.cs",
+      "sha256": "90C8A0E43C0C7BC0CC42088440F0C8F4EF7F1F1386FCEF84F925D1A49190A0DE"
+    },
+    {
+      "file": "src\\Presentation\\SheetView.cs",
+      "sha256": "1AF4614EB252B37D42E0053779A3A9784D435ACFDE983CBFD83127AF81691765"
+    },
+    {
+      "file": "tests\\CompactSheetLayoutTests.cs",
+      "sha256": "854E60FEA13E3480F63C87BA6522A8A83093423F5D1223A6B96E9B46B3A06D84"
+    },
+    {
+      "file": "tests\\CoreTests.cs",
+      "sha256": "AD4074D6AD3D1C81E5CC7F825F32AD6A82423925B309C6AE011EB3865DC3F14E"
+    },
+    {
+      "file": "tests\\CoverageFormulaTests.cs",
+      "sha256": "199E54F3D7E5633328A338FB4FD391E849CD8E0AFE37C43069C4F7B82BB55DC9"
+    },
+    {
+      "file": "tests\\ItemTooltipTests.cs",
+      "sha256": "5CEDAF6F1C7F776D384B70092229E1A6738F7733917AEC48BC19ACFB81644AF3"
+    },
+    {
+      "file": "tests\\LifecycleCoverageTests.cs",
+      "sha256": "CC1828CD231DF3AB8851A65D7C440D04AFB1DBE95D139DC420F013D3992C2166"
+    },
+    {
+      "file": "tests\\NativeTabRegressionTests.cs",
+      "sha256": "E5E82C6629AB6B9DC0F34D12AB814E5C714F8D225C1ACA673B0883B46B0E1761"
+    },
+    {
+      "file": "tests\\NativeTabTests.cs",
+      "sha256": "1B49F8CFEF71D318F47CC0B8728BD3246D1DD987A805AA3998833BCDA041FED4"
+    },
+    {
+      "file": "tests\\PresentationTests.cs",
+      "sha256": "43B7A01246C145E3CC70CA651D2AAC8114F575546D3B6E7874A9202E28C0F882"
+    }
+  ],
+  "modified_source_files": [
+    "src\\Core\\CompactSheetLayout.cs",
+    "src\\Plugin.cs",
+    "src\\Presentation\\NativeItemHover.cs",
+    "src\\Presentation\\NativeUiStyle.cs",
+    "src\\Presentation\\SheetView.cs",
+    "tests\\CompactSheetLayoutTests.cs",
+    "tests\\CoreTests.cs"
+  ],
+  "next_feature_candidate_unchanged": true,
+  "installed_files_unchanged": [
+    {
+      "file": "BepInEx\\plugins\\Alexander-CharacterSheet\\Alexander.CharacterSheet.dll",
+      "sha256": "F776196B2B639AB43BF187116F4040F2694D6283B771350C054AF1776E3816D2",
+      "unchanged": true
+    },
+    {
+      "file": "BepInEx\\core\\BepInEx.dll",
+      "sha256": "D021965B0FE61EE2BA8F68D931DFE4ADF172075038D220950D811B12A036CA0E",
+      "unchanged": true
+    },
+    {
+      "file": "BepInEx\\core\\BepInEx.Preloader.dll",
+      "sha256": "9E69AEA4F69F8E8364045C5E8784DD92D79F5065F57F661D65F5ACFE7BFBCE2A",
+      "unchanged": true
+    },
+    {
+      "file": "BepInEx\\core\\Newtonsoft.Json.dll",
+      "sha256": "4A3D7BBAA2C347C2F98FA06A7324EBF311F696D9965E9BA0A81A56219420CE01",
+      "unchanged": true
+    }
+  ],
+  "plugin_compilation": "PASS with existing local public API references; no implementation inspection",
+  "runtime_status": "NOT DEPLOYED OR GAME TESTED",
+  "runtime_unknowns": [
+    "native text/background choice",
+    "canvas scaling and clipping",
+    "pointer and scroll behavior",
+    "visual composition",
+    "user confirmation of existing pause/resume"
+  ],
+  "fresh_log_checkpoint": {
+    "checked_utc": "2026-10-06T02:02:22.0824796Z",
+    "startup_version": "0.2.2.1",
+    "attach_count": 9,
+    "guard_warnings": 0,
+    "plugin_errors": 0,
+    "plugin_warnings": 0,
+    "log_last_write_utc": "2026-10-06T01:58:52.3341473Z",
+    "game_running": false,
+    "limit": "Untimestamped attachment messages cannot establish distinct Tab press count"
+  },
+  "notes": "docs/CompactLayout-0.2.2.2.md",
+  "final_ui_cleanup": "Removed unused header tooltip; existing stat popup retains Shift/detail instructions. Final DLL recompiled; core geometry/tests unchanged."
+}
